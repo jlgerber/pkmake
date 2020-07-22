@@ -8,4 +8,4 @@ edition = "2018"
 
 [dependencies]
 structopt="0.3"
-derive_builder="0.9"
+anyhow = "1.0"

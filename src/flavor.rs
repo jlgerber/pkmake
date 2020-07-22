@@ -1,4 +1,7 @@
 use std::str::FromStr;
+use anyhow::anyhow;
+use anyhow::Error as AnyhowError;
+
 
 /// A flavor may either be vanilla or named 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -13,14 +16,14 @@ fn is_named_flavor(c: char) -> bool {
 }
 
 impl FromStr for Flavor {
-    type Err = String;
+    type Err = AnyhowError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
             "^" | "vanilla" => Ok(Self::Vanilla),
             _ if s.chars().next().unwrap_or('1').is_alphabetic() 
               && s.chars().all(is_named_flavor) => Ok(Self::Named(s.to_string())),
-            _ => Err(format!("Invalid Flavor: '{}'", s))
+            _ => Err(anyhow!("Invalid Flavor: '{}'", s))
 
         }
     }
@@ -50,7 +53,7 @@ mod tests {
         let vans = vec!["^", "vanilla", "Vanilla", "VANILLA"];
         for van in vans {
             let result = Flavor::from_str(van);
-            assert_eq!(result, Ok(Flavor::Vanilla));
+            assert_eq!(result.unwrap(), Flavor::Vanilla);
         }
     } 
 
@@ -59,7 +62,7 @@ mod tests {
         let nameds = vec!["foo", "FOO", "bar", "bla_f223"];
         for named in nameds {
             let result = Flavor::from_str(named);
-            assert_eq!(result, Ok(Flavor::Named(named.to_string())));
+            assert_eq!(result.unwrap(), Flavor::Named(named.to_string()));
         }
     }
     

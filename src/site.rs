@@ -1,5 +1,8 @@
 use std::str::FromStr;
 use crate::named_site::NamedSite;
+use anyhow::anyhow;
+use anyhow::Error as AnyhowError;
+
 
 /// enum representing valid state of Sites input
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -16,7 +19,7 @@ fn site_tst(c: char) -> bool {
 
 impl FromStr for Site {
 
-    type Err=String; //todo replace with custom 
+    type Err=AnyhowError; //todo replace with custom 
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
@@ -24,11 +27,11 @@ impl FromStr for Site {
             "all" => Ok(Site::All),
             _ => {
                 if !s.chars().all(site_tst) {
-                    Err("must be alphabetic".into())
+                    Err(anyhow!("must be alphabetic"))
                 } else {
                     match NamedSite::from_str(s) {
                         Ok(site) => Ok(Site::Named(site)),
-                        Err(_) => Err(format!("Invalid Site Name {}", s))
+                        Err(_) => Err(anyhow!("Invalid Site Name {}", s))
                     }
                 }
             }
@@ -54,7 +57,7 @@ mod tests {
         let locals = vec!["local", "Local", "LOCAL"];
         for local in locals {
             let result = Site::from_str(local);
-            assert_eq!(result, Ok(Site::Local));
+            assert_eq!(result.unwrap(), Site::Local);
         }
     }
 
@@ -63,7 +66,7 @@ mod tests {
         let alls = vec!["all", "All", "ALL"];
         for all_ in alls {
             let result = Site::from_str(all_);
-            assert_eq!(result, Ok(Site::All));
+            assert_eq!(result.unwrap(), Site::All);
         }
     }
 
@@ -78,7 +81,7 @@ mod tests {
         ];
         for nm in named {
             let result = Site::from_str(nm.0);
-            assert_eq!(result, Ok(Site::Named(nm.1)));
+            assert_eq!(result.unwrap(), Site::Named(nm.1));
         }
     }
 

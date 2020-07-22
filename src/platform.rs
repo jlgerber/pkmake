@@ -3,7 +3,8 @@
 //!
 //! representation of build platforms
 //!
-
+use anyhow::anyhow;
+use anyhow::Error as AnyhowError;
 use std::str::FromStr;
 /*
  
@@ -31,7 +32,7 @@ pub enum Platform {
 }
 
 impl FromStr for Platform {
-    type Err = String;
+    type Err = AnyhowError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
@@ -41,7 +42,7 @@ impl FromStr for Platform {
             "cent6_64" | "cent6" => Ok(Self::Cent6_64),
             "cent7_64" | "cent7" => Ok(Self::Cent7_64),
             "cent8_64" | "cent8" => Ok(Self::Cent8_64),
-            _ => Err(format!("Invalid Platform '{}'", s))
+            _ => Err(anyhow!("Invalid Platform '{}'", s))
         }
     }
 }
@@ -63,7 +64,7 @@ mod tests {
         let wins = vec!["win7", "WIN7", "win7_64", "WIN7_64"];
         for win in wins {
             let result = Platform::from_str(win);
-            assert_eq!(result, Ok(Platform::Win7_64));
+            assert_eq!(result.unwrap(), Platform::Win7_64);
         }
     }
 
@@ -72,7 +73,7 @@ mod tests {
         let wins = vec!["win10", "WIN10", "win10_64", "WIN10_64"];
         for win in wins {
             let result = Platform::from_str(win);
-            assert_eq!(result, Ok(Platform::Win10_64));
+            assert_eq!(result.unwrap(), Platform::Win10_64);
         }
     }
     
@@ -81,7 +82,7 @@ mod tests {
         let wins = vec!["cent6", "CENT6", "cent6_64", "CENT6_64"];
         for win in wins {
             let result = Platform::from_str(win);
-            assert_eq!(result, Ok(Platform::Cent6_64));
+            assert_eq!(result.unwrap(), Platform::Cent6_64);
         }
     }
 
@@ -90,7 +91,7 @@ mod tests {
         let wins = vec!["cent7", "CENT7", "cent7_64", "CENT7_64"];
         for win in wins {
             let result = Platform::from_str(win);
-            assert_eq!(result, Ok(Platform::Cent7_64));
+            assert_eq!(result.unwrap(), Platform::Cent7_64);
         }
     }
  
@@ -99,7 +100,7 @@ mod tests {
         let wins = vec!["cent8", "CENT8", "cent8_64", "CENT8_64"];
         for win in wins {
             let result = Platform::from_str(win);
-            assert_eq!(result, Ok(Platform::Cent8_64));
+            assert_eq!(result.unwrap(), Platform::Cent8_64);
         }
     }
 

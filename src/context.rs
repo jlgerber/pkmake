@@ -1,4 +1,6 @@
 use std::str::FromStr;
+use anyhow::anyhow;
+use anyhow::Error as AnyhowError;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Context {
@@ -8,14 +10,14 @@ pub enum Context {
 }
 
 impl FromStr for Context {
-    type Err = String;
+    type Err = AnyhowError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
             "facility" => Ok(Context::Facility),
             "shared" => Ok(Context::Shared),
             "user" => Ok(Context::User),
-            _ => Err(format!("unrecognized context: {}", s))
+            _ => Err(anyhow!("unrecognized context: {}", s))
         }
     }
 }
@@ -38,7 +40,7 @@ mod tests {
         let facs = vec!["facility", "Facility", "FACILITY"];
         for fac in facs {
             let result = Context::from_str(fac);
-            assert_eq!(result, Ok(Context::Facility));
+            assert_eq!(result.unwrap(), Context::Facility);
         }
     }
     
@@ -48,7 +50,7 @@ mod tests {
         let shareds = vec!["shared", "SHARED", "Shared"];
         for shared in shareds {
             let result = Context::from_str(shared);
-            assert_eq!(result, Ok(Context::Shared));
+            assert_eq!(result.unwrap(), Context::Shared);
         }
     }
     
@@ -58,7 +60,7 @@ mod tests {
         let usrs = vec!["user", "USER", "User"];
         for usr in usrs {
             let result = Context::from_str(usr);
-            assert_eq!(result, Ok(Context::User));
+            assert_eq!(result.unwrap(), Context::User);
         }
     }
     

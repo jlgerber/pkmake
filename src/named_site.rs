@@ -1,5 +1,7 @@
 use std::str::FromStr;
 use std::fmt;
+use anyhow::anyhow;
+use anyhow::Error as AnyhowError;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// List of Valid Sites, along with a placeholder for unknown sites. This is used 
@@ -29,7 +31,7 @@ impl fmt::Display for NamedSite {
 }
 
 impl FromStr for NamedSite {
-    type Err = String;
+    type Err = AnyhowError;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         match input.to_lowercase().as_str() {
@@ -38,7 +40,7 @@ impl FromStr for NamedSite {
             "portland" => Ok(Self::Portland),
             "montreal" => Ok(Self::Montreal),
             "vancouver" => Ok(Self::Vancouver),
-            _ => Err(format!("{} is not a valid NamedSite", input))
+            _ => Err(anyhow!("{} is not a valid NamedSite", input))
         }
     }
 }
@@ -73,7 +75,7 @@ mod tests {
         ];
         for site in sites {
             let result = NamedSite::from_str(site.0);
-            assert_eq!(result, Ok(site.1));
+            assert_eq!(result.unwrap(), site.1);
         }
     }
     
