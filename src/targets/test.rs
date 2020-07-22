@@ -1,0 +1,102 @@
+//! Test
+//!
+//! This module contains the Test struct, which models the parameters for the 
+//! pk test command. 
+//!
+//! Like other targets, it provides individual methods which follow the builder pattern.
+//! That is, each setter method takes `self` by mutable reference, and returns a mutable 
+//! reference to `self` as well. 
+
+/// Models the pk test target. 
+#[derive(Debug,PartialEq,Eq,Hash)]
+pub struct Test {
+    pub build_dir: Option<String>,
+    pub dry_run: bool,
+    pub verbose: bool,
+}
+
+impl Default for Test {
+
+    fn default() -> Self {
+        Self {
+            build_dir: None,
+            dry_run: false,
+            verbose: false
+        }
+    }
+}
+
+impl Test {
+    /// Set the build_dir. Note that one must wrap it in an Option. 
+    pub fn build_dir<I>(&mut self, input: Option<I>)
+        -> &mut Self 
+    where
+        I: Into<String>
+    {
+        match input {
+            Some(dir) => self.build_dir = Some(dir.into()),
+            None => self.build_dir = None,
+        } 
+        self
+    }
+
+    pub fn dry_run(&mut self, input: bool) -> &mut Self {
+        self.dry_run = input;
+        self
+    }
+
+    pub fn verbose(&mut self, input: bool) -> &mut Self {
+        self.verbose = input;
+        self
+    }
+    
+    /// Finalize a chain of calls by returning a modified instance of the Test instance.
+    ///
+    /// # Example
+    /// ```
+    /// #fn main() {
+    /// let test = Test::default()
+    ///             .build_dir(Some("foo/bar"))
+    ///             .dry_run(true)
+    ///             .verbose(true)
+    ///             .build();
+    /// #}
+    /// ```
+    pub fn build(&mut self) -> Self {
+        let mut dup = Self::default();
+        std::mem::swap(self, &mut dup);
+        dup 
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn can_construct_default() {
+        let result = Test::default();
+        let expected = Test {
+            build_dir: None,
+            dry_run: false,
+            verbose: false
+        };
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn can_modify_and_build() {
+        let result = Test::default()
+                            .build_dir(Some("foo/bar"))
+                            .dry_run(true)
+                            .verbose(true)
+                            .build();
+        let expected = Test {
+            build_dir: Some("foo/bar".to_string()),
+            dry_run: true,
+            verbose: true
+        };
+        assert_eq!(result, expected);
+    }
+}
