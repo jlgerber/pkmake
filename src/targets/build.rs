@@ -62,6 +62,12 @@ impl Doit for Build {
         } else {
             "".to_string()
         };
+        if self.verbose {
+            println!(
+                "build_dir: '{}' docs_str: '{}' flavor_str: '{}'",
+                &build_dir, &docs_str, &flavor_str
+            );
+        }
         let result = format!("pk build {}{}{}", build_dir, docs_str, flavor_str);
         Ok(result)
     }
