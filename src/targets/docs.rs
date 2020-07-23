@@ -12,7 +12,7 @@ pub struct Docs {
 impl Doit for Docs {
     type Err = AnyError;
 
-    fn doit(&self) -> Result<(),Self::Err> {
+    fn doit(&mut self) -> Result<(),Self::Err> {
 
         Ok(())
     }

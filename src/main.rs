@@ -1,24 +1,11 @@
 use structopt::{StructOpt};
-
+use anyhow::anyhow;
+use anyhow::Error as AnyError;
 use pk_make::build_env::BuildEnv;
-use pk_make::targets::{Build, Install, Docs, Test};
+use pk_make::targets::{Build, Install, Docs, Test, Run};
 use pk_make::traits::Doit;
 use pk_make::{flavor, context, site, platform};
-/*
- flag translation
- CONTEXT => --context 
- LEVEL => --level 
- SHOW => --show 
- WITH_DOCS => --with-docs 
- DRY_RUN => -n --dry-run 
- FLAVOUR => --flavor --flavour 
- SITES --sites (local|all|name)
- BUILD_DIR --build-dir 
- PLATFORMS => --platforms 
- VERBOSe => --verbose 
- VCS => --vcs 
- pk-make 
-*/
+
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "pk-make", about = "Invoke pk recipes.")]
@@ -112,15 +99,21 @@ enum Opt {
         #[structopt(short,long)]
         verbose: bool,
     },
-    /// Execute an arbitrary pk recipe via pk run-recipe. All arguments are passed to pk run-recipe, which is
-    /// responsible for validatio.
+    /// Execute an arbitrary pk recipe via pk run-recipe.
     #[structopt(setting(structopt::clap::AppSettings::TrailingVarArg), display_order=5)] 
     Run {
+        /// Print but do not execute Command
+        #[structopt(short="n", long="dry-run")]
+        dry_run: bool,
+
+        /// Provide verbose output while executing command
+        #[structopt(short,long)]
+        verbose: bool,
         vars: Vec<String>
     }
 }
 
-fn main() {
+fn main() -> Result<(),AnyError>  {
     let opt = Opt::from_args();
     match opt {
         Opt::Build{
@@ -130,14 +123,14 @@ fn main() {
             flavor, 
             verbose
         } => {
-            let build = Build::default()
+            let mut build = Build::default()
                         .with_docs(!skip_docs)
                         .dry_run(dry_run)
                         .build_dir(build_dir)
                         .flavors(flavor)
                         .verbose(verbose)
                         .build();
-           build.doit().unwrap(); 
+           build.doit() 
         },
         Opt::Install{
             skip_docs, 
@@ -149,7 +142,7 @@ fn main() {
             build_dir, 
             verbose
         } => {
-            let install = Install::default()
+            let mut install = Install::default()
                             .with_docs(!skip_docs)
                             .context(context)
                             .show(show)
@@ -159,7 +152,62 @@ fn main() {
                             .build_dir(build_dir)
                             .verbose(verbose)
                             .build();
+            install.doit()  
+        },
+        Opt::Docs{
+            build_dir,
+            dry_run,
+            verbose
+        } => {
+            let mut docs = Docs::default()
+                        .dry_run(dry_run)
+                        .build_dir(build_dir)
+                        .verbose(verbose)
+                        .build();
+            docs.doit()
         }
-        _ => unimplemented!()
+        Opt::Test {
+            dry_run,
+            build_dir,
+            verbose
+        } => {
+            let mut test = Test::default()
+                        .dry_run(dry_run)
+                        .build_dir(build_dir)
+                        .verbose(verbose)
+                        .build();
+            test.doit()
+        }
+        Opt::Run {
+            dry_run,
+            verbose,
+            vars
+        } => {
+            let mut run = Run::default()
+                        .dry_run(dry_run)
+                        .verbose(verbose)
+                        .vars(vars)
+                        .build();
+            run.doit()
+        }
     }
 }
+
+/*
+ * The following is a list of flags from Makebridge 
+ flag translation
+ CONTEXT => --context 
+ LEVEL => --level 
+ SHOW => --show 
+ WITH_DOCS => --with-docs 
+ DRY_RUN => -n --dry-run 
+ FLAVOUR => --flavor --flavour 
+ SITES --sites (local|all|name)
+ BUILD_DIR --build-dir 
+ PLATFORMS => --platforms 
+ VERBOSe => --verbose 
+ VCS => --vcs 
+ pk-make 
+*/
+
+

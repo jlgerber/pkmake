@@ -21,7 +21,7 @@ pub struct Test {
 impl Doit for Test {
     type Err = AnyError;
 
-    fn doit(&self) -> Result<(),Self::Err> {
+    fn doit(&mut self) -> Result<(),Self::Err> {
         if self.verbose {
             println!("{:#?}", self);
         }

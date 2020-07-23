@@ -16,7 +16,7 @@ pub struct Build {
 impl Doit for Build {
     type Err = AnyError;
 
-    fn doit(&self) -> Result<(),Self::Err> {
+    fn doit(&mut self) -> Result<(),Self::Err> {
         if self.verbose {
             println!("{:#?}", self);
         }
