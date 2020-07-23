@@ -12,7 +12,7 @@ use subprocess::Redirection;
 pub struct Build {
     pub with_docs: bool,
     pub dry_run: bool,
-    pub build_dir: Option<String>,
+    pub dist_dir: Option<String>,
     pub flavors: Option<HashSet<Flavor>>,
     pub verbose: bool,
 }
@@ -34,13 +34,13 @@ impl Doit for Build {
     fn construct_command(&self) -> Result<String, Self::Err> {
         let build_env = BuildEnv::new(".")?;
         // get the build dir from the build_env
-        let env_build_dir = build_env
-            .build_dir
+        let env_dist_dir = build_env
+            .dist_dir
             .to_str()
-            .ok_or(anyhow!("unable to fetch build_dir from env"))?
+            .ok_or(anyhow!("unable to fetch dist_dir from env"))?
             .into();
-        // if the use supplied the build_dir, great. Otherwise, grab it from the env
-        let build_dir = self.build_dir.as_ref().unwrap_or(&env_build_dir);
+        // if the use supplied the dist_dir, great. Otherwise, grab it from the env
+        let dist_dir = self.dist_dir.as_ref().unwrap_or(&env_dist_dir);
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
         let flavor = if self.flavors.is_some() {
@@ -64,11 +64,11 @@ impl Doit for Build {
         };
         if self.verbose {
             println!(
-                "build_dir: '{}' docs_str: '{}' flavor_str: '{}'",
-                &build_dir, &docs_str, &flavor_str
+                "dist_dir: '{}' docs_str: '{}' flavor_str: '{}'",
+                &dist_dir, &docs_str, &flavor_str
             );
         }
-        let result = format!("pk build {}{}{}", build_dir, docs_str, flavor_str);
+        let result = format!("pk build {}{}{}", dist_dir, docs_str, flavor_str);
         Ok(result)
     }
 }
@@ -78,7 +78,7 @@ impl Default for Build {
         Self {
             with_docs: true,
             dry_run: false,
-            build_dir: None,
+            dist_dir: None,
             flavors: None,
             verbose: false,
         }
@@ -96,13 +96,13 @@ impl Build {
         self
     }
 
-    pub fn build_dir<I>(&mut self, input: Option<I>) -> &mut Self
+    pub fn dist_dir<I>(&mut self, input: Option<I>) -> &mut Self
     where
         I: Into<String>,
     {
         match input {
-            None => self.build_dir = None,
-            Some(dir) => self.build_dir = Some(dir.into()),
+            None => self.dist_dir = None,
+            Some(dir) => self.dist_dir = Some(dir.into()),
         }
         self
     }
@@ -156,7 +156,7 @@ mod tests {
         let expected = Build {
             with_docs: true,
             dry_run: false,
-            build_dir: None,
+            dist_dir: None,
             flavors: None,
             verbose: false,
         };
@@ -170,7 +170,7 @@ mod tests {
         let expected = Build {
             with_docs: false, // set by with_docs above
             dry_run: false,
-            build_dir: None,
+            dist_dir: None,
             flavors: None,
             verbose: false,
         };
@@ -184,7 +184,7 @@ mod tests {
         let expected = Build {
             with_docs: true, // set by with_docs above
             dry_run: true,
-            build_dir: None,
+            dist_dir: None,
             flavors: None,
             verbose: false,
         };
@@ -192,20 +192,20 @@ mod tests {
     }
 
     #[test]
-    fn can_set_build_dir() {
+    fn can_set_dist_dir() {
         let mut result = Build::default();
-        result.build_dir(Some("foo/bar"));
+        result.dist_dir(Some("foo/bar"));
         let expected = Build {
             with_docs: true, // set by with_docs above
             dry_run: false,
-            build_dir: Some("foo/bar".to_string()),
+            dist_dir: Some("foo/bar".to_string()),
             flavors: None,
             verbose: false,
         };
         assert_eq!(result, expected);
         // now test it with a String
         let mut result = Build::default();
-        result.build_dir(Some("foo/bar".to_string()));
+        result.dist_dir(Some("foo/bar".to_string()));
         assert_eq!(result, expected);
     }
 
@@ -222,7 +222,7 @@ mod tests {
         let expected = Build {
             with_docs: true, // set by with_docs above
             dry_run: false,
-            build_dir: None,
+            dist_dir: None,
             flavors: Some(flavs),
             verbose: false,
         };
@@ -240,7 +240,7 @@ mod tests {
         let expected = Build {
             with_docs: true, // set by with_docs above
             dry_run: false,
-            build_dir: None,
+            dist_dir: None,
             flavors: None,
             verbose: false,
         };
@@ -254,7 +254,7 @@ mod tests {
         let expected = Build {
             with_docs: true,
             dry_run: false,
-            build_dir: None,
+            dist_dir: None,
             flavors: None,
             verbose: true,
         };
@@ -266,7 +266,7 @@ mod tests {
         let result = Build::default()
             .with_docs(false)
             .dry_run(true)
-            .build_dir(Some("foo/bar"))
+            .dist_dir(Some("foo/bar"))
             .flavors(Some(vec![Flavor::Vanilla]))
             .verbose(true)
             .build();
@@ -275,7 +275,7 @@ mod tests {
         let expected = Build {
             with_docs: false, // set by with_docs above
             dry_run: true,
-            build_dir: Some("foo/bar".to_string()),
+            dist_dir: Some("foo/bar".to_string()),
             flavors: Some(flavs),
             verbose: true,
         };
@@ -287,7 +287,7 @@ mod tests {
 pub struct BuildBuilder {
     pub with_docs: bool,
     pub dry_run: bool,
-    pub build_dir: Option<String>,
+    pub dist_dir: Option<String>,
     pub flavors: Option<HashSet<flavor::Flavor>>,
     pub verbose: bool
 }
@@ -297,7 +297,7 @@ impl Default for BuildBuilder {
         Self {
             with_docs: true,
             dry_run: false,
-            build_dir: None,
+            dist_dir: None,
             flavors: None,
             verbose: false
         }
