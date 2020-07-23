@@ -41,6 +41,11 @@ impl Doit for Build {
             .into();
         // if the use supplied the dist_dir, great. Otherwise, grab it from the env
         let dist_dir = self.dist_dir.as_ref().unwrap_or(&env_dist_dir);
+        let dist_dir_str = if self.dist_dir.is_some() {
+            format!(" --dist-dir={}", dist_dir)
+        } else {
+            "".to_string()
+        };
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
         let flavor = if self.flavors.is_some() {
@@ -65,10 +70,10 @@ impl Doit for Build {
         if self.verbose {
             println!(
                 "dist_dir: '{}' docs_str: '{}' flavor_str: '{}'",
-                &dist_dir, &docs_str, &flavor_str
+                &dist_dir_str, &docs_str, &flavor_str
             );
         }
-        let result = format!("pk build {}{}{}", dist_dir, docs_str, flavor_str);
+        let result = format!("pk build {}{}{}", dist_dir_str, docs_str, flavor_str);
         Ok(result)
     }
 }
