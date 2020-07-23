@@ -1,20 +1,23 @@
-use std::path::PathBuf;
-use std::str::FromStr;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
-/// Enumerate the potential vcs systems found at the root 
+use std::path::PathBuf;
+use std::str::FromStr;
+/// Enumerate the potential vcs systems found at the root
 /// of a project
-#[derive(Debug,PartialEq,Eq,Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Vcs {
     Git,
     Svn,
     Both,
-    Unknown
+    Unknown,
 }
 
 impl Vcs {
     /// Constructor function builds a Vcs variant from a location
-    pub fn from_path<I>(loc: I) -> Self where I: Into<PathBuf> {
+    pub fn from_path<I>(loc: I) -> Self
+    where
+        I: Into<PathBuf>,
+    {
         let mut root = loc.into();
         // VCS Exists?
         root.push(".svn");
@@ -34,14 +37,26 @@ impl Vcs {
             Self::Unknown
         }
     }
-    
     /// Return a string representation
     pub fn as_str(&self) -> &'static str {
         match self {
             Vcs::Git => "git",
             Vcs::Svn => "svn",
             Vcs::Both => "git+svn",
-            Vcs::Unknown => "unknown"
+            Vcs::Unknown => "unknown",
+        }
+    }
+
+    pub fn is_unknown(&self) -> bool {
+        match &self {
+            Vcs::Unknown => true,
+            _ => false,
+        }
+    }
+    pub fn is_both(&self) -> bool {
+        match &self {
+            Vcs::Both => true,
+            _ => false,
         }
     }
 }
@@ -49,13 +64,12 @@ impl Vcs {
 impl FromStr for Vcs {
     type Err = AnyError;
 
-    fn from_str(input: &str) -> Result<Self,Self::Err> {
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
         match input.to_lowercase().as_str() {
             "git" => Ok(Vcs::Git),
             "svn" => Ok(Vcs::Svn),
             "git+svn" | "svn+git" | "both" | "git&svn" | "svn&git" => Ok(Vcs::Both),
-            _ => Err(anyhow!("'{}' unrecognized vcs", input))
+            _ => Err(anyhow!("'{}' unrecognized vcs", input)),
         }
     }
 }
-
