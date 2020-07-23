@@ -1,14 +1,22 @@
-use std::str::FromStr;
 use anyhow::anyhow;
 use anyhow::Error as AnyhowError;
+use std::str::FromStr;
 
-
-/// A flavor may either be vanilla or named 
+/// A flavor may either be vanilla or named
 #[derive(Debug, PartialEq, Eq, Hash)]
-pub enum Flavor{
+pub enum Flavor {
     Vanilla,
     Named(String),
-    Unknown(String)
+    Unknown(String),
+}
+impl Flavor {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Vanilla => "^",
+            Self::Named(ref s) => s.as_str(),
+            Self::Unknown(ref s) => s.as_str(),
+        }
+    }
 }
 
 fn is_named_flavor(c: char) -> bool {
@@ -21,10 +29,12 @@ impl FromStr for Flavor {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
             "^" | "vanilla" => Ok(Self::Vanilla),
-            _ if s.chars().next().unwrap_or('1').is_alphabetic() 
-              && s.chars().all(is_named_flavor) => Ok(Self::Named(s.to_string())),
-            _ => Err(anyhow!("Invalid Flavor: '{}'", s))
-
+            _ if s.chars().next().unwrap_or('1').is_alphabetic()
+                && s.chars().all(is_named_flavor) =>
+            {
+                Ok(Self::Named(s.to_string()))
+            }
+            _ => Err(anyhow!("Invalid Flavor: '{}'", s)),
         }
     }
 }
@@ -33,7 +43,7 @@ impl From<&str> for Flavor {
     fn from(other: &str) -> Self {
         match Flavor::from_str(other) {
             Ok(val) => val,
-            Err(_) => Flavor::Unknown(other.to_string())
+            Err(_) => Flavor::Unknown(other.to_string()),
         }
     }
 }
@@ -55,7 +65,7 @@ mod tests {
             let result = Flavor::from_str(van);
             assert_eq!(result.unwrap(), Flavor::Vanilla);
         }
-    } 
+    }
 
     #[test]
     fn from_named() {
@@ -65,7 +75,6 @@ mod tests {
             assert_eq!(result.unwrap(), Flavor::Named(named.to_string()));
         }
     }
-    
     #[test]
     fn from_from_trait() {
         let vals = vec!["foo", "bar"];
@@ -75,7 +84,10 @@ mod tests {
         }
         assert_eq!(Flavor::from("^"), Flavor::Vanilla);
         assert_eq!(Flavor::from("Vanilla"), Flavor::Vanilla);
-        assert_eq!(Flavor::from("foo bar#$$"), Flavor::Unknown("foo bar#$$".to_string()));
+        assert_eq!(
+            Flavor::from("foo bar#$$"),
+            Flavor::Unknown("foo bar#$$".to_string())
+        );
     }
 
     #[test]
