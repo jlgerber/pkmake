@@ -15,6 +15,7 @@ pub struct Build {
     pub dist_dir: Option<String>,
     pub flavors: Option<HashSet<Flavor>>,
     pub verbose: bool,
+    pub defines: Option<Vec<String>>,
 }
 
 impl Doit for Build {
@@ -39,6 +40,13 @@ impl Doit for Build {
             .to_str()
             .ok_or(anyhow!("unable to fetch dist_dir from env"))?
             .into();
+
+        let mut defines_str = String::new();
+        if self.defines.is_some() {
+            for def in self.defines.as_ref().unwrap() {
+                defines_str.push_str(&format!(" -D={}", def));
+            }
+        }
         // if the use supplied the dist_dir, great. Otherwise, grab it from the env
         let dist_dir = self.dist_dir.as_ref().unwrap_or(&env_dist_dir);
         let dist_dir_str = if self.dist_dir.is_some() {
@@ -69,11 +77,14 @@ impl Doit for Build {
         };
         if self.verbose {
             println!(
-                "dist_dir: '{}' docs_str: '{}' flavor_str: '{}'",
-                &dist_dir_str, &docs_str, &flavor_str
+                "dist_dir: '{}' docs_str: '{}' flavor_str: '{}' defines_str: '{}'",
+                &dist_dir_str, &docs_str, &flavor_str, &defines_str
             );
         }
-        let result = format!("pk build {}{}{}", dist_dir_str, docs_str, flavor_str);
+        let result = format!(
+            "pk audit && pk build {}{}{}{}",
+            dist_dir_str, docs_str, flavor_str, defines_str
+        );
         Ok(result)
     }
 }
@@ -86,6 +97,7 @@ impl Default for Build {
             dist_dir: None,
             flavors: None,
             verbose: false,
+            defines: None,
         }
     }
 }
@@ -134,7 +146,10 @@ impl Build {
         self.verbose = input;
         self
     }
-
+    pub fn defines(&mut self, input: Option<Vec<String>>) -> &mut Self {
+        self.defines = input;
+        self
+    }
     /// Terminate a chain of calls with a build to return an owned instance.
     ///
     /// # Example
@@ -164,6 +179,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             verbose: false,
+            defines: None,
         };
         assert_eq!(result, expected);
     }
@@ -178,6 +194,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             verbose: false,
+            defines: None,
         };
         assert_eq!(result, expected);
     }
@@ -192,6 +209,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             verbose: false,
+            defines: None,
         };
         assert_eq!(result, expected);
     }
@@ -206,6 +224,7 @@ mod tests {
             dist_dir: Some("foo/bar".to_string()),
             flavors: None,
             verbose: false,
+            defines: None,
         };
         assert_eq!(result, expected);
         // now test it with a String
@@ -230,6 +249,7 @@ mod tests {
             dist_dir: None,
             flavors: Some(flavs),
             verbose: false,
+            defines: None,
         };
         assert_eq!(result, expected);
     }
@@ -248,6 +268,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             verbose: false,
+            defines: None,
         };
         assert_eq!(result, expected);
     }
@@ -262,6 +283,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             verbose: true,
+            defines: None,
         };
         assert_eq!(result, expected);
     }
@@ -283,6 +305,7 @@ mod tests {
             dist_dir: Some("foo/bar".to_string()),
             flavors: Some(flavs),
             verbose: true,
+            defines: None,
         };
         assert_eq!(result, expected);
     }

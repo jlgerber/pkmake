@@ -18,7 +18,7 @@ enum Opt {
         /// Print out commands but do not execute them
         #[structopt(short = "n", long = "dry-run")]
         dry_run: bool,
-        /// Specify the dist directory
+        /// Override the default Output Distribution Directory
         #[structopt(short, long = "dist-dir")]
         dist_dir: Option<String>,
         /// Optionally specify one or more flavors. This option may be repeated multiple times
@@ -27,6 +27,8 @@ enum Opt {
         /// Provide more verbose output
         #[structopt(short, long)]
         verbose: bool,
+        #[structopt(short = "D", long)]
+        define: Option<Vec<String>>,
     },
     #[structopt(display_order = 2)]
     /// Build and install one or more flavors of a package to one or more platforms
@@ -113,6 +115,7 @@ fn main() -> Result<(), AnyError> {
             dist_dir,
             flavor,
             verbose,
+            define,
         } => {
             let mut build = Build::default()
                 .with_docs(!skip_docs)
@@ -120,6 +123,7 @@ fn main() -> Result<(), AnyError> {
                 .dist_dir(dist_dir)
                 .flavors(flavor)
                 .verbose(verbose)
+                .defines(define)
                 .build();
             build.doit()
         }
