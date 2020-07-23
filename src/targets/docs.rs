@@ -1,9 +1,23 @@
+use crate::traits::Doit;
+use anyhow::Error as AnyError;
+
+
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Docs {
     pub build_dir: Option<String>,
     pub dry_run: bool,
     pub verbose: bool,
 }
+
+impl Doit for Docs {
+    type Err = AnyError;
+
+    fn doit(&self) -> Result<(),Self::Err> {
+
+        Ok(())
+    }
+}
+
 
 impl std::default::Default for Docs {
     fn default() -> Self {
@@ -30,9 +44,10 @@ impl Docs {
     ///
     /// # Example 
     /// ```
-    /// #fn main() {
+    /// # fn main() {
+    /// use pk_make::Docs;
     /// let docs= Docs::default().dry_run(true).build();
-    /// #}
+    /// # }
     /// ```
     pub fn dry_run(&mut self, input: bool) -> &mut Self {
         self.dry_run = input;
@@ -49,7 +64,10 @@ impl Docs {
     ///
     /// # Example
     /// ```
+    /// # fn main() {
+    /// use pk_make::Build;
     /// let build = Build::default().verbose(true).with_docs(false).build();
+    /// # }
     /// ```
     pub fn build(&mut self) -> Self {
         let mut default = Self::default();

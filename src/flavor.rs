@@ -12,7 +12,7 @@ pub enum Flavor{
 }
 
 fn is_named_flavor(c: char) -> bool {
-    c.is_alphanumeric() || c == '_'
+    c.is_alphanumeric() || c == '_' || c == '.'
 }
 
 impl FromStr for Flavor {
@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     fn from_named() {
-        let nameds = vec!["foo", "FOO", "bar", "bla_f223"];
+        let nameds = vec!["foo", "FOO", "bar", "bla_f223_foo.bar"];
         for named in nameds {
             let result = Flavor::from_str(named);
             assert_eq!(result.unwrap(), Flavor::Named(named.to_string()));

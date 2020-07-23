@@ -1,12 +1,9 @@
 use structopt::{StructOpt};
 
-mod named_site;
-mod site;
-mod context;
-mod platform;
-mod flavor;
-mod targets;
-use targets::{Build, Install, Docs, Test};
+use pk_make::build_env::BuildEnv;
+use pk_make::targets::{Build, Install, Docs, Test};
+use pk_make::traits::Doit;
+use pk_make::{flavor, context, site, platform};
 /*
  flag translation
  CONTEXT => --context 
@@ -133,12 +130,14 @@ fn main() {
             flavor, 
             verbose
         } => {
-            println!("skip_docs: {}\n dry_run: {}\n build_dir: {:?}\n flavor: {:?}\n verbose: {}", 
-                     skip_docs, 
-                     dry_run, 
-                     build_dir, 
-                     flavor, 
-                     verbose );
+            let build = Build::default()
+                        .with_docs(!skip_docs)
+                        .dry_run(dry_run)
+                        .build_dir(build_dir)
+                        .flavors(flavor)
+                        .verbose(verbose)
+                        .build();
+           build.doit().unwrap(); 
         },
         Opt::Install{
             skip_docs, 
@@ -150,16 +149,16 @@ fn main() {
             build_dir, 
             verbose
         } => {
-            println!("skip_docs: {}\n context: {:?}\n show: {:?}\n site: {:?}\n platform: {:?}\n flavor: {:?}\n build_dir: {:?}\n verbose: {}",
-                     skip_docs,
-                     context,
-                     show, 
-                     site,
-                     platform,
-                     flavor,
-                     build_dir,
-                     verbose
-                     );
+            let install = Install::default()
+                            .with_docs(!skip_docs)
+                            .context(context)
+                            .show(show)
+                            .sites(site)
+                            .platforms(platform)
+                            .flavors(flavor)
+                            .build_dir(build_dir)
+                            .verbose(verbose)
+                            .build();
         }
         _ => unimplemented!()
     }

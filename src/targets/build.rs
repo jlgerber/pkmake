@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 use crate::flavor::Flavor;
+use crate::traits::Doit;
+use anyhow::Error as AnyError;
 
 /// build target 
 #[derive(Debug, PartialEq, Eq)]
@@ -10,6 +12,18 @@ pub struct Build {
     pub flavors: Option<HashSet<Flavor>>,
     pub verbose: bool,
 }
+
+impl Doit for Build {
+    type Err = AnyError;
+
+    fn doit(&self) -> Result<(),Self::Err> {
+        if self.verbose {
+            println!("{:#?}", self);
+        }
+        Ok(())
+    }
+}
+
 impl Default for Build {
     fn default() -> Self {
         Self {
@@ -68,7 +82,10 @@ impl Build {
     ///
     /// # Example
     /// ```
+    /// # fn main() {
+    /// use pk_make::Build;
     /// let build = Build::default().verbose(true).with_docs(false).build();
+    /// # }
     /// ```
     pub fn build(&mut self) -> Self {
         let mut default = Self::default();
@@ -206,6 +223,7 @@ mod tests {
             verbose: true 
         };
         assert_eq!(result, expected);
+        
     }
 }
 /*

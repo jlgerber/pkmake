@@ -1,0 +1,235 @@
+schema: 1
+name: 'vrayddbase'
+version: '5.0.8'
+type: 'package'
+description: Digital Domain's collection of vray shaders and utilities
+url: 'http://dd-svnmaster.d2.com:8000/projects/software/browser/package/vrayddbase/trunk'
+os:
+  - linux
+
+recipes:
+  build:
+    includes:
+      - build-common
+      - build-vray
+      - build-vray-for-maya
+      - build-final
+  build-common:
+    requires:
+      bs: '0.34.0+<1'
+      confundle: '4+<5'
+    steps:
+      - buildup -v --output-dir=$distDir $packageDir
+  build-vray:
+    requires:
+      bs: '0.34.0+<1'
+      gcc: '4.8.5'
+      make: '^4.0'
+      sqlite: '3.13.0+<4'
+      subversion: '1.9.4+<2'
+      pk_svn_deps: '1.3.3+<2'
+      yaml_cpp: '0.3+<0.4'
+    steps:
+      - cd $packageDir && pk-svn-deps --workspace $packageDir
+      - mkdir -p $tempDir/vray
+      - env | grep -E '_PACKAGE_ROOT|_VERSION' > $tempDir/vray/packages.conf
+      - cd $packageDir && pb2
+        -I$tempDir/vray/packages.conf
+        --private=$tempDir/vray
+        -DVRAY_MAKE_MODULE=vray
+        :vray-plugins
+      - cd $packageDir && pb2
+        -I$tempDir/vray/packages.conf
+        --private=$tempDir/vray
+        --prefix=$distDir
+        --install
+        --lib-dir=vray
+        :vray-plugins
+      - echo "Copying .txt interface files"
+      - cp -v $distDir/vray/materials/*/*.txt $distDir/vray/.
+      - cp -v $distDir/vray/textures/*/*.txt $distDir/vray/.
+      - cp -v $distDir/vray/brdfs/*/*.txt $distDir/vray/.
+  build-vray-for-maya:
+    requires:
+      bs: '0.34.0+<1'
+      gcc: '4.8.5'
+      make: '^4.0'
+      sqlite: '3.13.0+<4'
+      subversion: '1.9.4+<2'
+      pk_svn_deps: '1.3.3+<2'
+      yaml_cpp: '0.3+<0.4'
+    steps:
+      - cd $packageDir && pk-svn-deps --workspace $packageDir
+      - mkdir -p $tempDir/vray_for_maya
+      - env | grep -E '_PACKAGE_ROOT|_VERSION' > $tempDir/vray_for_maya/packages.conf
+      - cd $packageDir && pb2
+        --private=$tempDir/vray_for_maya
+        --workspace=$packageDir
+        -I$tempDir/vray_for_maya/packages.conf
+        :maya-plugins
+      - cd $packageDir && pb2
+        -I$tempDir/vray_for_maya/packages.conf
+        --private=$tempDir/vray_for_maya
+        --prefix=$distDir
+        --install
+        --lib-dir=maya/plugins
+        :maya-plugins
+      - cd $packageDir && pb2
+        -I$tempDir/vray_for_maya/packages.conf
+        --private=$tempDir/vray_for_maya
+        -DVRAY_MAKE_MODULE=vray_for_maya
+        :vray-plugins
+      - cd $packageDir && pb2
+        -I$tempDir/vray_for_maya/packages.conf
+        --private=$tempDir/vray_for_maya
+        --prefix=$distDir
+        --install
+        --lib-dir=vray_for_maya
+        :vray-plugins
+      - echo "Copying .txt interface files"
+      - cp -v $distDir/vray/*.txt $distDir/vray_for_maya/.
+      - cp -v $distDir/vray/materials/*/*.txt $distDir/vray_for_maya/.
+      - cp -v $distDir/vray/textures/*/*.txt $distDir/vray_for_maya/.
+      - cp -v $distDir/vray/brdfs/*/*.txt $distDir/vray_for_maya/.
+  build-final:
+    steps:
+      - echo "Removing unneeded folders"
+      - rm -rf $distDir/vray/materials
+      - rm -rf $distDir/vray/textures
+      - rm -rf $distDir/vray/brdfs
+      - rm -rf $distDir/vray/aafilters
+      - rm -rf $distDir/vray/cameras
+       
+  docs:
+    requires:
+      docable: '0.2+<1.0'
+      sphinx: '1.8.5+<2'
+      sphinx_extensions: '1.8.0+<2'
+    steps:
+      - PYTHONPATH=$distDir/python:$PYTHONPATH
+        docable --build-dir=$tempDir --output-dir=$distDir/docs $packageDir/docs
+        -Dpackage=$package -Dversion=$version
+      - echo "Preview docs at file://$distDir/docs/html/index.html"
+
+flavours:
+
+  - name: vray4.0.29259_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29259'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29259_for_maya2018'
+
+  - name: vray4.0.29567_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29567'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29567_for_maya2018'
+
+  - name: vray4.0.29635_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29635'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29635_for_maya2018'
+
+  - name: vray4.0.29727_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29727'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29727_for_maya2018'
+
+  - name: vray4.0.29747_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29747'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29747_for_maya2018'
+  
+  - name: vray4.0.29789_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29789'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29789_for_maya2018'
+  
+  - name: vray4.0.29799_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29799'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29799_for_maya2018'
+  
+  - name: vray4.0.29849_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29849'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29849_for_maya2018'
+
+  - name: vray4.0.29904_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29904'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29904_for_maya2018'
+
+  - name: vray4.0.29935_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.29935'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.29935_for_maya2018'
+
+  - name: vray4.0.30046_for_maya2018
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.30046'
+      build-vray-for-maya:
+        requires:
+          maya: '2018.sp3'
+          vray_for_maya: '4.0.30046_for_maya2018'
+
+  - name: vray4.0.30046_for_maya2020
+    recipes:
+      build-vray:
+        requires:
+          vray: '4.0.30046'
+      build-vray-for-maya:
+        requires:
+          maya: '2020.2'
+          vray_for_maya: '4.0.30046_for_maya2020'
+

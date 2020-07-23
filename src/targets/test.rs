@@ -6,6 +6,9 @@
 //! Like other targets, it provides individual methods which follow the builder pattern.
 //! That is, each setter method takes `self` by mutable reference, and returns a mutable 
 //! reference to `self` as well. 
+use crate::traits::Doit;
+use anyhow::Error as AnyError;
+
 
 /// Models the pk test target. 
 #[derive(Debug,PartialEq,Eq,Hash)]
@@ -14,6 +17,19 @@ pub struct Test {
     pub dry_run: bool,
     pub verbose: bool,
 }
+
+impl Doit for Test {
+    type Err = AnyError;
+
+    fn doit(&self) -> Result<(),Self::Err> {
+        if self.verbose {
+            println!("{:#?}", self);
+        }
+ 
+        Ok(())
+    }
+}
+
 
 impl Default for Test {
 
@@ -54,13 +70,14 @@ impl Test {
     ///
     /// # Example
     /// ```
-    /// #fn main() {
+    /// # fn main() {
+    /// use pk_make::Test;
     /// let test = Test::default()
     ///             .build_dir(Some("foo/bar"))
     ///             .dry_run(true)
     ///             .verbose(true)
     ///             .build();
-    /// #}
+    /// # }
     /// ```
     pub fn build(&mut self) -> Self {
         let mut dup = Self::default();
