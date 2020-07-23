@@ -5,6 +5,8 @@ use std::path::Path;
 use crate::Flavor;
 use serde::Deserialize;
 
+/// minimal manifest information in a form that is convenient for us to consume. This
+/// struct is generated after parsing the manifest using serde... 
 #[derive(Debug,PartialEq,Eq)]
 pub struct ManifestInfo {
     pub name: String,
@@ -13,9 +15,9 @@ pub struct ManifestInfo {
 }
 
 impl ManifestInfo {
-    pub fn from_path(manifest: &Path) -> Result<ManifestInfo, AnyError>
-    {
-        Err(anyhow!("not implemented"))    
+    /// Generate a ManifestInfo from a &Path 
+    pub fn from_path(manifest: &Path) -> Result<ManifestInfo, AnyError> {
+        Ok(Manifest::from_path(&manifest)?.to_info()) 
     }
     // retrieve the name and version as a tuple 
     fn get_name_and_version(manifest: &Path) -> Result<(String,String),AnyError> {
