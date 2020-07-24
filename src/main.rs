@@ -3,7 +3,7 @@ use anyhow::Error as AnyError;
 //use pk_make::build_env::BuildEnv;
 use pk_make::targets::{Build, Docs, Install, Run, Test};
 use pk_make::traits::Doit;
-use pk_make::{context, flavor, platform, site, OverridePair};
+use pk_make::{context, flavor, platform, site, OverridePair, Vcs};
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -62,6 +62,9 @@ enum Opt {
     #[structopt(display_order = 2)]
     /// Build and install one or more flavors of a package to one or more platforms
     Install {
+        /// clean
+        #[structopt(long)]
+        clean: bool,
         /// Do not build the docs as part of the install  
         #[structopt(long = "skip-docs")]
         skip_docs: bool,
@@ -92,6 +95,29 @@ enum Opt {
         /// Controls  verbose output to shell
         #[structopt(short, long)]
         verbose: bool,
+
+        /// Override the default Output Distribution Directory
+        #[structopt(short, long = "dist-dir")]
+        dist_dir: Option<String>,
+        /// The target level's repository specified as a level-spec
+        #[structopt(short = "L", long)]
+        level: Option<String>,
+
+        /// Override version from version-lock
+        #[structopt(short, long = "override")]
+        overrides: Option<Vec<OverridePair>>,
+
+        /// Pass variable through to the recipe
+        #[structopt(short = "D", long)]
+        define: Option<Vec<String>>,
+
+        /// Include packages from the user workarea
+        #[structopt(long)]
+        work: bool,
+
+        /// choose a vcs system manually (sometimes necessary)
+        #[structopt(long)]
+        vcs: Option<Vcs>,
     },
     #[structopt(display_order = 3)]
     /// Build documentation
@@ -178,8 +204,16 @@ fn main() -> Result<(), AnyError> {
             flavor,
             build_dir,
             verbose,
+            clean,
+            dist_dir,
+            level,
+            overrides,
+            define,
+            work,
+            vcs,
         } => {
             let mut install = Install::default()
+                .clean(clean)
                 .with_docs(!skip_docs)
                 .context(context)
                 .show(show)
@@ -188,6 +222,12 @@ fn main() -> Result<(), AnyError> {
                 .flavors(flavor)
                 .build_dir(build_dir)
                 .verbose(verbose)
+                .dist_dir(dist_dir)
+                .level(level)
+                .overrides(overrides)
+                .defines(define)
+                .work(work)
+                .vcs(vcs)
                 .build();
             install.doit()
         }

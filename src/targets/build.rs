@@ -35,13 +35,15 @@ impl Doit for Build {
         }
         let cmd = self.construct_command()?;
         if self.dry_run || self.verbose {
-            println!("{}", cmd);
+            for c in cmd {
+                println!("{}", c);
+            }
         }
         Ok(())
     }
 
     /// construct the command which will be executed
-    fn construct_command(&self) -> Result<String, Self::Err> {
+    fn construct_command(&mut self) -> Result<Vec<String>, Self::Err> {
         let build_env = BuildEnv::new(".")?;
 
         let clean_str = if self.clean { " --clean" } else { "" };
@@ -88,7 +90,7 @@ impl Doit for Build {
             defines_str,
             work_str
         );
-        Ok(result)
+        Ok(vec![result])
     }
 }
 

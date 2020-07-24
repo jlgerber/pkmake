@@ -1,7 +1,9 @@
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
+use std::fmt;
 use std::path::PathBuf;
 use std::str::FromStr;
+
 /// Enumerate the potential vcs systems found at the root
 /// of a project
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -71,5 +73,11 @@ impl FromStr for Vcs {
             "git+svn" | "svn+git" | "both" | "git&svn" | "svn&git" => Ok(Vcs::Both),
             _ => Err(anyhow!("'{}' unrecognized vcs", input)),
         }
+    }
+}
+
+impl fmt::Display for Vcs {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
     }
 }
