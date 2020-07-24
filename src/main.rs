@@ -1,6 +1,6 @@
-use anyhow::anyhow;
+//use anyhow::anyhow;
 use anyhow::Error as AnyError;
-use pk_make::build_env::BuildEnv;
+//use pk_make::build_env::BuildEnv;
 use pk_make::targets::{Build, Docs, Install, Run, Test};
 use pk_make::traits::Doit;
 use pk_make::{context, flavor, platform, site, OverridePair};
@@ -12,6 +12,9 @@ enum Opt {
     /// Build one or more flavors of a package
     #[structopt(display_order = 1)]
     Build {
+        /// clean
+        #[structopt(long)]
+        clean: bool,
         /// Do not build the docs when building the main artifact(s)
         #[structopt(long = "skip-docs")]
         skip_docs: bool,
@@ -51,6 +54,10 @@ enum Opt {
         /// Pass variable through to the recipe
         #[structopt(short = "D", long)]
         define: Option<Vec<String>>,
+
+        /// Include packages from the user workarea
+        #[structopt(long)]
+        work: bool,
     },
     #[structopt(display_order = 2)]
     /// Build and install one or more flavors of a package to one or more platforms
@@ -133,6 +140,7 @@ fn main() -> Result<(), AnyError> {
     let opt = Opt::from_args();
     match opt {
         Opt::Build {
+            clean,
             skip_docs,
             dry_run,
             dist_dir,
@@ -143,6 +151,7 @@ fn main() -> Result<(), AnyError> {
             platform,
             verbose,
             define,
+            work,
         } => {
             let mut build = Build::default()
                 .with_docs(!skip_docs)
@@ -169,6 +178,7 @@ fn main() -> Result<(), AnyError> {
             verbose,
         } => {
             let mut install = Install::default()
+                .clean(clean)
                 .with_docs(!skip_docs)
                 .context(context)
                 .show(show)
@@ -177,6 +187,7 @@ fn main() -> Result<(), AnyError> {
                 .flavors(flavor)
                 .build_dir(build_dir)
                 .verbose(verbose)
+                .work(work)
                 .build();
             install.doit()
         }

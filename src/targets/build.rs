@@ -12,6 +12,7 @@ use subprocess::Redirection;
 /// build target
 #[derive(Debug, PartialEq, Eq)]
 pub struct Build {
+    pub clean: bool,
     pub with_docs: bool,
     pub dry_run: bool,
     pub dist_dir: Option<String>,
@@ -22,6 +23,7 @@ pub struct Build {
     pub platforms: Option<HashSet<Platform>>,
     pub verbose: bool,
     pub defines: Option<Vec<String>>,
+    pub work: bool,
 }
 
 impl Doit for Build {
@@ -41,6 +43,8 @@ impl Doit for Build {
     /// construct the command which will be executed
     fn construct_command(&self) -> Result<String, Self::Err> {
         let build_env = BuildEnv::new(".")?;
+
+        let clean_str = if self.clean { " --clean" } else { "" };
 
         let defines_str = self.get_defines_str();
 
@@ -63,6 +67,8 @@ impl Doit for Build {
 
         let platform_str = self.get_platform_str();
 
+        let work_str = if self.work { " --work" } else { "" };
+
         if self.verbose {
             println!(
                 "dist_dir: '{}' docs_str: '{}' flavor_str: '{}' defines_str: '{}'\n",
@@ -70,7 +76,8 @@ impl Doit for Build {
             );
         }
         let result = format!(
-            "pk audit && pk build {}{}{}{}{}{}{}{}",
+            "pk audit && pk build {}{}{}{}{}{}{}{}{}{}",
+            clean_str,
             dist_dir_str,
             docs_str,
             flavor_str,
@@ -78,7 +85,8 @@ impl Doit for Build {
             metadata_only_str,
             overrides_str,
             platform_str,
-            defines_str
+            defines_str,
+            work_str
         );
         Ok(result)
     }
@@ -205,6 +213,7 @@ impl Build {
 impl Default for Build {
     fn default() -> Self {
         Self {
+            clean: false,
             with_docs: true,
             dry_run: false,
             dist_dir: None,
@@ -215,12 +224,18 @@ impl Default for Build {
             platforms: None,
             verbose: false,
             defines: None,
+            work: false,
         }
     }
 }
 
 // Implementation of the Setter methods
 impl Build {
+    /// Set the clean value and return a mutable reference to self per the builder pattern.
+    pub fn clean(&mut self, value: bool) -> &mut Self {
+        self.clean = value;
+        self
+    }
     /// Set the with_docs value and return a mutable reference to self per the
     /// builder pattern.
     pub fn with_docs(&mut self, value: bool) -> &mut Self {
@@ -320,6 +335,10 @@ impl Build {
         self.defines = input;
         self
     }
+    pub fn work(&mut self, input: bool) -> &mut Self {
+        self.work = input;
+        self
+    }
     /// Terminate a chain of calls with a build to return an owned instance.
     ///
     /// # Example
@@ -344,6 +363,7 @@ mod tests {
     pub fn can_construct_default() {
         let result = Build::default();
         let expected = Build {
+            clean: false,
             with_docs: true,
             dry_run: false,
             dist_dir: None,
@@ -354,6 +374,7 @@ mod tests {
             platforms: None,
             verbose: false,
             defines: None,
+            work: false,
         };
         assert_eq!(result, expected);
     }
@@ -363,6 +384,7 @@ mod tests {
         let mut result = Build::default();
         result.with_docs(false);
         let expected = Build {
+            clean: false,
             with_docs: false, // set by with_docs above
             dry_run: false,
             dist_dir: None,
@@ -373,6 +395,7 @@ mod tests {
             platforms: None,
             verbose: false,
             defines: None,
+            work: false,
         };
         assert_eq!(result, expected);
     }
@@ -382,6 +405,7 @@ mod tests {
         let mut result = Build::default();
         result.dry_run(true);
         let expected = Build {
+            clean: false,
             with_docs: true, // set by with_docs above
             dry_run: true,
             dist_dir: None,
@@ -392,6 +416,7 @@ mod tests {
             platforms: None,
             verbose: false,
             defines: None,
+            work: false,
         };
         assert_eq!(result, expected);
     }
@@ -401,6 +426,7 @@ mod tests {
         let mut result = Build::default();
         result.dist_dir(Some("foo/bar"));
         let expected = Build {
+            clean: false,
             with_docs: true, // set by with_docs above
             dry_run: false,
             dist_dir: Some("foo/bar".to_string()),
@@ -411,6 +437,7 @@ mod tests {
             platforms: None,
             verbose: false,
             defines: None,
+            work: false,
         };
         assert_eq!(result, expected);
         // now test it with a String
@@ -430,6 +457,7 @@ mod tests {
         flavs.insert(Flavor::Vanilla);
         flavs.insert(Flavor::Named("foo".to_string()));
         let expected = Build {
+            clean: false,
             with_docs: true, // set by with_docs above
             dry_run: false,
             dist_dir: None,
@@ -440,6 +468,7 @@ mod tests {
             platforms: None,
             verbose: false,
             defines: None,
+            work: false,
         };
         assert_eq!(result, expected);
     }
@@ -453,6 +482,7 @@ mod tests {
         ]));
         result.flavors(None);
         let expected = Build {
+            clean: false,
             with_docs: true, // set by with_docs above
             dry_run: false,
             dist_dir: None,
@@ -463,6 +493,7 @@ mod tests {
             platforms: None,
             verbose: false,
             defines: None,
+            work: false,
         };
         assert_eq!(result, expected);
     }
@@ -472,6 +503,7 @@ mod tests {
         let mut result = Build::default();
         result.verbose(true);
         let expected = Build {
+            clean: false,
             with_docs: true,
             dry_run: false,
             dist_dir: None,
@@ -482,6 +514,7 @@ mod tests {
             platforms: None,
             verbose: true,
             defines: None,
+            work: false,
         };
         assert_eq!(result, expected);
     }
@@ -498,6 +531,7 @@ mod tests {
         let mut flavs = HashSet::new();
         flavs.insert(Flavor::Vanilla);
         let expected = Build {
+            clean: false,
             with_docs: false, // set by with_docs above
             dry_run: true,
             dist_dir: Some("foo/bar".to_string()),
@@ -508,6 +542,7 @@ mod tests {
             platforms: None,
             verbose: true,
             defines: None,
+            work: false,
         };
         assert_eq!(result, expected);
     }
