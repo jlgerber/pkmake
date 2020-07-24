@@ -53,7 +53,7 @@ impl Doit for Build {
 
         let level_str = self.get_level_str();
 
-        let metadata_only_str = if self.with_docs {
+        let metadata_only_str = if self.metadata_only {
             " --metadata-only"
         } else {
             ""
@@ -193,7 +193,7 @@ impl Build {
         } else {
             "".to_string()
         };
-        let overrides_str = if self.platforms.is_some() {
+        let overrides_str = if self.overrides.is_some() {
             format!(" --override={}", &overrides)
         } else {
             "".to_string()
