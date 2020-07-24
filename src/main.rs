@@ -40,7 +40,7 @@ enum Opt {
         metadata_only: bool,
 
         /// Override version from version-lock
-        #[structopt(long = "override")]
+        #[structopt(short, long = "override")]
         overrides: Option<Vec<OverridePair>>,
 
         /// Provide the platform(s) to build for. This flag may be repeated.
@@ -154,6 +154,7 @@ fn main() -> Result<(), AnyError> {
             work,
         } => {
             let mut build = Build::default()
+                .clean(clean)
                 .with_docs(!skip_docs)
                 .dry_run(dry_run)
                 .dist_dir(dist_dir)
@@ -164,6 +165,7 @@ fn main() -> Result<(), AnyError> {
                 .platforms(platform)
                 .verbose(verbose)
                 .defines(define)
+                .work(work)
                 .build();
             build.doit()
         }
@@ -178,7 +180,6 @@ fn main() -> Result<(), AnyError> {
             verbose,
         } => {
             let mut install = Install::default()
-                .clean(clean)
                 .with_docs(!skip_docs)
                 .context(context)
                 .show(show)
@@ -187,7 +188,6 @@ fn main() -> Result<(), AnyError> {
                 .flavors(flavor)
                 .build_dir(build_dir)
                 .verbose(verbose)
-                .work(work)
                 .build();
             install.doit()
         }
