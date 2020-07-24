@@ -15,6 +15,7 @@ pub struct Build {
     pub dry_run: bool,
     pub dist_dir: Option<String>,
     pub flavors: Option<HashSet<Flavor>>,
+    pub level: Option<String>,
     pub platforms: Option<HashSet<Platform>>,
     pub verbose: bool,
     pub defines: Option<Vec<String>>,
@@ -47,6 +48,8 @@ impl Doit for Build {
 
         let flavor_str = self.get_flavor_str();
 
+        let level_str = self.get_level_str();
+
         let platform_str = self.get_platform_str();
 
         if self.verbose {
@@ -56,8 +59,8 @@ impl Doit for Build {
             );
         }
         let result = format!(
-            "pk audit && pk build {}{}{}{}{}",
-            dist_dir_str, docs_str, flavor_str, platform_str, defines_str
+            "pk audit && pk build {}{}{}{}{}{}",
+            dist_dir_str, docs_str, flavor_str, level_str, platform_str, defines_str
         );
         Ok(result)
     }
@@ -119,6 +122,13 @@ impl Build {
         flavor_str
     }
 
+    fn get_level_str(&self) -> String {
+        match self.level.as_ref() {
+            Some(level) => format!(" --level={}", level),
+            None => "".to_string(),
+        }
+    }
+
     fn get_platform_str(&self) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
@@ -151,6 +161,7 @@ impl Default for Build {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            level: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -201,6 +212,19 @@ impl Build {
                     });
                 }
             }
+        }
+        self
+    }
+
+    /// Set the level value and return a mutable reference to
+    /// self, per the builder pattern.
+    pub fn level<I>(&mut self, input: Option<I>) -> &mut Self
+    where
+        I: Into<String>,
+    {
+        match input {
+            None => self.level = None,
+            Some(level) => self.level = Some(level.into()),
         }
         self
     }
@@ -262,6 +286,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            level: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -278,6 +303,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            level: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -294,6 +320,7 @@ mod tests {
             dry_run: true,
             dist_dir: None,
             flavors: None,
+            level: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -310,6 +337,7 @@ mod tests {
             dry_run: false,
             dist_dir: Some("foo/bar".to_string()),
             flavors: None,
+            level: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -336,6 +364,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: Some(flavs),
+            level: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -356,6 +385,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            level: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -372,6 +402,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            level: None,
             platforms: None,
             verbose: true,
             defines: None,
@@ -395,6 +426,7 @@ mod tests {
             dry_run: true,
             dist_dir: Some("foo/bar".to_string()),
             flavors: Some(flavs),
+            level: None,
             platforms: None,
             verbose: true,
             defines: None,

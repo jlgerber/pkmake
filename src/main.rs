@@ -15,21 +15,32 @@ enum Opt {
         /// Do not build the docs when building the main artifact(s)
         #[structopt(long = "skip-docs")]
         skip_docs: bool,
+
         /// Print out commands but do not execute them
         #[structopt(short = "n", long = "dry-run")]
         dry_run: bool,
+
         /// Override the default Output Distribution Directory
         #[structopt(short, long = "dist-dir")]
         dist_dir: Option<String>,
+
         /// Optionally specify one or more flavors. This option may be repeated multiple times
         #[structopt(short, long)]
         flavor: Option<Vec<flavor::Flavor>>,
+
+        /// The target level's repository specified as a level-spec
+        #[structopt(short = "L", long)]
+        level: Option<String>,
+
         /// Provide the platform(s) to build for. This flag may be repeated.
         #[structopt(short, long)]
         platform: Option<Vec<platform::Platform>>,
+
         /// Provide more verbose output
         #[structopt(short, long)]
         verbose: bool,
+
+        /// Pass variable through to the recipe
         #[structopt(short = "D", long)]
         define: Option<Vec<String>>,
     },
@@ -117,6 +128,7 @@ fn main() -> Result<(), AnyError> {
             dry_run,
             dist_dir,
             flavor,
+            level,
             platform,
             verbose,
             define,
@@ -126,6 +138,7 @@ fn main() -> Result<(), AnyError> {
                 .dry_run(dry_run)
                 .dist_dir(dist_dir)
                 .flavors(flavor)
+                .level(level)
                 .platforms(platform)
                 .verbose(verbose)
                 .defines(define)
