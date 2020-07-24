@@ -1,5 +1,6 @@
 use crate::build_env::BuildEnv;
 use crate::flavor::Flavor;
+use crate::platform::Platform;
 use crate::traits::Doit;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
@@ -14,6 +15,7 @@ pub struct Build {
     pub dry_run: bool,
     pub dist_dir: Option<String>,
     pub flavors: Option<HashSet<Flavor>>,
+    pub platforms: Option<HashSet<Platform>>,
     pub verbose: bool,
     pub defines: Option<Vec<String>>,
 }
@@ -45,6 +47,8 @@ impl Doit for Build {
 
         let flavor_str = self.get_flavor_str();
 
+        let platform_str = self.get_platform_str();
+
         if self.verbose {
             println!(
                 "dist_dir: '{}' docs_str: '{}' flavor_str: '{}' defines_str: '{}'\n",
@@ -52,8 +56,8 @@ impl Doit for Build {
             );
         }
         let result = format!(
-            "pk audit && pk build {}{}{}{}",
-            dist_dir_str, docs_str, flavor_str, defines_str
+            "pk audit && pk build {}{}{}{}{}",
+            dist_dir_str, docs_str, flavor_str, platform_str, defines_str
         );
         Ok(result)
     }
@@ -94,7 +98,7 @@ impl Build {
     fn get_flavor_str(&self) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
-        let flavor = if self.flavors.is_some() {
+        let flavors = if self.flavors.is_some() {
             self.flavors
                 .as_ref()
                 .unwrap()
@@ -108,11 +112,35 @@ impl Build {
             "".to_string()
         };
         let flavor_str = if self.flavors.is_some() {
-            format!(" --flavor={}", &flavor)
+            format!(" --flavor={}", &flavors)
         } else {
             "".to_string()
         };
         flavor_str
+    }
+
+    fn get_platform_str(&self) -> String {
+        // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
+        // get a vector of Flavors, them convert them to strs, and join them into a string
+        let platforms = if self.platforms.is_some() {
+            self.platforms
+                .as_ref()
+                .unwrap()
+                .iter()
+                .collect::<Vec<_>>()
+                .iter()
+                .map(|v| v.as_str())
+                .collect::<Vec<_>>()
+                .join(",")
+        } else {
+            "".to_string()
+        };
+        let platform_str = if self.platforms.is_some() {
+            format!(" --platform={}", &platforms)
+        } else {
+            "".to_string()
+        };
+        platform_str
     }
 }
 
@@ -123,6 +151,7 @@ impl Default for Build {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            platforms: None,
             verbose: false,
             defines: None,
         }
@@ -175,6 +204,24 @@ impl Build {
         }
         self
     }
+    /// Set platforms per the builder pattern
+    pub fn platforms(&mut self, input: Option<Vec<Platform>>) -> &mut Self {
+        match input {
+            None => self.platforms = None,
+            Some(platforms) => {
+                if self.platforms.is_none() {
+                    self.platforms = Some(HashSet::new())
+                }
+                if let Some(ref mut platforms_hs) = self.platforms {
+                    platforms.into_iter().for_each(|flav| {
+                        platforms_hs.insert(flav);
+                        ()
+                    });
+                }
+            }
+        }
+        self
+    }
     /// Set verbose state and return a mutable reference to self
     /// per the builder pattern.
     pub fn verbose(&mut self, input: bool) -> &mut Self {
@@ -215,6 +262,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            platforms: None,
             verbose: false,
             defines: None,
         };
@@ -230,6 +278,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            platforms: None,
             verbose: false,
             defines: None,
         };
@@ -245,6 +294,7 @@ mod tests {
             dry_run: true,
             dist_dir: None,
             flavors: None,
+            platforms: None,
             verbose: false,
             defines: None,
         };
@@ -260,6 +310,7 @@ mod tests {
             dry_run: false,
             dist_dir: Some("foo/bar".to_string()),
             flavors: None,
+            platforms: None,
             verbose: false,
             defines: None,
         };
@@ -285,6 +336,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: Some(flavs),
+            platforms: None,
             verbose: false,
             defines: None,
         };
@@ -304,6 +356,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            platforms: None,
             verbose: false,
             defines: None,
         };
@@ -319,6 +372,7 @@ mod tests {
             dry_run: false,
             dist_dir: None,
             flavors: None,
+            platforms: None,
             verbose: true,
             defines: None,
         };
@@ -341,6 +395,7 @@ mod tests {
             dry_run: true,
             dist_dir: Some("foo/bar".to_string()),
             flavors: Some(flavs),
+            platforms: None,
             verbose: true,
             defines: None,
         };

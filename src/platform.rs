@@ -1,5 +1,5 @@
-//! 
-//! Platform 
+//!
+//! Platform
 //!
 //! representation of build platforms
 //!
@@ -7,7 +7,6 @@ use anyhow::anyhow;
 use anyhow::Error as AnyhowError;
 use std::str::FromStr;
 /*
- 
 fc4_32
 deb4_64
 cent5_64
@@ -28,21 +27,34 @@ pub enum Platform {
     Cent6_64,
     Cent7_64,
     Cent8_64,
-    Unknown(String)
+    Unknown(String),
 }
 
+impl Platform {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Win7_64 => "win7_64",
+            Self::Win10_64 => "win10_64",
+            Self::Osx10_64 => "osx10_64",
+            Self::Cent6_64 => "cent6_64",
+            Self::Cent7_64 => "cent7_64",
+            Self::Cent8_64 => "cent8_64",
+            Self::Unknown(ref s) => s.as_str(),
+        }
+    }
+}
 impl FromStr for Platform {
     type Err = AnyhowError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "win7_64"  | "win7"  => Ok(Self::Win7_64),
+            "win7_64" | "win7" => Ok(Self::Win7_64),
             "win10_64" | "win10" => Ok(Self::Win10_64),
             "osx10_64" | "osx10" => Ok(Self::Osx10_64),
             "cent6_64" | "cent6" => Ok(Self::Cent6_64),
             "cent7_64" | "cent7" => Ok(Self::Cent7_64),
             "cent8_64" | "cent8" => Ok(Self::Cent8_64),
-            _ => Err(anyhow!("Invalid Platform '{}'", s))
+            _ => Err(anyhow!("Invalid Platform '{}'", s)),
         }
     }
 }
@@ -51,7 +63,7 @@ impl From<&str> for Platform {
     fn from(other: &str) -> Self {
         match Platform::from_str(other) {
             Ok(val) => val,
-            Err(_) => Self::Unknown(other.to_string())
+            Err(_) => Self::Unknown(other.to_string()),
         }
     }
 }
@@ -76,8 +88,8 @@ mod tests {
             assert_eq!(result.unwrap(), Platform::Win10_64);
         }
     }
-    
-     #[test]
+
+    #[test]
     fn from_cent6() {
         let wins = vec!["cent6", "CENT6", "cent6_64", "CENT6_64"];
         for win in wins {
@@ -94,7 +106,6 @@ mod tests {
             assert_eq!(result.unwrap(), Platform::Cent7_64);
         }
     }
- 
     #[test]
     fn from_cent8() {
         let wins = vec!["cent8", "CENT8", "cent8_64", "CENT8_64"];
@@ -111,7 +122,7 @@ mod tests {
             let result = Platform::from(plat);
             assert_eq!(result, Platform::Cent8_64);
         }
-        // test a bad input 
+        // test a bad input
         let result = Platform::from("foobarbla");
         assert_eq!(result, Platform::Unknown("foobarbla".to_string()));
     }

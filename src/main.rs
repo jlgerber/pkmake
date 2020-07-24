@@ -24,6 +24,9 @@ enum Opt {
         /// Optionally specify one or more flavors. This option may be repeated multiple times
         #[structopt(short, long)]
         flavor: Option<Vec<flavor::Flavor>>,
+        /// Provide the platform(s) to build for. This flag may be repeated.
+        #[structopt(short, long)]
+        platform: Option<Vec<platform::Platform>>,
         /// Provide more verbose output
         #[structopt(short, long)]
         verbose: bool,
@@ -114,6 +117,7 @@ fn main() -> Result<(), AnyError> {
             dry_run,
             dist_dir,
             flavor,
+            platform,
             verbose,
             define,
         } => {
@@ -122,6 +126,7 @@ fn main() -> Result<(), AnyError> {
                 .dry_run(dry_run)
                 .dist_dir(dist_dir)
                 .flavors(flavor)
+                .platforms(platform)
                 .verbose(verbose)
                 .defines(define)
                 .build();
