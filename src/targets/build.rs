@@ -45,7 +45,7 @@ impl Doit for Build {
         // if the use supplied the dist_dir, great. Otherwise, grab it from the env
         let dist_dir_str = self.get_dist_dir_str(&build_env)?;
 
-        let docs_str = if self.with_docs { " --with-docs" } else { "" };
+        let docs_str = self.get_docs_str();
 
         let flavor_str = self.get_flavor_str();
 
@@ -110,7 +110,13 @@ impl Build {
         };
         Ok(dist_dir_str)
     }
-
+    fn get_docs_str(&self) -> &str {
+        if self.with_docs && !self.metadata_only {
+            " --with-docs"
+        } else {
+            ""
+        }
+    }
     fn get_flavor_str(&self) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
