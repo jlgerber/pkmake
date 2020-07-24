@@ -3,7 +3,7 @@ use anyhow::Error as AnyError;
 use pk_make::build_env::BuildEnv;
 use pk_make::targets::{Build, Docs, Install, Run, Test};
 use pk_make::traits::Doit;
-use pk_make::{context, flavor, platform, site};
+use pk_make::{context, flavor, platform, site, OverridePair};
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -35,6 +35,10 @@ enum Opt {
         /// Only write out package metadata
         #[structopt(long = "metadata-only")]
         metadata_only: bool,
+
+        /// Override version from version-lock
+        #[structopt(long = "override")]
+        overrides: Option<Vec<OverridePair>>,
 
         /// Provide the platform(s) to build for. This flag may be repeated.
         #[structopt(short, long)]
@@ -135,6 +139,7 @@ fn main() -> Result<(), AnyError> {
             flavor,
             level,
             metadata_only,
+            overrides,
             platform,
             verbose,
             define,
@@ -146,6 +151,7 @@ fn main() -> Result<(), AnyError> {
                 .flavors(flavor)
                 .level(level)
                 .metadata_only(metadata_only)
+                .overrides(overrides)
                 .platforms(platform)
                 .verbose(verbose)
                 .defines(define)

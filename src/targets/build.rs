@@ -2,6 +2,7 @@ use crate::build_env::BuildEnv;
 use crate::flavor::Flavor;
 use crate::platform::Platform;
 use crate::traits::Doit;
+use crate::OverridePair;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use std::collections::HashSet;
@@ -17,6 +18,7 @@ pub struct Build {
     pub flavors: Option<HashSet<Flavor>>,
     pub level: Option<String>,
     pub metadata_only: bool,
+    pub overrides: Option<Vec<OverridePair>>,
     pub platforms: Option<HashSet<Platform>>,
     pub verbose: bool,
     pub defines: Option<Vec<String>>,
@@ -57,6 +59,8 @@ impl Doit for Build {
             ""
         };
 
+        let overrides_str = self.get_overrides_str();
+
         let platform_str = self.get_platform_str();
 
         if self.verbose {
@@ -66,12 +70,13 @@ impl Doit for Build {
             );
         }
         let result = format!(
-            "pk audit && pk build {}{}{}{}{}{}{}",
+            "pk audit && pk build {}{}{}{}{}{}{}{}",
             dist_dir_str,
             docs_str,
             flavor_str,
             level_str,
             metadata_only_str,
+            overrides_str,
             platform_str,
             defines_str
         );
@@ -171,6 +176,30 @@ impl Build {
         };
         platform_str
     }
+
+    fn get_overrides_str(&self) -> String {
+        // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
+        // get a vector of Flavors, them convert them to strs, and join them into a string
+        let overrides = if self.overrides.is_some() {
+            self.overrides
+                .as_ref()
+                .unwrap()
+                .iter()
+                .collect::<Vec<_>>()
+                .iter()
+                .map(|v| v.as_str())
+                .collect::<Vec<_>>()
+                .join(",")
+        } else {
+            "".to_string()
+        };
+        let overrides_str = if self.platforms.is_some() {
+            format!(" --override={}", &overrides)
+        } else {
+            "".to_string()
+        };
+        overrides_str
+    }
 }
 
 impl Default for Build {
@@ -182,6 +211,7 @@ impl Default for Build {
             flavors: None,
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -255,7 +285,11 @@ impl Build {
         self.metadata_only = value;
         self
     }
-
+    /// Set the overrides value and return a mutable reference to self
+    pub fn overrides(&mut self, value: Option<Vec<OverridePair>>) -> &mut Self {
+        self.overrides = value;
+        self
+    }
     /// Set platforms per the builder pattern
     pub fn platforms(&mut self, input: Option<Vec<Platform>>) -> &mut Self {
         match input {
@@ -316,6 +350,7 @@ mod tests {
             flavors: None,
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -334,6 +369,7 @@ mod tests {
             flavors: None,
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -352,6 +388,7 @@ mod tests {
             flavors: None,
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -370,6 +407,7 @@ mod tests {
             flavors: None,
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -398,6 +436,7 @@ mod tests {
             flavors: Some(flavs),
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -420,6 +459,7 @@ mod tests {
             flavors: None,
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: false,
             defines: None,
@@ -438,6 +478,7 @@ mod tests {
             flavors: None,
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: true,
             defines: None,
@@ -463,6 +504,7 @@ mod tests {
             flavors: Some(flavs),
             level: None,
             metadata_only: false,
+            overrides: None,
             platforms: None,
             verbose: true,
             defines: None,
