@@ -16,6 +16,7 @@ pub struct Build {
     pub dist_dir: Option<String>,
     pub flavors: Option<HashSet<Flavor>>,
     pub level: Option<String>,
+    pub metadata_only: bool,
     pub platforms: Option<HashSet<Platform>>,
     pub verbose: bool,
     pub defines: Option<Vec<String>>,
@@ -50,6 +51,12 @@ impl Doit for Build {
 
         let level_str = self.get_level_str();
 
+        let metadata_only_str = if self.with_docs {
+            " --metadata-only"
+        } else {
+            ""
+        };
+
         let platform_str = self.get_platform_str();
 
         if self.verbose {
@@ -59,8 +66,14 @@ impl Doit for Build {
             );
         }
         let result = format!(
-            "pk audit && pk build {}{}{}{}{}{}",
-            dist_dir_str, docs_str, flavor_str, level_str, platform_str, defines_str
+            "pk audit && pk build {}{}{}{}{}{}{}",
+            dist_dir_str,
+            docs_str,
+            flavor_str,
+            level_str,
+            metadata_only_str,
+            platform_str,
+            defines_str
         );
         Ok(result)
     }
@@ -162,6 +175,7 @@ impl Default for Build {
             dist_dir: None,
             flavors: None,
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: false,
             defines: None,
@@ -228,6 +242,14 @@ impl Build {
         }
         self
     }
+
+    /// Set the metadata_only value and return a mutable reference to self
+    /// as per the builder pattern.
+    pub fn metadata_only(&mut self, value: bool) -> &mut Self {
+        self.metadata_only = value;
+        self
+    }
+
     /// Set platforms per the builder pattern
     pub fn platforms(&mut self, input: Option<Vec<Platform>>) -> &mut Self {
         match input {
@@ -287,6 +309,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: false,
             defines: None,
@@ -304,6 +327,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: false,
             defines: None,
@@ -321,6 +345,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: false,
             defines: None,
@@ -338,6 +363,7 @@ mod tests {
             dist_dir: Some("foo/bar".to_string()),
             flavors: None,
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: false,
             defines: None,
@@ -365,6 +391,7 @@ mod tests {
             dist_dir: None,
             flavors: Some(flavs),
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: false,
             defines: None,
@@ -386,6 +413,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: false,
             defines: None,
@@ -403,6 +431,7 @@ mod tests {
             dist_dir: None,
             flavors: None,
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: true,
             defines: None,
@@ -427,6 +456,7 @@ mod tests {
             dist_dir: Some("foo/bar".to_string()),
             flavors: Some(flavs),
             level: None,
+            metadata_only: false,
             platforms: None,
             verbose: true,
             defines: None,

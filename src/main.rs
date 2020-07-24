@@ -32,6 +32,10 @@ enum Opt {
         #[structopt(short = "L", long)]
         level: Option<String>,
 
+        /// Only write out package metadata
+        #[structopt(long = "metadata-only")]
+        metadata_only: bool,
+
         /// Provide the platform(s) to build for. This flag may be repeated.
         #[structopt(short, long)]
         platform: Option<Vec<platform::Platform>>,
@@ -63,6 +67,7 @@ enum Opt {
         /// repeated one or more times
         #[structopt(short, long)]
         site: Option<Vec<site::Site>>,
+
         /// Optionally provide the platform or platforms to build for
         #[structopt(short, long)]
         platform: Option<Vec<platform::Platform>>,
@@ -129,6 +134,7 @@ fn main() -> Result<(), AnyError> {
             dist_dir,
             flavor,
             level,
+            metadata_only,
             platform,
             verbose,
             define,
@@ -139,6 +145,7 @@ fn main() -> Result<(), AnyError> {
                 .dist_dir(dist_dir)
                 .flavors(flavor)
                 .level(level)
+                .metadata_only(metadata_only)
                 .platforms(platform)
                 .verbose(verbose)
                 .defines(define)
