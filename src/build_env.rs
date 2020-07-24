@@ -19,6 +19,7 @@ pub struct BuildEnv {
     pub dist_dir: PathBuf,
     pub vcs: Vcs,
     pub manifest: PathBuf,
+    pub dd_show: Option<String>,
 }
 
 const MANIFESTS: [&'static str; 2] = ["manifest.yaml", "pk.yaml"];
@@ -62,6 +63,7 @@ impl BuildEnv {
 
         let manifest = Self::get_manifest(package_root.clone())?;
 
+        let dd_show = std::env::var("DD_SHOW").ok();
         Ok(BuildEnv {
             package_root,
             dd_os,
@@ -70,6 +72,7 @@ impl BuildEnv {
             dist_dir,
             vcs,
             manifest,
+            dd_show,
         })
     }
     // retrieve the manifest if possible
