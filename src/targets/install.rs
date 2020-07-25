@@ -11,8 +11,10 @@ use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use std::collections::HashSet;
 
+const DEFAULT_CONTEXT: Context = Context::User;
+
 #[derive(Debug, PartialEq, Eq)]
-/// Install target.
+/// struct implementing Install target.
 pub struct Install {
     pub clean: bool,
     pub dry_run: bool,
@@ -26,16 +28,18 @@ pub struct Install {
     pub verbose: bool,
     pub dist_dir: Option<String>,
     pub level: Option<String>,
-    //pub metadata_only: bool,
     pub overrides: Option<Vec<OverridePair>>,
     pub defines: Option<Vec<String>>,
     pub work: bool,
     pub vcs: Option<Vcs>,
 }
 
+/***************************
+  Doit trait implementation
+****************************/
 impl Doit for Install {
     type Err = AnyError;
-
+    /// doit executes the install target command
     fn doit(&mut self) -> Result<(), Self::Err> {
         if self.verbose {
             println!("{:#?}", self);
@@ -98,7 +102,6 @@ impl Doit for Install {
         let work_str = if self.work { "--work" } else { "" };
         let build_dir_str = self.get_build_dir_str(&build_env)?;
 
-        let site_str = self.get_site_str();
         // we have to build an install command for every target
         let mut result = vec![format!(
             "pk audit && pk build {} {} {} {} {} {} {} {} {}",
@@ -117,7 +120,14 @@ impl Doit for Install {
     }
 }
 
+//
+// Helper Methods for Install::construct_command(...)
+//
 impl Install {
+    // context/show and level are both responsible for setting execution level. Context and
+    // show are vestiges of the build system everyone is familiar with. Level is the pk native
+    // replacement for them. This function reconciles one with the other, and errors if they
+    // contradict eachother.
     fn reconcile_context_and_level(&mut self, build_env: &BuildEnv) -> Result<(), AnyError> {
         // We need to check to see that the user didnt pass in both
         // level and show and Level, since they are intended to do the same
@@ -126,25 +136,37 @@ impl Install {
         let some_show = self.show.is_some();
         let some_context = self.context.is_some();
 
+        // If the user has set both the level and either the context or show (or both),
+        // rather than try and apply an arbitrary rule to determine priority, an error
+        // is returned.
         if some_level && (some_context || some_show) {
             return Err(anyhow!("Hey There. Level and Show/Context arguments overlap in functionality. Either use one or the other"));
         }
-
+        // At this point, if the level has been set, we can be certain that the show and context have not been set.
+        // There is nothing more that needs to be done, so we exit.
         if some_level {
             return Ok(());
         }
+        // At this point, we know that level has not been set. We need to update the level, based on the context
+        // and show values, applying defaults if the user has not supplied them.
 
-        // get context
-        let context = if let Some(context) = self.context.as_ref() {
-            context
-        } else {
-            &Context::User
+        // Extract the context, which is wrapped in an Option,
+        let context = match self.context.as_ref() {
+            Some(context) => context,
+            None => &Context::User,
         };
-        // nothing more to be done if context == facility
+        // At this point, there is nothing more to be done if the context is Facility, since
+        // this fact is used elsewhere to short circuit additional work based on the level.
+        // So, we can simply return early.
         if context == &Context::Facility {
             return Ok(());
         }
-        // get show
+        // At this point, we know that level has not been set, and the context is NOT Facility. Now
+        // we have to retreive the show and figure out whether we are in the user context or
+        // shared context. This information will be used to set the level.
+
+        // get the  show. If the show has not been explicitly set, we pull the show
+        // from DD_SHOW via the BuildEnv
         let show = if let Some(show) = self.show.as_ref() {
             show
         } else {
@@ -157,13 +179,16 @@ impl Install {
                 }
             }
         };
-
+        // If the show is facility, again we special case it, and set the context to facility
         if show.to_lowercase().as_str() == "facility" {
             self.context = Some(Context::Facility);
         }
+        // TODO: I believe that we still have to set level to either the showname or <show>.work depending upon
+        // the context.
         Ok(())
     }
 
+    // build up the string representing the define flag invocation.
     fn get_defines_str(&self) -> String {
         // NB: The -D flag works differently in pk build in that it
         // follows posix convention for multiple values; it supports
@@ -177,14 +202,13 @@ impl Install {
         defines_str
     }
 
+    // build up the pk install dist-dir flag depending on the state of
+    // self.dist_dir
     fn get_dist_dir_str(&self) -> String {
-        let dist_dir_str = if self.dist_dir.is_some() {
-            let dist_dir = self.dist_dir.as_ref().unwrap();
-            format!("--dist-dir={}", dist_dir)
-        } else {
-            "".to_string()
-        };
-        dist_dir_str
+        match self.dist_dir.as_ref() {
+            Some(dist_dir) => format!("--dist-dir={}", dist_dir),
+            None => "".to_string(),
+        }
     }
 
     fn get_docs_str(&self) -> &str {
@@ -226,7 +250,8 @@ impl Install {
         }
     }
 
-    fn get_platform_str(&self) -> String {
+    /* replaced by more terse method below
+    fn get_platform_str_(&self) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
         let platforms = if self.platforms.is_some() {
@@ -249,56 +274,65 @@ impl Install {
         };
         platform_str
     }
+    */
+    fn get_platform_str(&self) -> String {
+        // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
+        // get a vector of Flavors, them convert them to strs, and join them into a string
+        match self.platforms {
+            Some(ref platforms) => format!(
+                "--platform={}",
+                platforms
+                    .iter()
+                    .collect::<Vec<_>>()
+                    .iter()
+                    .map(|v| v.as_str())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            ),
+            None => "".to_string(),
+        }
+    }
 
     fn get_site_str(&self) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
-        let sites = if self.sites.is_some() {
-            self.platforms
-                .as_ref()
-                .unwrap()
-                .iter()
-                .collect::<Vec<_>>()
-                .iter()
-                .map(|v| v.as_str())
-                .collect::<Vec<_>>()
-                .join(",")
-        } else {
-            "".to_string()
-        };
-        let site_str = if self.sites.is_some() {
-            format!("--site={}", &sites)
-        } else {
-            "".to_string()
-        };
-        site_str
+        match self.sites {
+            Some(ref sites) => format!(
+                "--site={}",
+                sites
+                    .iter()
+                    .collect::<Vec<_>>()
+                    .iter()
+                    .map(|v| v.as_str())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            ),
+            None => "".to_string(),
+        }
     }
 
     fn get_overrides_str(&self) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
-        let overrides = if self.overrides.is_some() {
-            self.overrides
-                .as_ref()
-                .unwrap()
-                .iter()
-                .collect::<Vec<_>>()
-                .iter()
-                .map(|v| v.as_str())
-                .collect::<Vec<_>>()
-                .join(",")
-        } else {
-            "".to_string()
-        };
-        let overrides_str = if self.overrides.is_some() {
-            format!("--override={}", &overrides)
-        } else {
-            "".to_string()
-        };
-        overrides_str
+        match self.overrides {
+            Some(ref overrides) => format!(
+                "--override={}",
+                overrides
+                    .iter()
+                    .collect::<Vec<_>>()
+                    .iter()
+                    .map(|v| v.as_str())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            ),
+            None => "".to_string(),
+        }
     }
 
     fn get_build_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
+        // dont see the use in the env_build_dir here.
+        // TODO: remove build_env from arg list as it appears to be irrelevant
+        /*
         let env_build_dir = build_env
             .build_dir
             .to_str()
@@ -312,7 +346,12 @@ impl Install {
         } else {
             "".to_string()
         };
-        Ok(build_dir_str)
+        //Ok(build_dir_str)
+        */
+        match self.build_dir.as_ref() {
+            Some(build_dir) => Ok(format!("--build-dir={}", build_dir)),
+            None => Ok("".to_string()),
+        }
     }
 
     // used to update the results with the installation call
@@ -340,17 +379,29 @@ impl Install {
             .map(|s| s.as_str())
             .unwrap_or(env_dist_dir);
 
+        let site_str = self.get_site_str();
+
+        let platform_str = self.get_platform_str();
+
+        let level_str = self.get_level_str();
+
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
                 result.push(format!(
-                    "pk install {}/{}-{}",
+                    "pk install {} {} {} {}/{}-{}",
+                    level_str,
+                    site_str,
+                    platform_str,
                     dist_dir,
                     manifest_info.name(),
                     manifest_info.version()
                 ));
             } else {
                 result.push(format!(
-                    "pk install {}/{}-{}_{}",
+                    "pk install {} {} {} {}/{}-{}_{}",
+                    level_str,
+                    site_str,
+                    platform_str,
                     dist_dir,
                     manifest_info.name(),
                     manifest_info.version(),
@@ -360,7 +411,18 @@ impl Install {
         }
         Ok(())
     }
+    /// Retrieve a reference to the context
+    pub fn get_context(&self) -> &Context {
+        match self.context {
+            None => &DEFAULT_CONTEXT,
+            Some(ref ctx) => ctx,
+        }
+    }
 }
+
+//
+// Implement Default trait for Install.
+//
 impl Default for Install {
     fn default() -> Self {
         Self {
@@ -384,17 +446,10 @@ impl Default for Install {
         }
     }
 }
-const DEFAULT_CONTEXT: Context = Context::User;
 
-impl Install {
-    /// Retrieve a reference to the context
-    pub fn get_context(&self) -> &Context {
-        match self.context {
-            None => &DEFAULT_CONTEXT,
-            Some(ref ctx) => ctx,
-        }
-    }
-}
+//
+// Public Methods
+//
 impl Install {
     /// Set the dry_run field.
     ///

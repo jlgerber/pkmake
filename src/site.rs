@@ -1,15 +1,14 @@
-use std::str::FromStr;
 use crate::named_site::NamedSite;
 use anyhow::anyhow;
 use anyhow::Error as AnyhowError;
-
+use std::str::FromStr;
 
 /// enum representing valid state of Sites input
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Site {
     Local,
     All,
-    Named(NamedSite)
+    Named(NamedSite),
 }
 // helper function to test whether a character is alphabetic
 // or a comma. Used for named site(s)
@@ -17,9 +16,17 @@ fn site_tst(c: char) -> bool {
     c.is_alphabetic() //|| c == ','
 }
 
+impl Site {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Local => "local",
+            Self::All => "all",
+            Self::Named(named_site) => named_site.to_str(),
+        }
+    }
+}
 impl FromStr for Site {
-
-    type Err=AnyhowError; //todo replace with custom 
+    type Err = AnyhowError; //todo replace with custom
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
@@ -31,7 +38,7 @@ impl FromStr for Site {
                 } else {
                     match NamedSite::from_str(s) {
                         Ok(site) => Ok(Site::Named(site)),
-                        Err(_) => Err(anyhow!("Invalid Site Name {}", s))
+                        Err(_) => Err(anyhow!("Invalid Site Name {}", s)),
                     }
                 }
             }
@@ -73,11 +80,11 @@ mod tests {
     #[test]
     fn can_build_named() {
         let named = vec![
-            ("hyderabad", NamedSite::Hyderabad), 
-            ("playa",NamedSite::Playa), 
+            ("hyderabad", NamedSite::Hyderabad),
+            ("playa", NamedSite::Playa),
             ("portland", NamedSite::Portland),
             ("montreal", NamedSite::Montreal),
-            ("vancouver", NamedSite::Vancouver)
+            ("vancouver", NamedSite::Vancouver),
         ];
         for nm in named {
             let result = Site::from_str(nm.0);
@@ -87,7 +94,7 @@ mod tests {
 
     #[test]
     fn errors_when_invalid_chars_used() {
-        let invalids = vec!["foo bar", "foo1", "foo,bar","bar$#%"];
+        let invalids = vec!["foo bar", "foo1", "foo,bar", "bar$#%"];
         for invalid in invalids {
             let result = Site::from_str(invalid);
             assert!(result.is_err());

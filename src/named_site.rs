@@ -1,22 +1,33 @@
-use std::str::FromStr;
-use std::fmt;
 use anyhow::anyhow;
 use anyhow::Error as AnyhowError;
+use std::fmt;
+use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-/// List of Valid Sites, along with a placeholder for unknown sites. This is used 
-/// by non-fallible constructor methods. 
+/// List of Valid Sites, along with a placeholder for unknown sites. This is used
+/// by non-fallible constructor methods.
 pub enum NamedSite {
     Hyderabad,
     Playa,
     Portland,
     Montreal,
     Vancouver,
-    Unknown(String)
+    Unknown(String),
 }
 
+impl NamedSite {
+    pub fn to_str(&self) -> &str {
+        match self {
+            Self::Hyderabad => "hyderabad",
+            Self::Playa => "playa",
+            Self::Portland => "portland",
+            Self::Montreal => "montreal",
+            Self::Vancouver => "vancouver",
+            Self::Unknown(ref val) => val,
+        }
+    }
+}
 impl fmt::Display for NamedSite {
-    
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //write!(f, "({}, {})", self.x, self.y)
         match self {
@@ -25,9 +36,9 @@ impl fmt::Display for NamedSite {
             Self::Portland => write!(f, "Portland"),
             Self::Montreal => write!(f, "Montreal"),
             Self::Vancouver => write!(f, "Vancouver"),
-            Self::Unknown(ref val) => write!(f, "{} (Unknown)", val)
+            Self::Unknown(ref val) => write!(f, "{} (Unknown)", val),
         }
-    }  
+    }
 }
 
 impl FromStr for NamedSite {
@@ -40,7 +51,7 @@ impl FromStr for NamedSite {
             "portland" => Ok(Self::Portland),
             "montreal" => Ok(Self::Montreal),
             "vancouver" => Ok(Self::Vancouver),
-            _ => Err(anyhow!("{} is not a valid NamedSite", input))
+            _ => Err(anyhow!("{} is not a valid NamedSite", input)),
         }
     }
 }
@@ -61,24 +72,23 @@ mod tests {
     #[test]
     fn instance_from_str() {
         let sites = vec![
-            ("hyderabad", NamedSite::Hyderabad), 
-            ("HYDERABAD", NamedSite::Hyderabad), 
-            ("playa", NamedSite::Playa), 
-            ("Playa", NamedSite::Playa), 
+            ("hyderabad", NamedSite::Hyderabad),
+            ("HYDERABAD", NamedSite::Hyderabad),
+            ("playa", NamedSite::Playa),
+            ("Playa", NamedSite::Playa),
             ("Playa Vista", NamedSite::Playa),
             ("playavista", NamedSite::Playa),
             ("portland", NamedSite::Portland),
             ("Portland", NamedSite::Portland),
-           ("Montreal",NamedSite::Montreal), 
-           ("vancouver",NamedSite::Vancouver),
-            ("Vancouver", NamedSite::Vancouver)
+            ("Montreal", NamedSite::Montreal),
+            ("vancouver", NamedSite::Vancouver),
+            ("Vancouver", NamedSite::Vancouver),
         ];
         for site in sites {
             let result = NamedSite::from_str(site.0);
             assert_eq!(result.unwrap(), site.1);
         }
     }
-    
     #[test]
     fn err_from_bad_str() {
         let result = NamedSite::from_str("fluboxland");
@@ -87,18 +97,18 @@ mod tests {
 
     #[test]
     fn instance_from() {
-         let sites = vec![
-            ("hyderabad", NamedSite::Hyderabad), 
-            ("HYDERABAD", NamedSite::Hyderabad), 
-            ("playa", NamedSite::Playa), 
-            ("Playa", NamedSite::Playa), 
+        let sites = vec![
+            ("hyderabad", NamedSite::Hyderabad),
+            ("HYDERABAD", NamedSite::Hyderabad),
+            ("playa", NamedSite::Playa),
+            ("Playa", NamedSite::Playa),
             ("Playa Vista", NamedSite::Playa),
             ("playavista", NamedSite::Playa),
             ("portland", NamedSite::Portland),
             ("Portland", NamedSite::Portland),
-            ("Montreal",NamedSite::Montreal), 
-            ("vancouver",NamedSite::Vancouver),
-            ("Vancouver", NamedSite::Vancouver)
+            ("Montreal", NamedSite::Montreal),
+            ("vancouver", NamedSite::Vancouver),
+            ("Vancouver", NamedSite::Vancouver),
         ];
         for site in sites {
             let result = NamedSite::from(site.0);
@@ -112,5 +122,3 @@ mod tests {
         assert_eq!(result, NamedSite::Unknown("fluboxland".to_string()));
     }
 }
-
-
