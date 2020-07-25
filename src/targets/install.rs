@@ -144,9 +144,18 @@ impl Install {
         }
         // At this point, if the level has been set, we can be certain that the show and context have not been set.
         // There is nothing more that needs to be done, so we exit.
-        if some_level {
-            return Ok(());
+        match self.level.as_ref() {
+            Some(level) => {
+                if level.to_lowercase().as_str() == "facility" {
+                    self.context = Some(Context::Facility);
+                }
+                return Ok(());
+            }
+            None => (),
         }
+        // if some_level {
+        //     return Ok(());
+        // }
         // At this point, we know that level has not been set. We need to update the level, based on the context
         // and show values, applying defaults if the user has not supplied them.
 
