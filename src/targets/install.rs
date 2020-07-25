@@ -45,7 +45,7 @@ impl Doit for Install {
         if self.verbose {
             println!("{:#?}", self);
         }
-        let cmd = self.construct_command()?;
+        let cmd = self.build_cmd()?;
         if self.dry_run || self.verbose {
             for c in cmd {
                 println!("{}", c);
@@ -54,7 +54,7 @@ impl Doit for Install {
         Ok(())
     }
     /// construct the command which will be executed
-    fn construct_command(&mut self) -> Result<Vec<String>, Self::Err> {
+    fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
         let build_env = BuildEnv::new(".")?;
 
         self.reconcile_context_and_level(&build_env)?;
@@ -122,7 +122,7 @@ impl Doit for Install {
 }
 
 //
-// Helper Methods for Install::construct_command(...)
+// Helper Methods for Install::build_cmd(...)
 //
 impl Install {
     // context/show and level are both responsible for setting execution level. Context and
