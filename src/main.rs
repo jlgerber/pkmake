@@ -193,7 +193,7 @@ fn main() -> Result<(), AnyError> {
                 .level(level)
                 .metadata_only(metadata_only)
                 .overrides(overrides)
-                .platforms(platform)
+                .platforms(platform)?
                 .verbose(verbose)
                 .defines(define)
                 .work(work)

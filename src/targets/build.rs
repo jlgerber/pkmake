@@ -6,8 +6,9 @@ use crate::OverridePair;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use std::collections::HashSet;
-use subprocess::Exec;
-use subprocess::Redirection;
+//use subprocess::Exec;
+//use subprocess::Redirection;
+use std::convert::TryInto;
 
 /// build target
 #[derive(Debug, PartialEq, Eq)]
@@ -307,24 +308,71 @@ impl Build {
         self.overrides = value;
         self
     }
-    /// Set platforms per the builder pattern
-    pub fn platforms(&mut self, input: Option<Vec<Platform>>) -> &mut Self {
-        match input {
-            None => self.platforms = None,
-            Some(platforms) => {
-                if self.platforms.is_none() {
-                    self.platforms = Some(HashSet::new())
+    /*
+        /// Set platforms per the builder pattern
+        pub fn platforms(&mut self, input: Option<Vec<Platform>>) -> &mut Self {
+            match input {
+                None => self.platforms = None,
+                Some(platforms) => {
+                    if self.platforms.is_none() {
+                        self.platforms = Some(HashSet::new())
+                    }
+                    if let Some(ref mut platforms_hs) = self.platforms {
+                        platforms.into_iter().for_each(|flav| {
+                            platforms_hs.insert(flav);
+                            ()
+                        });
+                    }
                 }
-                if let Some(ref mut platforms_hs) = self.platforms {
-                    platforms.into_iter().for_each(|flav| {
-                        platforms_hs.insert(flav);
-                        ()
-                    });
+            }
+            self
+        }
+    */
+
+    /// Add a vec of platforms to the list of platforms on the BUild struct. This may be called
+    /// multiple times to accumulate platforms.
+    ///
+    /// # Example
+    /// ```
+    /// # fn main() -> Result<(),Box<dyn std::error::Error>> {
+    /// # use pk_make::Build;
+    /// let install = Build::default()
+    ///                 .platforms(Some(vec!["cent7", "cent6"]))?
+    ///                 .build();
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn platforms<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
+    where
+        I: TryInto<Platform>,
+    {
+        match value {
+            None => self.platforms = None,
+            Some(plats) => {
+                let plats: Result<Vec<_>, _> =
+                    plats.into_iter().map(|i_val| i_val.try_into()).collect();
+                match plats {
+                    Err(_) => return Err(anyhow!("failed to convert to platform")),
+                    Ok(val) => match self.platforms {
+                        Some(ref mut platforms) => {
+                            for v in val {
+                                platforms.insert(v);
+                            }
+                        }
+                        None => {
+                            let mut hset = HashSet::new();
+                            for v in val {
+                                hset.insert(v);
+                            }
+                            self.platforms = Some(hset);
+                        }
+                    },
                 }
             }
         }
-        self
+        Ok(self)
     }
+
     /// Set verbose state and return a mutable reference to self
     /// per the builder pattern.
     pub fn verbose(&mut self, input: bool) -> &mut Self {

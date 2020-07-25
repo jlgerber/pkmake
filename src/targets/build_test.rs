@@ -1,5 +1,7 @@
 use super::*;
 
+// test that we are getting what we expect when we call
+// Build::defauot()
 #[test]
 pub fn can_construct_default() {
     let result = Build::default();
@@ -20,6 +22,7 @@ pub fn can_construct_default() {
     assert_eq!(result, expected);
 }
 
+// .with_docs test
 #[test]
 pub fn can_set_with_docs() {
     let mut result = Build::default();
@@ -132,6 +135,60 @@ fn setting_flavors_none_clears() {
         metadata_only: false,
         overrides: None,
         platforms: None,
+        verbose: false,
+        defines: None,
+        work: false,
+    };
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn can_set_platforms_from_strs() {
+    let mut result = Build::default();
+    result.platforms(Some(vec!["cent7", "cent6"])).unwrap();
+
+    let mut pforms = HashSet::new();
+    pforms.insert(Platform::Cent7_64);
+    pforms.insert(Platform::Cent6_64);
+
+    let expected = Build {
+        clean: false,
+        with_docs: true, // set by with_docs above
+        dry_run: false,
+        dist_dir: None,
+        flavors: None,
+        level: None,
+        metadata_only: false,
+        overrides: None,
+        platforms: Some(pforms),
+        verbose: false,
+        defines: None,
+        work: false,
+    };
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn can_set_platforms() {
+    let mut result = Build::default();
+    result
+        .platforms(Some(vec![Platform::Cent6_64, Platform::Cent7_64]))
+        .unwrap();
+
+    let mut pforms = HashSet::new();
+    pforms.insert(Platform::Cent7_64);
+    pforms.insert(Platform::Cent6_64);
+
+    let expected = Build {
+        clean: false,
+        with_docs: true, // set by with_docs above
+        dry_run: false,
+        dist_dir: None,
+        flavors: None,
+        level: None,
+        metadata_only: false,
+        overrides: None,
+        platforms: Some(pforms),
         verbose: false,
         defines: None,
         work: false,
