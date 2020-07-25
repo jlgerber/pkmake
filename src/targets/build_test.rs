@@ -288,7 +288,7 @@ fn defines_given_vec_string_updates_state() {
 }
 
 #[test]
-fn can_build() {
+fn build_given_mut_ref_to_self_produces_owned_instance() {
     let result = Build::default()
         .with_docs(false)
         .dry_run(true)
