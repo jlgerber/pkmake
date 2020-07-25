@@ -225,7 +225,7 @@ fn main() -> Result<(), AnyError> {
                 .context(context)
                 .show(show)
                 .sites(site)?
-                .platforms(platform)
+                .platforms(platform)?
                 .flavors(flavor)
                 .build_dir(build_dir)
                 .verbose(verbose)

@@ -602,7 +602,7 @@ impl Install {
     /// ```
     pub fn sites<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
     where
-        I: std::convert::TryInto<Site>,
+        I: TryInto<Site>,
     {
         match value {
             None => self.sites = None,
@@ -692,28 +692,35 @@ impl Install {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn platforms<I>(&mut self, value: Option<Vec<I>>) -> &mut Self
+    pub fn platforms<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
     where
-        I: Into<Platform>,
+        I: TryInto<Platform>,
     {
         match value {
-            Some(vals) => match self.platforms {
-                Some(ref mut platforms) => {
-                    for val in vals {
-                        platforms.insert(val.into());
-                    }
-                }
-                None => {
-                    let mut hset = HashSet::new();
-                    for val in vals {
-                        hset.insert(val.into());
-                    }
-                    self.platforms = Some(hset);
-                }
-            },
             None => self.platforms = None,
+            Some(plats) => {
+                let plats: Result<Vec<_>, _> =
+                    plats.into_iter().map(|i_val| i_val.try_into()).collect();
+                match plats {
+                    Err(_) => return Err(anyhow!("failed to convert to platform")),
+                    Ok(val) => match self.platforms {
+                        Some(ref mut platforms) => {
+                            for v in val {
+                                platforms.insert(v);
+                            }
+                        }
+                        None => {
+                            let mut hset = HashSet::new();
+                            for v in val {
+                                hset.insert(v);
+                            }
+                            self.platforms = Some(hset);
+                        }
+                    },
+                }
+            }
         }
-        self
+        Ok(self)
     }
 
     /// Set a flavor in the Install struct. This method may be called multiple times,
