@@ -360,25 +360,3 @@ impl Build {
 #[cfg(test)]
 #[path = "./build_test.rs"]
 mod build_test;
-/*
-#[derive(Debug, PartialEq, Eq)]
-pub struct BuildBuilder {
-    pub with_docs: bool,
-    pub dry_run: bool,
-    pub dist_dir: Option<String>,
-    pub flavors: Option<HashSet<flavor::Flavor>>,
-    pub verbose: bool
-}
-
-impl Default for BuildBuilder {
-    fn default() -> Self {
-        Self {
-            with_docs: true,
-            dry_run: false,
-            dist_dir: None,
-            flavors: None,
-            verbose: false
-        }
-    }
-}
-*/
