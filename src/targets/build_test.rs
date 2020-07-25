@@ -3,7 +3,7 @@ use super::*;
 // test that we are getting what we expect when we call
 // Build::defauot()
 #[test]
-pub fn can_construct_default() {
+pub fn default_produces_instance_with_expected_state() {
     let result = Build::default();
     let expected = Build {
         clean: false,
@@ -45,7 +45,7 @@ pub fn can_set_with_docs() {
 }
 
 #[test]
-pub fn can_set_dry_run() {
+pub fn dry_run_given_bool_sets_state() {
     let mut result = Build::default();
     result.dry_run(true);
     let expected = Build {
@@ -66,7 +66,7 @@ pub fn can_set_dry_run() {
 }
 
 #[test]
-fn can_set_dist_dir() {
+fn dist_dir_given_some_str_updates_state() {
     let mut result = Build::default();
     result.dist_dir(Some("foo/bar"));
     let expected = Build {
@@ -91,7 +91,32 @@ fn can_set_dist_dir() {
 }
 
 #[test]
-fn can_set_flavors() {
+fn dist_dir_given_some_string_updates_state() {
+    let mut result = Build::default();
+    result.dist_dir(Some("foo/bar".to_string()));
+    let expected = Build {
+        clean: false,
+        with_docs: true, // set by with_docs above
+        dry_run: false,
+        dist_dir: Some("foo/bar".to_string()),
+        flavors: None,
+        level: None,
+        metadata_only: false,
+        overrides: None,
+        platforms: None,
+        verbose: false,
+        defines: None,
+        work: false,
+    };
+    assert_eq!(result, expected);
+    // now test it with a String
+    let mut result = Build::default();
+    result.dist_dir(Some("foo/bar".to_string()));
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn flavors_given_some_vec_flavor_updates_state() {
     let mut result = Build::default();
     result.flavors(Some(vec![
         Flavor::Vanilla,
@@ -118,7 +143,7 @@ fn can_set_flavors() {
 }
 
 #[test]
-fn setting_flavors_none_clears() {
+fn flavors_given_none_sets_state_to_none() {
     let mut result = Build::default();
     result.flavors(Some(vec![
         Flavor::Vanilla,
@@ -143,7 +168,7 @@ fn setting_flavors_none_clears() {
 }
 
 #[test]
-fn can_set_platforms_from_strs() {
+fn platforms_given_some_vec_str_updates_state() {
     let mut result = Build::default();
     result.platforms(Some(vec!["cent7", "cent6"])).unwrap();
 
@@ -169,7 +194,7 @@ fn can_set_platforms_from_strs() {
 }
 
 #[test]
-fn can_set_platforms() {
+fn platforms_given_some_vec_platform_updates_state() {
     let mut result = Build::default();
     result
         .platforms(Some(vec![Platform::Cent6_64, Platform::Cent7_64]))
@@ -197,7 +222,7 @@ fn can_set_platforms() {
 }
 
 #[test]
-fn can_set_verbose() {
+fn verbose_given_bool_updates_state() {
     let mut result = Build::default();
     result.verbose(true);
     let expected = Build {
@@ -212,6 +237,51 @@ fn can_set_verbose() {
         platforms: None,
         verbose: true,
         defines: None,
+        work: false,
+    };
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn defines_given_vec_str_updates_state() {
+    let mut result = Build::default();
+    result.defines(Some(vec!["foo=bar", "ba=ba_blacksheep"]));
+    let expected = Build {
+        clean: false,
+        with_docs: true,
+        dry_run: false,
+        dist_dir: None,
+        flavors: None,
+        level: None,
+        metadata_only: false,
+        overrides: None,
+        platforms: None,
+        verbose: false,
+        defines: Some(vec!["foo=bar".to_string(), "ba=ba_blacksheep".to_string()]),
+        work: false,
+    };
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn defines_given_vec_string_updates_state() {
+    let mut result = Build::default();
+    result.defines(Some(vec![
+        "foo=bar".to_string(),
+        "ba=ba_blacksheep".to_string(),
+    ]));
+    let expected = Build {
+        clean: false,
+        with_docs: true,
+        dry_run: false,
+        dist_dir: None,
+        flavors: None,
+        level: None,
+        metadata_only: false,
+        overrides: None,
+        platforms: None,
+        verbose: false,
+        defines: Some(vec!["foo=bar".to_string(), "ba=ba_blacksheep".to_string()]),
         work: false,
     };
     assert_eq!(result, expected);

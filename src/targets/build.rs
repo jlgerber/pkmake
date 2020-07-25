@@ -381,7 +381,11 @@ impl Build {
     }
     /// Set the defines and return a mutable reference to self per the
     /// builder pattern.
-    pub fn defines(&mut self, input: Option<Vec<String>>) -> &mut Self {
+    pub fn defines<I>(&mut self, input: Option<Vec<I>>) -> &mut Self
+    where
+        I: Into<String>,
+    {
+        let input = input.map(|v| v.into_iter().map(|s| s.into()).collect::<Vec<_>>());
         self.defines = input;
         self
     }

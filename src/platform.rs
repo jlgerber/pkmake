@@ -75,7 +75,7 @@ impl TryFrom<&str> for Platform {
     type Error = PkMakeError;
 
     fn try_from(input: &str) -> Result<Self, Self::Error> {
-        Self::from_str(input).map_err(|e| PkMakeError::ConvertFrom(input.to_string()))
+        Self::from_str(input).map_err(|_e| PkMakeError::ConvertFrom(input.to_string()))
     }
 }
 
