@@ -3,9 +3,12 @@
 //!
 //! representation of build platforms
 //!
+use crate::PkMakeError;
 use anyhow::anyhow;
 use anyhow::Error as AnyhowError;
+use std::convert::TryFrom;
 use std::str::FromStr;
+
 /*
 fc4_32
 deb4_64
@@ -27,7 +30,7 @@ pub enum Platform {
     Cent6_64,
     Cent7_64,
     Cent8_64,
-    Unknown(String),
+    //Unknown(String),
 }
 
 impl Platform {
@@ -39,8 +42,17 @@ impl Platform {
             Self::Cent6_64 => "cent6_64",
             Self::Cent7_64 => "cent7_64",
             Self::Cent8_64 => "cent8_64",
-            Self::Unknown(ref s) => s.as_str(),
+            //Self::Unknown(ref s) => s.as_str(),
         }
+    }
+
+    /// Overrides the auto generated trait impl of from to provide a
+    /// fallible version
+    pub fn from<I>(input: I) -> Result<Self, PkMakeError>
+    where
+        I: AsRef<str>,
+    {
+        Self::try_from(input.as_ref())
     }
 }
 impl FromStr for Platform {
@@ -59,14 +71,22 @@ impl FromStr for Platform {
     }
 }
 
-impl From<&str> for Platform {
-    fn from(other: &str) -> Self {
-        match Platform::from_str(other) {
-            Ok(val) => val,
-            Err(_) => Self::Unknown(other.to_string()),
-        }
+impl TryFrom<&str> for Platform {
+    type Error = PkMakeError;
+
+    fn try_from(input: &str) -> Result<Self, Self::Error> {
+        Self::from_str(input).map_err(|e| PkMakeError::ConvertFrom(input.to_string()))
     }
 }
+
+// impl From<&str> for Platform {
+//     fn from(other: &str) -> Self {
+//         match Platform::from_str(other) {
+//             Ok(val) => val,
+//             Err(_) => Self::Unknown(other.to_string()),
+//         }
+//     }
+// }
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -119,12 +139,12 @@ mod tests {
     fn from_trait_impl() {
         let plats = vec!["cent8", "Cent8", "cent8_64"];
         for plat in plats {
-            let result = Platform::from(plat);
+            let result = Platform::from(plat).unwrap();
             assert_eq!(result, Platform::Cent8_64);
         }
         // test a bad input
         let result = Platform::from("foobarbla");
-        assert_eq!(result, Platform::Unknown("foobarbla".to_string()));
+        assert!(result.is_err());
     }
 
     #[test]

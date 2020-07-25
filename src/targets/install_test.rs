@@ -40,6 +40,7 @@ fn can_build() {
         .sites(Some(vec!["all"]))
         .unwrap()
         .platform(Some("cent7"))
+        .unwrap()
         .flavor(Some("^"))
         .verbose(true)
         .dist_dir(Some("./foo/bar"))

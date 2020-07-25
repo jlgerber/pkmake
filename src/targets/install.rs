@@ -10,6 +10,7 @@ use crate::Vcs;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use std::collections::HashSet;
+use std::convert::TryInto;
 
 const DEFAULT_CONTEXT: Context = Context::User;
 
@@ -635,43 +636,60 @@ impl Install {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// # use pk_make::Install;
     /// let install = Install::default()
-    ///                 .platform(Some("cent6"))
-    ///                 .platform(Some("cent7"))
+    ///                 .platform(Some("cent6"))?
+    ///                 .platform(Some("cent7"))?
     ///                 .build();
+    /// # Ok(())
     /// # }
     /// ```
-    pub fn platform<I>(&mut self, value: Option<I>) -> &mut Self
+    pub fn platform<I>(&mut self, value: Option<I>) -> Result<&mut Self, AnyError>
     where
-        I: Into<Platform>,
+        I: TryInto<Platform> + std::fmt::Debug + Clone,
     {
         match value {
             Some(val) => match self.platforms {
                 Some(ref mut platforms) => {
-                    platforms.insert(val.into());
+                    let val_cpy = val.clone();
+                    //platforms.insert(val.into());
+                    match val.try_into() {
+                        Ok(v) => platforms.insert(v.into()),
+                        Err(_) => {
+                            return Err(anyhow!("Error converting {:?} into Platform", val_cpy))
+                        }
+                    };
                 }
                 None => {
+                    let val_cpy = val.clone();
                     let mut hset = HashSet::new();
-                    hset.insert(val.into());
+                    //hset.insert(val.into());
+                    //
+                    match val.try_into() {
+                        Ok(v) => hset.insert(v),
+                        Err(_) => {
+                            return Err(anyhow!("Error converting {:?} into Platform", val_cpy))
+                        }
+                    };
                     self.platforms = Some(hset);
                 }
             },
             None => self.platforms = None,
         }
-        self
+        Ok(self)
     }
     /// Add a vec of platforms to the list of platforms on the Install struct. This may be called
     /// multiple times to accumulate platforms.
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    /// # fn main() -> Result<(),Box<dyn std::error::Error>> {
     /// # use pk_make::Install;
     /// let install = Install::default()
-    ///                 .platforms(Some(vec!["cent7", "cent6"]))
+    ///                 .platforms(Some(vec!["cent7", "cent6"]))?
     ///                 .build();
+    /// # Ok(())
     /// # }
     /// ```
     pub fn platforms<I>(&mut self, value: Option<Vec<I>>) -> &mut Self
