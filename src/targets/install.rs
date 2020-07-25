@@ -83,7 +83,7 @@ impl Doit for Install {
         let defines_str = self.get_defines_str();
 
         // if the use supplied the dist_dir, great. Otherwise, grab it from the env
-        let dist_dir_str = self.get_dist_dir_str(&build_env)?;
+        let dist_dir_str = self.get_dist_dir_str();
 
         let docs_str = self.get_docs_str();
 
@@ -111,12 +111,8 @@ impl Doit for Install {
             defines_str,
             work_str,
             build_dir_str,
-            // install flags
-            //level_str,
-            //platform_str,
-            //site_str
         )];
-        self.update_results_with_install(&mut result, &build_env, &dist_dir_str)?;
+        self.update_results_with_install(&mut result, &build_env)?;
         Ok(result)
     }
 }
@@ -181,21 +177,14 @@ impl Install {
         defines_str
     }
 
-    fn get_dist_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
-        let env_dist_dir = build_env
-            .dist_dir
-            .to_str()
-            .ok_or(anyhow!("unable to fetch dist_dir from env"))?
-            .into();
-
-        // if the use supplied the dist_dir, great. Otherwise, grab it from the env
-        let dist_dir = self.dist_dir.as_ref().unwrap_or(&env_dist_dir);
+    fn get_dist_dir_str(&self) -> String {
         let dist_dir_str = if self.dist_dir.is_some() {
+            let dist_dir = self.dist_dir.as_ref().unwrap();
             format!("--dist-dir={}", dist_dir)
         } else {
             "".to_string()
         };
-        Ok(dist_dir_str)
+        dist_dir_str
     }
 
     fn get_docs_str(&self) -> &str {
@@ -331,7 +320,6 @@ impl Install {
         &mut self,
         result: &mut Vec<String>,
         build_env: &BuildEnv,
-        dist_dir: &str,
     ) -> Result<(), AnyError> {
         // ManifestInfo reads the manifest and retreives package information
         // the name, version, and the list of flavors
@@ -341,6 +329,16 @@ impl Install {
         } else {
             self.flavors.as_ref().unwrap().iter().collect::<Vec<_>>()
         };
+        let env_dist_dir = build_env
+            .dist_dir
+            .to_str()
+            .ok_or(anyhow!("unable to fetch dist_dir from env"))?;
+
+        let dist_dir = self
+            .dist_dir
+            .as_ref()
+            .map(|s| s.as_str())
+            .unwrap_or(env_dist_dir);
 
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
