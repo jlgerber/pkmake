@@ -46,11 +46,11 @@ impl BuildEnv {
         private_dir.push("private");
 
         // build dir
-        let mut build_dir = root.clone();
+        let mut build_dir = private_dir.clone();
         build_dir.push("build");
 
         // dist dir
-        let mut dist_dir = root.clone();
+        let mut dist_dir = private_dir.clone();
         dist_dir.push("dist");
 
         let vcs = Vcs::from_path(&root);
