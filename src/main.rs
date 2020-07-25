@@ -65,6 +65,11 @@ enum Opt {
         /// clean
         #[structopt(long)]
         clean: bool,
+
+        /// Print out commands but do not execute them
+        #[structopt(short = "n", long = "dry-run")]
+        dry_run: bool,
+
         /// Do not build the docs as part of the install  
         #[structopt(long = "skip-docs")]
         skip_docs: bool,
@@ -197,6 +202,7 @@ fn main() -> Result<(), AnyError> {
         }
         Opt::Install {
             skip_docs,
+            dry_run,
             context,
             show,
             site,
@@ -214,6 +220,7 @@ fn main() -> Result<(), AnyError> {
         } => {
             let mut install = Install::default()
                 .clean(clean)
+                .dry_run(dry_run)
                 .with_docs(!skip_docs)
                 .context(context)
                 .show(show)

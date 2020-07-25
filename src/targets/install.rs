@@ -116,7 +116,7 @@ impl Doit for Install {
             //platform_str,
             //site_str
         )];
-        self.update_results_with_install(&mut result, &build_env, &dist_dir_str, &flavor_str)?;
+        self.update_results_with_install(&mut result, &build_env, &dist_dir_str)?;
         Ok(result)
     }
 }
@@ -332,13 +332,18 @@ impl Install {
         result: &mut Vec<String>,
         build_env: &BuildEnv,
         dist_dir: &str,
-        flavors: &str,
     ) -> Result<(), AnyError> {
         // ManifestInfo reads the manifest and retreives package information
         // the name, version, and the list of flavors
         let manifest_info = ManifestInfo::from_path(build_env.manifest.as_ref())?;
-        for flavor in flavors.split(",") {
-            if flavor == "^" || flavor == "vanilla" {
+        let flavors_ref = if self.flavors.is_none() {
+            manifest_info.flavors.iter().collect::<Vec<_>>()
+        } else {
+            self.flavors.as_ref().unwrap().iter().collect::<Vec<_>>()
+        };
+
+        for flavor in flavors_ref {
+            if flavor == &Flavor::Vanilla {
                 result.push(format!(
                     "pk install {}/{}-{}",
                     dist_dir,
@@ -351,7 +356,7 @@ impl Install {
                     dist_dir,
                     manifest_info.name(),
                     manifest_info.version(),
-                    flavor
+                    flavor.as_str()
                 ));
             }
         }
