@@ -182,9 +182,15 @@ impl Install {
         // If the show is facility, again we special case it, and set the context to facility
         if show.to_lowercase().as_str() == "facility" {
             self.context = Some(Context::Facility);
+            return Ok(());
         }
         // TODO: I believe that we still have to set level to either the showname or <show>.work depending upon
-        // the context.
+        // the context. DONE
+        if context == &Context::Shared {
+            self.level = Some(show.clone());
+        } else {
+            self.level = Some(format!("{}.work", show));
+        }
         Ok(())
     }
 
