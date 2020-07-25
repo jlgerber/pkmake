@@ -1,5 +1,6 @@
 pub mod build_env;
 pub mod context;
+pub mod error;
 pub mod flavor;
 pub mod manifest_info;
 pub mod named_site;
@@ -13,6 +14,7 @@ pub mod vcs;
 
 pub use build_env::BuildEnv;
 pub use context::Context;
+pub use error::PkMakeError;
 pub use flavor::Flavor;
 pub use manifest_info::{Manifest, ManifestInfo};
 pub use named_site::NamedSite;

@@ -19,7 +19,7 @@ win7_64
 win10_64
 
  */
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Platform {
     Win7_64,
     Win10_64,

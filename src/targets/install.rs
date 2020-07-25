@@ -143,7 +143,7 @@ impl Install {
             return Err(anyhow!("Hey There. Level and Show/Context arguments overlap in functionality. Either use one or the other"));
         }
         // At this point, if the level has been set, we can be certain that the show and context have not been set.
-        // There is nothing more that needs to be done, so we exit.
+        // We check to see if the level is "faciilty" and update the context if it is so. Then we return early.
         match self.level.as_ref() {
             Some(level) => {
                 if level.to_lowercase().as_str() == "facility" {
@@ -153,9 +153,6 @@ impl Install {
             }
             None => (),
         }
-        // if some_level {
-        //     return Ok(());
-        // }
         // At this point, we know that level has not been set. We need to update the level, based on the context
         // and show values, applying defaults if the user has not supplied them.
 
@@ -193,8 +190,8 @@ impl Install {
             self.context = Some(Context::Facility);
             return Ok(());
         }
-        // TODO: I believe that we still have to set level to either the showname or <show>.work depending upon
-        // the context. DONE
+        // lastly, we update the level depending upon the context. We know that
+        // we are at a show at this point...
         if context == &Context::Shared {
             self.level = Some(show.clone());
         } else {
@@ -546,72 +543,91 @@ impl Install {
     }
 
     /// Add a site to the list of sites maintianed by the Install struct. This
-    /// method may be called multiple times.
+    /// method may be called multiple times. The method is fallible, and must
+    /// be unwrapped.
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    /// # fn main() -> Result<(),Box<dyn std::error::Error>> {
     /// # use pk_make::Install;
     /// let install = Install::default()
-    ///                 .site(Some("vancouver"))
-    ///                 .site(Some("playa"))
+    ///                 .site(Some("vancouver"))?
+    ///                 .site(Some("playa"))?
     ///                 .build();
+    /// # Ok(())
     /// # }
     /// ```
-    pub fn site<I>(&mut self, value: Option<I>) -> &mut Self
+    pub fn site<I>(&mut self, value: Option<I>) -> Result<&mut Self, AnyError>
     where
-        I: Into<Site>,
+        I: std::convert::TryInto<Site> + std::fmt::Debug + Clone,
     {
         match value {
             Some(val) => match self.sites {
                 Some(ref mut sites) => {
-                    sites.insert(val.into());
+                    let val_cpy = val.clone();
+                    match val.try_into() {
+                        Ok(v) => sites.insert(v.into()),
+                        Err(_) => return Err(anyhow!("Error converting {:?} into Site", val_cpy)),
+                    };
                 }
                 None => {
                     let mut hset = HashSet::new();
-                    hset.insert(val.into());
+                    let val_cpy = val.clone();
+                    match val.try_into() {
+                        Ok(v) => hset.insert(v),
+                        Err(_) => return Err(anyhow!("Error converting {:?} into Site", val_cpy)),
+                    };
+                    //hset.insert(val.into());
                     self.sites = Some(hset);
                 }
             },
             None => self.sites = None,
         }
-        self
+        Ok(self)
     }
 
-    /// Add a vec of sites to the list of sites maintianed by the Install struct. This
-    /// method may be called multiple times.
+    /// Add a vec of sites to the list of sites maintianed by the Install struct. This is a
+    /// fallible setter, and must be unwrapped or '?'ed
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    /// # fn main() -> Result<(),Box<dyn std::error::Error>> {
     /// # use pk_make::Install;
     /// let install = Install::default()
-    ///                 .sites(Some(vec!["vancouver","portland"]))
+    ///                 .sites(Some(vec!["vancouver","portland"]))?
     ///                 .build();
+    /// # Ok(())
     /// # }
     /// ```
-    pub fn sites<I>(&mut self, value: Option<Vec<I>>) -> &mut Self
+    pub fn sites<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
     where
-        I: Into<Site>,
+        I: std::convert::TryInto<Site>,
     {
         match value {
-            Some(vals) => match self.sites {
-                Some(ref mut sites) => {
-                    for val in vals {
-                        sites.insert(val.into());
-                    }
-                }
-                None => {
-                    let mut hset = HashSet::new();
-                    for val in vals {
-                        hset.insert(val.into());
-                    }
-                    self.sites = Some(hset);
-                }
-            },
             None => self.sites = None,
+            Some(sites) => {
+                let sites: Result<Vec<_>, _> =
+                    sites.into_iter().map(|i_val| i_val.try_into()).collect();
+                match sites {
+                    Err(_) => return Err(anyhow!("failed to convert one or more overrides")),
+                    Ok(val) => match self.sites {
+                        Some(ref mut sites) => {
+                            for v in val {
+                                sites.insert(v);
+                            }
+                        }
+                        None => {
+                            let mut hset = HashSet::new();
+                            for v in val {
+                                hset.insert(v);
+                            }
+                            self.sites = Some(hset);
+                        }
+                    },
+                }
+            }
         }
-        self
+        Ok(self)
     }
 
     /// Add a platform to the list of platforms on the Install struct. This may be called
@@ -791,16 +807,52 @@ impl Install {
         }
         self
     }
-
-    /// Set the overrides value and return a mutable reference to self
-    pub fn overrides(&mut self, value: Option<Vec<OverridePair>>) -> &mut Self {
-        self.overrides = value;
-        self
+    /// Set the overrides value and return a mutable reference to self. This method
+    /// is fallible, and must be unwrapped to get a &mut Self
+    ///
+    /// # Example
+    /// ```rust
+    /// # fn main() -> Result<(),Box<dyn std::error::Error>> {
+    /// # use pk_make::Install;
+    /// let install = Install::default()
+    ///                 .overrides(Some(vec!["makebridge=3.0.0"]))?
+    ///                 .build();
+    /// # Ok(())
+    /// # }
+    pub fn overrides<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
+    where
+        I: std::convert::TryInto<OverridePair>,
+    {
+        match value {
+            None => {
+                self.overrides = None;
+                Ok(self)
+            }
+            Some(v) => {
+                let vals: Result<Vec<_>, _> = v.into_iter().map(|i_val| i_val.try_into()).collect();
+                match vals {
+                    Err(_) => return Err(anyhow!("failed to convert one or more overrides")),
+                    Ok(val) => {
+                        self.overrides = Some(val);
+                        Ok(self)
+                    }
+                }
+            }
+        }
     }
 
     /// Set the defines and return a mutable reference to self per the
     /// builder pattern.
-    pub fn defines(&mut self, input: Option<Vec<String>>) -> &mut Self {
+    pub fn defines<I>(&mut self, input: Option<Vec<I>>) -> &mut Self
+    where
+        I: Into<String>,
+    {
+        let input = input.map(|vec_i| {
+            vec_i
+                .into_iter()
+                .map(|i_val| i_val.into())
+                .collect::<Vec<_>>()
+        });
         self.defines = input;
         self
     }
@@ -821,84 +873,8 @@ impl Install {
     }
 }
 
+// thanks to Karol Kuczmarski
+// http://xion.io/post/code/rust-unit-test-placement.html
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn can_construct_default() {
-        let result = Install::default();
-        let expected = Install {
-            dry_run: false,
-            with_docs: true,
-            build_dir: None,
-            context: None,
-            show: None,
-            sites: None,
-            platforms: None,
-            flavors: None,
-            verbose: false,
-
-            clean: false,
-            dist_dir: None,
-            level: None,
-            overrides: None,
-            defines: None,
-            work: false,
-            vcs: None,
-        };
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn can_build() {
-        let result = Install::default()
-            .dry_run(true)
-            .with_docs(false)
-            .build_dir(Some("foo/bar"))
-            .context(Some(Context::Facility))
-            .show(Some("dev01"))
-            .site(Some("all"))
-            .platform(Some("cent7"))
-            .flavor(Some("^"))
-            .verbose(true)
-            .build();
-        let mut site_hs = HashSet::new();
-        site_hs.insert(Site::All);
-        let mut platforms_hs = HashSet::new();
-        platforms_hs.insert(Platform::Cent7_64);
-        let mut flavors_hs = HashSet::new();
-        flavors_hs.insert(Flavor::Vanilla);
-
-        let expected = Install {
-            dry_run: true,
-            with_docs: false,
-            build_dir: Some("foo/bar".to_string()),
-            context: Some(Context::Facility),
-            show: Some("dev01".to_string()),
-            sites: Some(site_hs),
-            platforms: Some(platforms_hs),
-            flavors: Some(flavors_hs),
-            verbose: true,
-
-            clean: false,
-            dist_dir: None,
-            level: None,
-            overrides: None,
-            defines: None,
-            work: false,
-            vcs: None,
-        };
-        assert_eq!(result, expected);
-    }
-}
-/*
-    dry_run: false,
- with_docs: true,
- context:None,
- show: None,
- sites:None,
- platforms: None,
- flavors: None,
- verbose: false
-*/
+#[path = "./install_test.rs"]
+mod install_test;

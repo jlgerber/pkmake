@@ -1,9 +1,11 @@
-use anyhow::anyhow;
-use anyhow::Error as AnyhowError;
+use crate::PkMakeError;
+//use anyhow::anyhow;
+//use anyhow::Error as AnyhowError;
+use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 /// List of Valid Sites, along with a placeholder for unknown sites. This is used
 /// by non-fallible constructor methods.
 pub enum NamedSite {
@@ -26,6 +28,15 @@ impl NamedSite {
             Self::Unknown(ref val) => val,
         }
     }
+
+    /// Overrides the auto generated trait impl of from to provide a
+    /// fallible version
+    pub fn from<I>(input: I) -> Result<Self, PkMakeError>
+    where
+        I: AsRef<str>,
+    {
+        Self::try_from(input.as_ref())
+    }
 }
 impl fmt::Display for NamedSite {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -42,7 +53,7 @@ impl fmt::Display for NamedSite {
 }
 
 impl FromStr for NamedSite {
-    type Err = AnyhowError;
+    type Err = PkMakeError;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         match input.to_lowercase().as_str() {
@@ -51,20 +62,27 @@ impl FromStr for NamedSite {
             "portland" => Ok(Self::Portland),
             "montreal" => Ok(Self::Montreal),
             "vancouver" => Ok(Self::Vancouver),
-            _ => Err(anyhow!("{} is not a valid NamedSite", input)),
+            _ => Err(PkMakeError::InvalidSite(input.to_string())),
         }
     }
 }
 
-impl From<&str> for NamedSite {
-    fn from(input: &str) -> NamedSite {
-        match NamedSite::from_str(input) {
-            Ok(site) => site,
-            Err(_) => Self::Unknown(input.to_string()),
-        }
+// impl From<&str> for NamedSite {
+//     fn from(input: &str) -> NamedSite {
+//         match NamedSite::from_str(input) {
+//             Ok(site) => site,
+//             Err(_) => Self::Unknown(input.to_string()),
+//         }
+//     }
+// }
+
+impl TryFrom<&str> for NamedSite {
+    type Error = PkMakeError;
+
+    fn try_from(input: &str) -> Result<Self, Self::Error> {
+        Self::from_str(input)
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -112,13 +130,13 @@ mod tests {
         ];
         for site in sites {
             let result = NamedSite::from(site.0);
-            assert_eq!(result, site.1);
+            assert_eq!(result.unwrap(), site.1);
         }
     }
 
     #[test]
     fn instance_from_bad_input() {
         let result = NamedSite::from("fluboxland");
-        assert_eq!(result, NamedSite::Unknown("fluboxland".to_string()));
+        assert!(result.is_err());
     }
 }

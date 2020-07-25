@@ -224,14 +224,14 @@ fn main() -> Result<(), AnyError> {
                 .with_docs(!skip_docs)
                 .context(context)
                 .show(show)
-                .sites(site)
+                .sites(site)?
                 .platforms(platform)
                 .flavors(flavor)
                 .build_dir(build_dir)
                 .verbose(verbose)
                 .dist_dir(dist_dir)
                 .level(level)
-                .overrides(overrides)
+                .overrides(overrides)?
                 .defines(define)
                 .work(work)
                 .vcs(vcs)
