@@ -6,4 +6,6 @@ pub enum PkMakeError {
     ConvertFrom(String),
     #[error("Invalid Site:'{0}'")]
     InvalidSite(String),
+    #[error("Invalid Flavor:'{0}'")]
+    InvalidFlavor(String),
 }
