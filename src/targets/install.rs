@@ -111,10 +111,9 @@ impl Doit for Install {
 
         let build_dir_str = self.get_build_dir_str()?;
 
-        let logfile_str = self.get_logfile_str();
         // we have to build an install command for every target
         let mut result = vec![format!(
-            "pk audit && pk build {} {} {} {} {} {} {} {} {} {}",
+            "pk audit && pk build {} {} {} {} {} {} {} {} {}",
             clean_str,
             dist_dir_str,
             docs_str,
@@ -124,7 +123,6 @@ impl Doit for Install {
             defines_str,
             work_str,
             build_dir_str,
-            logfile_str
         )];
         self.update_results_with_install(&mut result, &build_env)?;
         Ok(result)
@@ -395,24 +393,28 @@ impl Install {
 
         let level_str = self.get_level_str();
 
+        let logfile_str = self.get_logfile_str();
+
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
                 result.push(format!(
-                    "pk install {} {} {} {}/{}-{}",
+                    "pk install {} {} {} {} {}/{}-{}",
                     level_str,
                     site_str,
                     platform_str,
                     dist_dir,
+                    logfile_str,
                     manifest_info.name(),
                     manifest_info.version()
                 ));
             } else {
                 result.push(format!(
-                    "pk install {} {} {} {}/{}-{}_{}",
+                    "pk install {} {} {} {} {}/{}-{}_{}",
                     level_str,
                     site_str,
                     platform_str,
                     dist_dir,
+                    logfile_str,
                     manifest_info.name(),
                     manifest_info.version(),
                     flavor.as_str()
