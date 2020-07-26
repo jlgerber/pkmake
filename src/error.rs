@@ -10,4 +10,6 @@ pub enum PkMakeError {
     InvalidFlavor(String),
     #[error("Invalid Context:'{0}'")]
     InvalidContext(String),
+    #[error("Invalid Platform:'{0}'")]
+    InvalidPlatform(String),
 }

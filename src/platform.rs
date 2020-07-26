@@ -56,7 +56,7 @@ impl Platform {
     }
 }
 impl FromStr for Platform {
-    type Err = AnyhowError;
+    type Err = PkMakeError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
@@ -66,7 +66,7 @@ impl FromStr for Platform {
             "cent6_64" | "cent6" => Ok(Self::Cent6_64),
             "cent7_64" | "cent7" => Ok(Self::Cent7_64),
             "cent8_64" | "cent8" => Ok(Self::Cent8_64),
-            _ => Err(anyhow!("Invalid Platform '{}'", s)),
+            _ => Err(PkMakeError::InvalidPlatform(s.to_string())),
         }
     }
 }
@@ -75,7 +75,7 @@ impl TryFrom<&str> for Platform {
     type Error = PkMakeError;
 
     fn try_from(input: &str) -> Result<Self, Self::Error> {
-        Self::from_str(input).map_err(|_e| PkMakeError::ConvertFrom(input.to_string()))
+        Self::from_str(input).map_err(|_e| PkMakeError::InvalidPlatform(input.to_string()))
     }
 }
 
