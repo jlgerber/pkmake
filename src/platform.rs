@@ -4,8 +4,8 @@
 //! representation of build platforms
 //!
 use crate::PkMakeError;
-use anyhow::anyhow;
-use anyhow::Error as AnyhowError;
+//use anyhow::anyhow;
+//use anyhow::Error as AnyhowError;
 use std::convert::TryFrom;
 use std::str::FromStr;
 

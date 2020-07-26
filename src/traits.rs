@@ -1,4 +1,3 @@
-use crate::PkMakeError;
 pub trait Doit {
     type Err;
 

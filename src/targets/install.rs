@@ -99,14 +99,14 @@ impl Doit for Install {
 
         let flavor_str = self.get_flavor_str();
 
-        let level_str = self.get_level_str();
+        //let level_str = self.get_level_str();
 
         let overrides_str = self.get_overrides_str();
 
         let platform_str = self.get_platform_str();
 
         let work_str = if self.work { "--work" } else { "" };
-        let build_dir_str = self.get_build_dir_str(&build_env)?;
+        let build_dir_str = self.get_build_dir_str()?;
 
         // we have to build an install command for every target
         let mut result = vec![format!(
@@ -347,25 +347,7 @@ impl Install {
         }
     }
 
-    fn get_build_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
-        // dont see the use in the env_build_dir here.
-        // TODO: remove build_env from arg list as it appears to be irrelevant
-        /*
-        let env_build_dir = build_env
-            .build_dir
-            .to_str()
-            .ok_or(anyhow!("unable to fetch build_dir from env"))?
-            .into();
-
-        // if the use supplied the build_dir, great. Otherwise, grab it from the env
-        let build_dir = self.build_dir.as_ref().unwrap_or(&env_build_dir);
-        let build_dir_str = if self.build_dir.is_some() {
-            format!("--build-dir={}", build_dir)
-        } else {
-            "".to_string()
-        };
-        //Ok(build_dir_str)
-        */
+    fn get_build_dir_str(&self) -> Result<String, AnyError> {
         match self.build_dir.as_ref() {
             Some(build_dir) => Ok(format!("--build-dir={}", build_dir)),
             None => Ok("".to_string()),

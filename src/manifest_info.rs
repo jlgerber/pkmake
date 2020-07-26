@@ -1,8 +1,7 @@
 use crate::Flavor;
-use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use serde::Deserialize;
-use shellfn::shell;
+//use shellfn::shell;
 use std::path::Path;
 
 /// minimal manifest information in a form that is convenient for us to consume. This
@@ -26,6 +25,7 @@ impl ManifestInfo {
     pub fn version(&self) -> &str {
         self.version.as_str()
     }
+    /* THIS IS AN ALTERNATE VERSION WHICH RELIES ON PK MANIFEST
     // retrieve the name and version as a tuple
     fn get_name_and_version(manifest: &Path) -> Result<(String, String), AnyError> {
         match _get_name_and_version(manifest.to_str().unwrap()) {
@@ -43,15 +43,16 @@ impl ManifestInfo {
             Err(e) => Err(anyhow!("{}", e)),
         }
     }
+    */
 }
-
+/*
 #[shell]
 fn _get_name_and_version(manifest: &str) -> Result<Vec<String>, AnyError> {
     r#"
     echo `pk namifest --field=name,version -f $MANIFEST`
     "#
 }
-
+*/
 /// minimal flavour information from manifest
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 pub struct Flavour {
