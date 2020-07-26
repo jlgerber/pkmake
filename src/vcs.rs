@@ -89,3 +89,7 @@ impl fmt::Display for Vcs {
         write!(f, "{}", self.as_str())
     }
 }
+
+#[cfg(test)]
+#[path = "./unit_tests/vcs_test.rs"]
+mod vcs_test;

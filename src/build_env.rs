@@ -101,3 +101,7 @@ impl BuildEnv {
         Ok(manifest)
     }
 }
+
+#[cfg(test)]
+#[path = "./unit_tests/build_env_test.rs"]
+mod build_env_test;
