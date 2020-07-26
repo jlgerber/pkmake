@@ -107,13 +107,13 @@ impl Doit for Install {
 
         let platform_str = self.get_platform_str();
 
-        let work_str = if self.work { "--work" } else { "" };
+        let work_str = if self.work { " --work" } else { "" };
 
         let build_dir_str = self.get_build_dir_str()?;
 
         // we have to build an install command for every target
         let mut result = vec![format!(
-            "pk audit && pk build {} {} {} {} {} {} {} {} {}",
+            "pk audit && pk build{}{}{}{}{}{}{}{}{}",
             clean_str,
             dist_dir_str,
             docs_str,
@@ -224,14 +224,14 @@ impl Install {
     // self.dist_dir
     fn get_dist_dir_str(&self) -> String {
         match self.dist_dir.as_ref() {
-            Some(dist_dir) => format!("--dist-dir={}", dist_dir),
+            Some(dist_dir) => format!(" --dist-dir={}", dist_dir),
             None => "".to_string(),
         }
     }
 
     fn get_docs_str(&self) -> &str {
         if self.with_docs {
-            "--with-docs"
+            " --with-docs"
         } else {
             ""
         }
@@ -254,7 +254,7 @@ impl Install {
             "".to_string()
         };
         if self.flavors.is_some() {
-            format!("--flavor={}", &flavors)
+            format!(" --flavor={}", &flavors)
         } else {
             "".to_string()
         }
@@ -262,7 +262,7 @@ impl Install {
 
     fn get_level_str(&self) -> String {
         match self.level.as_ref() {
-            Some(level) => format!("--level={}", level),
+            Some(level) => format!(" --level={}", level),
             None => "".to_string(),
         }
     }
@@ -297,7 +297,7 @@ impl Install {
         // get a vector of Flavors, them convert them to strs, and join them into a string
         match self.platforms {
             Some(ref platforms) => format!(
-                "--platform={}",
+                " --platform={}",
                 platforms
                     .iter()
                     .collect::<Vec<_>>()
@@ -315,7 +315,7 @@ impl Install {
         // get a vector of Flavors, them convert them to strs, and join them into a string
         match self.sites {
             Some(ref sites) => format!(
-                "--site={}",
+                " --site={}",
                 sites
                     .iter()
                     .collect::<Vec<_>>()
@@ -333,7 +333,7 @@ impl Install {
         // get a vector of Flavors, them convert them to strs, and join them into a string
         match self.overrides {
             Some(ref overrides) => format!(
-                "--override={}",
+                " --override={}",
                 overrides
                     .iter()
                     .collect::<Vec<_>>()
@@ -348,7 +348,7 @@ impl Install {
 
     fn get_build_dir_str(&self) -> Result<String, AnyError> {
         match self.build_dir.as_ref() {
-            Some(build_dir) => Ok(format!("--build-dir={}", build_dir)),
+            Some(build_dir) => Ok(format!(" --build-dir={}", build_dir)),
             None => Ok("".to_string()),
         }
     }
@@ -356,7 +356,7 @@ impl Install {
         match self.logfile.as_ref() {
             Some(logfile) => {
                 let lf: &std::path::Path = logfile.as_ref();
-                format!("--logfile={}", lf.display())
+                format!(" --logfile={}", lf.display())
             }
             None => "".to_string(),
         }
@@ -398,7 +398,7 @@ impl Install {
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
                 result.push(format!(
-                    "pk install {} {} {} {} {}/{}-{}",
+                    "pk install{}{}{}{}{}/{}-{}",
                     level_str,
                     site_str,
                     platform_str,
@@ -409,7 +409,7 @@ impl Install {
                 ));
             } else {
                 result.push(format!(
-                    "pk install {} {} {} {} {}/{}-{}_{}",
+                    "pk install{}{}{}{}{}/{}-{}_{}",
                     level_str,
                     site_str,
                     platform_str,
