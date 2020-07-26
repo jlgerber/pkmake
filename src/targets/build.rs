@@ -5,7 +5,10 @@ use crate::traits::Doit;
 use crate::OverridePair;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
-use std::collections::HashSet;
+//use std::collections::HashSet;
+// IndexSet provides consistent ordering of keys based on insertion
+// order
+use indexmap::IndexSet as HashSet;
 //use subprocess::Exec;
 //use subprocess::Redirection;
 use std::convert::TryInto;
@@ -79,7 +82,7 @@ impl Doit for Build {
             );
         }
         let result = format!(
-            "pk audit && pk build {}{}{}{}{}{}{}{}{}{}",
+            "pk audit && pk build{}{}{}{}{}{}{}{}{}{}",
             clean_str,
             dist_dir_str,
             docs_str,
@@ -265,25 +268,56 @@ impl Build {
         }
         self
     }
-    /// Set flavors per the builder pattern
-    pub fn flavors(&mut self, input: Option<Vec<Flavor>>) -> &mut Self {
-        match input {
+    /*
+        /// Set flavors per the builder pattern
+        pub fn flavors(&mut self, input: Option<Vec<Flavor>>) -> &mut Self {
+            match input {
+                None => self.flavors = None,
+                Some(flavors) => {
+                    if self.flavors.is_none() {
+                        self.flavors = Some(HashSet::new())
+                    }
+                    if let Some(ref mut flavors_hs) = self.flavors {
+                        flavors.into_iter().for_each(|flav| {
+                            flavors_hs.insert(flav);
+                            ()
+                        });
+                    }
+                }
+            }
+            self
+        }
+    */
+    pub fn flavors<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
+    where
+        I: TryInto<Flavor> + std::fmt::Debug + Clone,
+    {
+        match value {
             None => self.flavors = None,
             Some(flavors) => {
-                if self.flavors.is_none() {
-                    self.flavors = Some(HashSet::new())
-                }
-                if let Some(ref mut flavors_hs) = self.flavors {
-                    flavors.into_iter().for_each(|flav| {
-                        flavors_hs.insert(flav);
-                        ()
-                    });
+                let flavors: Result<Vec<_>, _> =
+                    flavors.into_iter().map(|i_val| i_val.try_into()).collect();
+                match flavors {
+                    Err(_) => return Err(anyhow!("failed to convert one or more flavors")),
+                    Ok(val) => match self.flavors {
+                        Some(ref mut flavors) => {
+                            for v in val {
+                                flavors.insert(v);
+                            }
+                        }
+                        None => {
+                            let mut hset = HashSet::new();
+                            for v in val {
+                                hset.insert(v);
+                            }
+                            self.flavors = Some(hset);
+                        }
+                    },
                 }
             }
         }
-        self
+        Ok(self)
     }
-
     /// Set the level value and return a mutable reference to
     /// self, per the builder pattern.
     pub fn level<I>(&mut self, input: Option<I>) -> &mut Self
@@ -393,6 +427,7 @@ impl Build {
         self.work = input;
         self
     }
+
     /// Terminate a chain of calls with a build to return an owned instance.
     ///
     /// # Example
