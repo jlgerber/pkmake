@@ -397,7 +397,7 @@ impl Install {
 
         let site_str = self.get_site_str();
 
-        let platform_str = self.get_platform_str();
+        let platform_str = self.get_platform_str(&build_env);
 
         let level_str = self.get_level_str();
 
