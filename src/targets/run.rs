@@ -3,6 +3,7 @@
 //! but gain flexibility.
 //!
 use crate::traits::Doit;
+use crate::BuildEnv;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 
@@ -14,26 +15,37 @@ pub struct Run {
     vars: Vec<String>,
 }
 
+//
+// private methods
+//
+impl Run {
+    fn get_recipe_target_str(&self) -> &str {
+        // we assume that validation has been done already
+        self.vars[0].as_str()
+    }
+    fn get_recipe_args_str(&self) -> String {
+        self.vars[1..].join(" ")
+    }
+}
 impl Doit for Run {
     type Err = AnyError;
 
     fn doit(&mut self) -> Result<(), Self::Err> {
-        if self.vars.is_empty() {
-            return Err(anyhow!(
-                "Run has no vars. Must supply at least one as the recipe name"
-            ));
-        }
-        if self.vars[0].starts_with('-') {
-            return Err(anyhow!(
-                "first argument must be a valid target. It cannot be a flag: '{}'",
-                &self.vars[0]
-            ));
-        }
-        self.fix_args();
+        self.fix_args()?;
         if self.verbose {
             println!("{:#?}", self);
         }
         Ok(())
+    }
+
+    fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
+        let recipe_target = self.get_recipe_target_str();
+        let recipe_args_str = self.get_recipe_args_str();
+
+        Ok(vec![format!(
+            "pk run-recipe {} {}",
+            recipe_target, recipe_args_str
+        )])
     }
 }
 
@@ -69,7 +81,18 @@ impl Run {
         default
     }
 
-    fn fix_args(&mut self) {
+    fn fix_args(&mut self) -> Result<(), AnyError> {
+        if self.vars.is_empty() {
+            return Err(anyhow!(
+                "Run has no vars. Must supply at least one as the recipe name"
+            ));
+        }
+        if self.vars[0].starts_with('-') {
+            return Err(anyhow!(
+                "first argument must be a valid target. It cannot be a flag: '{}'",
+                &self.vars[0]
+            ));
+        }
         let mut verbose_found = false;
         let mut dry_run_found = false;
         for var in &self.vars {
@@ -98,6 +121,8 @@ impl Run {
         } else if dry_run_found && !self.dry_run {
             self.dry_run = true;
         }
+
+        Ok(())
     }
 }
 
