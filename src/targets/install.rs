@@ -106,7 +106,7 @@ impl Doit for Install {
 
         let overrides_str = self.get_overrides_str();
 
-        let platform_str = self.get_platform_str();
+        let platform_str = self.get_platform_str(&build_env);
 
         let work_str = if self.work { " --work" } else { "" };
 
@@ -293,7 +293,7 @@ impl Install {
         platform_str
     }
     */
-    fn get_platform_str(&self) -> String {
+    fn get_platform_str(&self, build_env: &BuildEnv) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
         match self.platforms {
@@ -307,7 +307,7 @@ impl Install {
                     .collect::<Vec<_>>()
                     .join(",")
             ),
-            None => "".to_string(),
+            None => format!(" --platform={}", build_env.dd_os.as_str()),
         }
     }
 
@@ -325,7 +325,7 @@ impl Install {
                     .collect::<Vec<_>>()
                     .join(",")
             ),
-            None => "".to_string(),
+            None => " --site=local".to_string(),
         }
     }
 
@@ -425,9 +425,10 @@ impl Install {
                     level_str,
                     site_str,
                     platform_str,
-                    dist_dir,
                     logfile_str,
                     maxjobs_str,
+                    // last 3
+                    dist_dir,
                     manifest_info.name(),
                     manifest_info.version()
                 ));
@@ -437,9 +438,10 @@ impl Install {
                     level_str,
                     site_str,
                     platform_str,
-                    dist_dir,
                     logfile_str,
                     maxjobs_str,
+                    // last 4
+                    dist_dir,
                     manifest_info.name(),
                     manifest_info.version(),
                     flavor.as_str()
