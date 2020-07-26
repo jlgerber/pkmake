@@ -405,6 +405,19 @@ impl Install {
 
         let maxjobs_str = self.get_maxjobs_str();
 
+        if self.verbose {
+            println!("\n Install Formatting\n");
+            for item in vec![
+                ("level", level_str.as_str()),
+                ("site", site_str.as_str()),
+                ("platform", platform_str.as_str()),
+                ("dist", dist_dir),
+                ("logfile", logfile_str.as_str()),
+                ("max-jobs", maxjobs_str.as_str()),
+            ] {
+                println!("{}: {}", item.0, item.1);
+            }
+        }
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
                 result.push(format!(
