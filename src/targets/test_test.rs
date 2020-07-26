@@ -3,7 +3,7 @@ use super::*;
 fn can_construct_default() {
     let result = Test::default();
     let expected = Test {
-        build_dir: None,
+        dist_dir: None,
         dry_run: false,
         verbose: false,
     };
@@ -14,12 +14,12 @@ fn can_construct_default() {
 #[test]
 fn can_modify_and_build() {
     let result = Test::default()
-        .build_dir(Some("foo/bar"))
+        .dist_dir(Some("foo/bar"))
         .dry_run(true)
         .verbose(true)
         .build();
     let expected = Test {
-        build_dir: Some("foo/bar".to_string()),
+        dist_dir: Some("foo/bar".to_string()),
         dry_run: true,
         verbose: true,
     };

@@ -1,9 +1,11 @@
 use crate::traits::Doit;
+use crate::BuildEnv;
+use anyhow::anyhow;
 use anyhow::Error as AnyError;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Docs {
-    pub build_dir: Option<String>,
+    pub dist_dir: Option<String>,
     pub dry_run: bool,
     pub verbose: bool,
 }
@@ -12,14 +14,45 @@ impl Doit for Docs {
     type Err = AnyError;
 
     fn doit(&mut self) -> Result<(), Self::Err> {
+        if self.verbose {
+            println!("{:#?}", self);
+        }
+        let cmd = self.build_cmd()?;
+        if self.dry_run || self.verbose {
+            for c in cmd {
+                println!("{}", c);
+            }
+        }
         Ok(())
+    }
+    fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
+        let build_env = BuildEnv::new(".")?;
+
+        let dist_dir_str = self.dist_dir_str(&build_env)?;
+        Ok(vec![format!("pk run-recipe docs {}", dist_dir_str)])
+    }
+}
+
+// private functions
+impl Docs {
+    fn dist_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
+        match &self.dist_dir {
+            None => {
+                let dist_dir = build_env
+                    .dist_dir
+                    .to_str()
+                    .ok_or_else(|| anyhow!("unable to get dist dir from environment"))?;
+                Ok(format!(" --dist-dir={}=", dist_dir))
+            }
+            Some(dist_dir) => Ok(format!(" --dist-dir={}", dist_dir)),
+        }
     }
 }
 
 impl std::default::Default for Docs {
     fn default() -> Self {
         Self {
-            build_dir: None,
+            dist_dir: None,
             dry_run: false,
             verbose: false,
         }
@@ -28,13 +61,13 @@ impl std::default::Default for Docs {
 
 impl Docs {
     /// Optionally set the build directory.  
-    pub fn build_dir<I>(&mut self, input: Option<I>) -> &mut Self
+    pub fn dist_dir<I>(&mut self, input: Option<I>) -> &mut Self
     where
         I: Into<String>,
     {
         match input {
-            None => self.build_dir = None,
-            Some(dir) => self.build_dir = Some(dir.into()),
+            None => self.dist_dir = None,
+            Some(dir) => self.dist_dir = Some(dir.into()),
         }
         self
     }

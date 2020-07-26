@@ -136,8 +136,8 @@ enum Opt {
     /// Build documentation
     Docs {
         /// Specify the build directory
-        #[structopt(short, long = "build-dir")]
-        build_dir: Option<String>,
+        #[structopt(short, long = "dist-dir")]
+        dist_dir: Option<String>,
         /// Print out commands but do not execute them
         #[structopt(short = "n", long = "dry-run")]
         dry_run: bool,
@@ -152,8 +152,8 @@ enum Opt {
         #[structopt(short = "n", long = "dry-run")]
         dry_run: bool,
         /// Specify the build directory
-        #[structopt(short, long = "build-dir")]
-        build_dir: Option<String>,
+        #[structopt(short, long = "dist-dir")]
+        dist_dir: Option<String>,
         /// Provide more verbose output
         #[structopt(short, long)]
         verbose: bool,
@@ -251,25 +251,25 @@ fn main() -> Result<(), AnyError> {
             install.doit()
         }
         Opt::Docs {
-            build_dir,
+            dist_dir,
             dry_run,
             verbose,
         } => {
             let mut docs = Docs::default()
                 .dry_run(dry_run)
-                .build_dir(build_dir)
+                .dist_dir(dist_dir)
                 .verbose(verbose)
                 .build();
             docs.doit()
         }
         Opt::Test {
             dry_run,
-            build_dir,
+            dist_dir,
             verbose,
         } => {
             let mut test = Test::default()
                 .dry_run(dry_run)
-                .build_dir(build_dir)
+                .dist_dir(dist_dir)
                 .verbose(verbose)
                 .build();
             test.doit()

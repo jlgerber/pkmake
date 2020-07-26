@@ -12,7 +12,7 @@ use anyhow::Error as AnyError;
 /// Models the pk test target.
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Test {
-    pub build_dir: Option<String>,
+    pub dist_dir: Option<String>,
     pub dry_run: bool,
     pub verbose: bool,
 }
@@ -31,7 +31,7 @@ impl Doit for Test {
 impl Default for Test {
     fn default() -> Self {
         Self {
-            build_dir: None,
+            dist_dir: None,
             dry_run: false,
             verbose: false,
         }
@@ -39,14 +39,14 @@ impl Default for Test {
 }
 
 impl Test {
-    /// Set the build_dir. Note that one must wrap it in an Option.
-    pub fn build_dir<I>(&mut self, input: Option<I>) -> &mut Self
+    /// Set the dist_dir. Note that one must wrap it in an Option.
+    pub fn dist_dir<I>(&mut self, input: Option<I>) -> &mut Self
     where
         I: Into<String>,
     {
         match input {
-            Some(dir) => self.build_dir = Some(dir.into()),
-            None => self.build_dir = None,
+            Some(dir) => self.dist_dir = Some(dir.into()),
+            None => self.dist_dir = None,
         }
         self
     }
@@ -67,7 +67,7 @@ impl Test {
     // /// # fn main() {
     /// use pk_make::Test;
     /// let test = Test::default()
-    ///             .build_dir(Some("foo/bar"))
+    ///             .dist_dir(Some("foo/bar"))
     ///             .dry_run(true)
     ///             .verbose(true)
     ///             .build();
