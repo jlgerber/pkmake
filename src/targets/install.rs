@@ -91,7 +91,7 @@ impl Doit for Install {
             };
         }
 
-        let clean_str = if self.clean { "--clean" } else { "" };
+        let clean_str = if self.clean { " --clean" } else { "" };
 
         let defines_str = self.get_defines_str();
 
