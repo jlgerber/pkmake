@@ -189,7 +189,7 @@ fn main() -> Result<(), AnyError> {
                 .with_docs(!skip_docs)
                 .dry_run(dry_run)
                 .dist_dir(dist_dir)
-                .flavors(flavor)
+                .flavors(flavor)?
                 .level(level)
                 .metadata_only(metadata_only)
                 .overrides(overrides)
@@ -226,7 +226,7 @@ fn main() -> Result<(), AnyError> {
                 .show(show)
                 .sites(site)?
                 .platforms(platform)?
-                .flavors(flavor)
+                .flavors(flavor)?
                 .build_dir(build_dir)
                 .verbose(verbose)
                 .dist_dir(dist_dir)
