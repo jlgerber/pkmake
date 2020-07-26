@@ -22,7 +22,7 @@ pub struct BuildEnv {
     pub dd_show: Option<String>,
 }
 
-const MANIFESTS: [&'static str; 2] = ["manifest.yaml", "pk.yaml"];
+const MANIFESTS: [&str; 2] = ["manifest.yaml", "pk.yaml"];
 
 impl BuildEnv {
     /// New up a BuildEnv given a path to the root directory of a project's

@@ -155,14 +155,11 @@ impl Install {
         }
         // At this point, if the level has been set, we can be certain that the show and context have not been set.
         // We check to see if the level is "faciilty" and update the context if it is so. Then we return early.
-        match self.level.as_ref() {
-            Some(level) => {
-                if level.to_lowercase().as_str() == "facility" {
-                    self.context = Some(Context::Facility);
-                }
-                return Ok(());
+        if let Some(level) = self.level.as_ref() {
+            if level.to_lowercase().as_str() == "facility" {
+                self.context = Some(Context::Facility);
             }
-            None => (),
+            return Ok(());
         }
         // At this point, we know that level has not been set. We need to update the level, based on the context
         // and show values, applying defaults if the user has not supplied them.
@@ -258,12 +255,11 @@ impl Install {
         } else {
             "".to_string()
         };
-        let flavor_str = if self.flavors.is_some() {
+        if self.flavors.is_some() {
             format!("--flavor={}", &flavors)
         } else {
             "".to_string()
-        };
-        flavor_str
+        }
     }
 
     fn get_level_str(&self) -> String {
@@ -384,12 +380,13 @@ impl Install {
         let env_dist_dir = build_env
             .dist_dir
             .to_str()
-            .ok_or(anyhow!("unable to fetch dist_dir from env"))?;
+            .ok_or_else(|| anyhow!("unable to fetch dist_dir from env"))?;
 
         let dist_dir = self
             .dist_dir
-            .as_ref()
-            .map(|s| s.as_str())
+            .as_deref()
+            //.as_ref()
+            //.map(|s| s.as_str())
             .unwrap_or(env_dist_dir);
 
         let site_str = self.get_site_str();
@@ -469,10 +466,10 @@ impl Install {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    // /// # fn main() {
     /// # use pk_make::Install;
     /// let install = Install::default().dry_run(true).build();
-    /// # }
+    // /// # }
     /// ```
     pub fn dry_run(&mut self, input: bool) -> &mut Self {
         self.dry_run = input;
@@ -482,10 +479,10 @@ impl Install {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    // /// # fn main() {
     /// # use pk_make::Install;
     /// let install = Install::default().with_docs(false).build();
-    /// # }
+    // /// # }
     /// ```
     pub fn with_docs(&mut self, value: bool) -> &mut Self {
         self.with_docs = value;
@@ -535,10 +532,10 @@ impl Install {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    // /// # fn main() {
     /// # use pk_make::Install;
     /// let install = Install::default().show(Some("DEV01")).build();
-    /// # }
+    // /// # }
     /// ```
     pub fn show<I>(&mut self, value: Option<I>) -> &mut Self
     where
@@ -575,7 +572,7 @@ impl Install {
                 Some(ref mut sites) => {
                     let val_cpy = val.clone();
                     match val.try_into() {
-                        Ok(v) => sites.insert(v.into()),
+                        Ok(v) => sites.insert(v),
                         Err(_) => return Err(anyhow!("Error converting {:?} into Site", val_cpy)),
                     };
                 }
@@ -663,7 +660,7 @@ impl Install {
                     let val_cpy = val.clone();
                     //platforms.insert(val.into());
                     match val.try_into() {
-                        Ok(v) => platforms.insert(v.into()),
+                        Ok(v) => platforms.insert(v),
                         Err(_) => {
                             return Err(anyhow!("Error converting {:?} into Platform", val_cpy))
                         }
@@ -759,7 +756,7 @@ impl Install {
                     let val_cpy = val.clone();
                     //platforms.insert(val.into());
                     match val.try_into() {
-                        Ok(v) => flavors.insert(v.into()),
+                        Ok(v) => flavors.insert(v),
                         Err(_) => {
                             return Err(anyhow!("Error converting {:?} into Flavor", val_cpy))
                         }
@@ -893,7 +890,7 @@ impl Install {
             Some(v) => {
                 let vals: Result<Vec<_>, _> = v.into_iter().map(|i_val| i_val.try_into()).collect();
                 match vals {
-                    Err(_) => return Err(anyhow!("failed to convert one or more overrides")),
+                    Err(_) => Err(anyhow!("failed to convert one or more overrides")),
                     Ok(val) => {
                         self.overrides = Some(val);
                         Ok(self)

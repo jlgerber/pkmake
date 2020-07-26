@@ -81,17 +81,19 @@ impl Manifest {
     pub fn to_info(self) -> Result<ManifestInfo, crate::PkMakeError> {
         let flavors: Result<Vec<_>, _> = self
             .flavours
-            .unwrap_or(vec![Flavour {
-                name: "^".to_string(),
-            }])
+            .unwrap_or_else(|| {
+                vec![Flavour {
+                    name: "^".to_string(),
+                }]
+            })
             .iter()
             .map(|v| Flavor::from(v.as_str()))
             .collect();
         let flavors = flavors?;
         Ok(ManifestInfo {
             name: self.name.clone(),
-            version: self.version.clone(),
-            flavors: flavors,
+            version: self.version,
+            flavors,
         })
     }
 }

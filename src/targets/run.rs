@@ -18,7 +18,7 @@ impl Doit for Run {
     type Err = AnyError;
 
     fn doit(&mut self) -> Result<(), Self::Err> {
-        if self.vars.len() == 0 {
+        if self.vars.is_empty() {
             return Err(anyhow!(
                 "Run has no vars. Must supply at least one as the recipe name"
             ));

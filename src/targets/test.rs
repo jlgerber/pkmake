@@ -64,14 +64,14 @@ impl Test {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    // /// # fn main() {
     /// use pk_make::Test;
     /// let test = Test::default()
     ///             .build_dir(Some("foo/bar"))
     ///             .dry_run(true)
     ///             .verbose(true)
     ///             .build();
-    /// # }
+    // /// # }
     /// ```
     pub fn build(&mut self) -> Self {
         let mut dup = Self::default();

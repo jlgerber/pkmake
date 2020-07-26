@@ -42,10 +42,10 @@ impl Docs {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    // /// # fn main() {
     /// use pk_make::Docs;
     /// let docs= Docs::default().dry_run(true).build();
-    /// # }
+    // /// # }
     /// ```
     pub fn dry_run(&mut self, input: bool) -> &mut Self {
         self.dry_run = input;
@@ -62,10 +62,10 @@ impl Docs {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    // /// # fn main() {
     /// use pk_make::Build;
     /// let build = Build::default().verbose(true).with_docs(false).build();
-    /// # }
+    // /// # }
     /// ```
     pub fn build(&mut self) -> Self {
         let mut default = Self::default();

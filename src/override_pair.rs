@@ -39,7 +39,7 @@ impl OverridePair {
 impl FromStr for OverridePair {
     type Err = PkMakeError;
     fn from_str(input: &str) -> Result<Self, Self::Err> {
-        let pieces = input.split("=").collect::<Vec<_>>();
+        let pieces = input.split('=').collect::<Vec<_>>();
         if pieces.len() != 2 {
             return Err(PkMakeError::ConvertFrom(input.to_string()));
         }

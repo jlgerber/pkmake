@@ -117,7 +117,7 @@ impl Build {
         let env_dist_dir = build_env
             .dist_dir
             .to_str()
-            .ok_or(anyhow!("unable to fetch dist_dir from env"))?
+            .ok_or_else(|| anyhow!("unable to fetch dist_dir from env"))?
             .into();
 
         // if the use supplied the dist_dir, great. Otherwise, grab it from the env
@@ -152,12 +152,11 @@ impl Build {
         } else {
             "".to_string()
         };
-        let flavor_str = if self.flavors.is_some() {
+        if self.flavors.is_some() {
             format!(" --flavor={}", &flavors)
         } else {
             "".to_string()
-        };
-        flavor_str
+        }
     }
 
     fn get_level_str(&self) -> String {
@@ -183,12 +182,11 @@ impl Build {
         } else {
             "".to_string()
         };
-        let platform_str = if self.platforms.is_some() {
+        if self.platforms.is_some() {
             format!(" --platform={}", &platforms)
         } else {
             "".to_string()
-        };
-        platform_str
+        }
     }
 
     fn get_overrides_str(&self) -> String {
@@ -207,12 +205,11 @@ impl Build {
         } else {
             "".to_string()
         };
-        let overrides_str = if self.overrides.is_some() {
+        if self.overrides.is_some() {
             format!(" --override={}", &overrides)
         } else {
             "".to_string()
-        };
-        overrides_str
+        }
     }
 }
 
@@ -432,10 +429,10 @@ impl Build {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    // /// # fn main() {
     /// use pk_make::Build;
     /// let build = Build::default().verbose(true).with_docs(false).build();
-    /// # }
+    // /// # }
     /// ```
     pub fn build(&mut self) -> Self {
         let mut default = Self::default();
