@@ -54,13 +54,15 @@ impl BuildEnv {
         dist_dir.push("dist");
 
         let vcs = Vcs::from_path(&root);
+        // we should be able to do local installs without knowing what our vcs system is.
+        /*
         if vcs.is_unknown() {
             return Err(anyhow!(
                 "Unable to determine vcs from path '{}'",
                 root.to_str().unwrap()
             ));
         }
-
+        */
         let manifest = Self::get_manifest(package_root.clone())?;
 
         let dd_show = std::env::var("DD_SHOW").ok();
