@@ -404,6 +404,7 @@ impl Install {
         let logfile_str = self.get_logfile_str();
 
         let maxjobs_str = self.get_maxjobs_str();
+
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
                 result.push(format!(
