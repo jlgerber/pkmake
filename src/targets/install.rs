@@ -407,7 +407,7 @@ impl Install {
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
                 result.push(format!(
-                    "pk install{}{}{}{}{}{}/{}-{}",
+                    "pk install{}{}{}{}{} {}/{}-{}",
                     level_str,
                     site_str,
                     platform_str,
@@ -419,7 +419,7 @@ impl Install {
                 ));
             } else {
                 result.push(format!(
-                    "pk install{}{}{}{}{}{}/{}-{}_{}",
+                    "pk install{}{}{}{}{} {}/{}-{}_{}",
                     level_str,
                     site_str,
                     platform_str,
