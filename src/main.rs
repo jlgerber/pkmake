@@ -138,12 +138,18 @@ enum Opt {
         /// Specify the build directory
         #[structopt(short, long = "dist-dir")]
         dist_dir: Option<String>,
+
         /// Print out commands but do not execute them
         #[structopt(short = "n", long = "dry-run")]
         dry_run: bool,
+
         /// Controls  verbose output to shell
         #[structopt(short, long)]
         verbose: bool,
+
+        /// Pass variable through to the recipe
+        #[structopt(short = "D", long)]
+        define: Option<Vec<String>>,
     },
     #[structopt(display_order = 4)]
     /// Run tests via the pk test target
@@ -258,10 +264,12 @@ fn main() -> Result<(), AnyError> {
             dist_dir,
             dry_run,
             verbose,
+            define,
         } => {
             let mut docs = Docs::default()
                 .dry_run(dry_run)
                 .dist_dir(dist_dir)
+                .defines(define)
                 .verbose(verbose)
                 .build();
             docs.doit()

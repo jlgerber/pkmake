@@ -8,6 +8,7 @@ pub struct Docs {
     pub dist_dir: Option<String>,
     pub dry_run: bool,
     pub verbose: bool,
+    pub defines: Option<Vec<String>>,
 }
 
 impl Doit for Docs {
@@ -29,7 +30,12 @@ impl Doit for Docs {
         let build_env = BuildEnv::new(".")?;
 
         let dist_dir_str = self.dist_dir_str(&build_env)?;
-        Ok(vec![format!("pk run-recipe docs {}", dist_dir_str)])
+        let defines_str = self.get_defines_str();
+
+        Ok(vec![format!(
+            "pk run-recipe docs {}{}",
+            dist_dir_str, defines_str
+        )])
     }
 }
 
@@ -47,6 +53,19 @@ impl Docs {
             Some(dist_dir) => Ok(format!(" --dist-dir={}", dist_dir)),
         }
     }
+    // build up the string representing the define flag invocation.
+    fn get_defines_str(&self) -> String {
+        // NB: The -D flag works differently in pk build in that it
+        // follows posix convention for multiple values; it supports
+        // multiple invocations of the flag.
+        let mut defines_str = String::new();
+        if self.defines.is_some() {
+            for def in self.defines.as_ref().unwrap() {
+                defines_str.push_str(&format!(" -D={}", def));
+            }
+        }
+        defines_str
+    }
 }
 
 impl std::default::Default for Docs {
@@ -55,6 +74,7 @@ impl std::default::Default for Docs {
             dist_dir: None,
             dry_run: false,
             verbose: false,
+            defines: None,
         }
     }
 }
@@ -88,6 +108,22 @@ impl Docs {
     /// Set verbose state
     pub fn verbose(&mut self, input: bool) -> &mut Self {
         self.verbose = input;
+        self
+    }
+
+    /// Set the defines and return a mutable reference to self per the
+    /// builder pattern.
+    pub fn defines<I>(&mut self, input: Option<Vec<I>>) -> &mut Self
+    where
+        I: Into<String>,
+    {
+        let input = input.map(|vec_i| {
+            vec_i
+                .into_iter()
+                .map(|i_val| i_val.into())
+                .collect::<Vec<_>>()
+        });
+        self.defines = input;
         self
     }
 
