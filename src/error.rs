@@ -12,4 +12,8 @@ pub enum PkMakeError {
     InvalidContext(String),
     #[error("Invalid Platform:'{0}'")]
     InvalidPlatform(String),
+    #[error("Invalid Vcs:'{0}'")]
+    InvalidVcs(String),
+    #[error("Missing Vcs from path:'{0}'")]
+    MissingVcs(String),
 }

@@ -66,9 +66,9 @@ impl Doit for Install {
         // bail out early if we are installing to facility, as we are simply calling
         if self.get_context() == &Context::Facility {
             return match build_env.vcs {
-                Vcs::Git => return Ok(vec!["git-tag create".into()]),
-                Vcs::Svn => return Ok(vec!["svn-tag create".into()]),
-                Vcs::Both => {
+                Some(Vcs::Git) => return Ok(vec!["git-tag create".into()]),
+                Some(Vcs::Svn) => return Ok(vec!["svn-tag create".into()]),
+                Some(Vcs::Both) => {
                     if let Some(ref vcs) = self.vcs {
                         match vcs {
                             Vcs::Git => Ok(vec!["git-tag create".into()]),

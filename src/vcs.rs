@@ -1,5 +1,7 @@
-use anyhow::anyhow;
-use anyhow::Error as AnyError;
+use crate::PkMakeError;
+//use anyhow::anyhow;
+//use anyhow::Error as AnyError;
+use std::convert::TryFrom;
 use std::fmt;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -11,12 +13,11 @@ pub enum Vcs {
     Git,
     Svn,
     Both,
-    Unknown,
 }
 
 impl Vcs {
     /// Constructor function builds a Vcs variant from a location
-    pub fn from_path<I>(loc: I) -> Self
+    pub fn from_path<I>(loc: I) -> Result<Self, PkMakeError>
     where
         I: Into<PathBuf>,
     {
@@ -30,13 +31,13 @@ impl Vcs {
         root.pop();
         // return appropriate variant
         if svn_dir_exists && git_dir_exists {
-            Self::Both
+            Ok(Self::Both)
         } else if svn_dir_exists {
-            Self::Svn
+            Ok(Self::Svn)
         } else if git_dir_exists {
-            Self::Git
+            Ok(Self::Git)
         } else {
-            Self::Unknown
+            Err(PkMakeError::MissingVcs(format!("{:?}", root)))
         }
     }
     /// Return a string representation
@@ -45,34 +46,43 @@ impl Vcs {
             Vcs::Git => "git",
             Vcs::Svn => "svn",
             Vcs::Both => "git+svn",
-            Vcs::Unknown => "unknown",
         }
     }
 
-    pub fn is_unknown(&self) -> bool {
-        match &self {
-            Vcs::Unknown => true,
-            _ => false,
-        }
-    }
     pub fn is_both(&self) -> bool {
         match &self {
             Vcs::Both => true,
             _ => false,
         }
     }
+    /// Overrides the auto generated trait impl of from to provide a
+    /// fallible version
+    pub fn from<I>(input: I) -> Result<Self, PkMakeError>
+    where
+        I: AsRef<str>,
+    {
+        Self::try_from(input.as_ref())
+    }
 }
 
 impl FromStr for Vcs {
-    type Err = AnyError;
+    type Err = PkMakeError;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         match input.to_lowercase().as_str() {
             "git" => Ok(Vcs::Git),
             "svn" => Ok(Vcs::Svn),
             "git+svn" | "svn+git" | "both" | "git&svn" | "svn&git" => Ok(Vcs::Both),
-            _ => Err(anyhow!("'{}' unrecognized vcs", input)),
+            _ => Err(PkMakeError::InvalidVcs(input.to_string())),
         }
+    }
+}
+
+impl TryFrom<&str> for Vcs {
+    type Error = PkMakeError;
+
+    fn try_from(input: &str) -> Result<Self, Self::Error> {
+        Self::from_str(input)
     }
 }
 

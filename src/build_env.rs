@@ -17,7 +17,7 @@ pub struct BuildEnv {
     pub private_dir: PathBuf,
     pub build_dir: PathBuf,
     pub dist_dir: PathBuf,
-    pub vcs: Vcs,
+    pub vcs: Option<Vcs>,
     pub manifest: PathBuf,
     pub dd_show: Option<String>,
 }
@@ -30,10 +30,10 @@ impl BuildEnv {
     /// directory.
     pub fn new<I>(package_root: I) -> Result<Self, AnyError>
     where
-        I: Into<PathBuf>,
+        I: AsRef<std::path::Path>, //Into<PathBuf>,
     {
-        let package_root = package_root.into();
-
+        //let package_root = package_root.into();
+        let package_root = std::fs::canonicalize(package_root)?;
         if !package_root.exists() {
             return Err(anyhow!("Path: '{:?}' does not exist", package_root));
         }
@@ -53,7 +53,7 @@ impl BuildEnv {
         let mut dist_dir = private_dir.clone();
         dist_dir.push("dist");
 
-        let vcs = Vcs::from_path(&root);
+        let vcs = Vcs::from_path(&root).ok();
         // we should be able to do local installs without knowing what our vcs system is.
         /*
         if vcs.is_unknown() {
