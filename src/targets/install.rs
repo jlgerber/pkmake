@@ -9,7 +9,10 @@ use crate::OverridePair;
 use crate::Vcs;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
-use std::collections::HashSet;
+//use std::collections::HashSet;
+// IndexSet provides consistent ordering of keys based on insertion
+// order
+use indexmap::IndexSet as HashSet;
 use std::convert::TryInto;
 
 const DEFAULT_CONTEXT: Context = Context::User;
@@ -728,33 +731,52 @@ impl Install {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
-    /// let mut install = Install::default();
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// # use pk_make::Install;
-    /// install.flavor(Some("^")).flavor(Some("maya2020"));
+    /// let mut install = Install::default();
+    /// install.flavor(Some("^"))?.flavor(Some("maya2020"))?;
     ///
     /// // Of course we could have done this in one line:
-    /// // let install = Install::default().flavor(Some("^")).flavor(Some("maya2020")).build();
+    /// // let install = Install::default()
+    /// //                       .flavor(Some("^"))?
+    /// //                       .flavor(Some("maya2020"))?
+    /// //                       .build();
+    /// # Ok(())
     /// # }
     /// ```
-    pub fn flavor<I>(&mut self, value: Option<I>) -> &mut Self
+    pub fn flavor<I>(&mut self, value: Option<I>) -> Result<&mut Self, AnyError>
     where
-        I: Into<Flavor>,
+        I: TryInto<Flavor> + std::fmt::Debug + Clone,
     {
         match value {
             Some(val) => match self.flavors {
                 Some(ref mut flavors) => {
-                    flavors.insert(val.into());
+                    let val_cpy = val.clone();
+                    //platforms.insert(val.into());
+                    match val.try_into() {
+                        Ok(v) => flavors.insert(v.into()),
+                        Err(_) => {
+                            return Err(anyhow!("Error converting {:?} into Flavor", val_cpy))
+                        }
+                    };
                 }
                 None => {
+                    let val_cpy = val.clone();
                     let mut hset = HashSet::new();
-                    hset.insert(val.into());
+                    //hset.insert(val.into());
+                    //
+                    match val.try_into() {
+                        Ok(v) => hset.insert(v),
+                        Err(_) => {
+                            return Err(anyhow!("Error converting {:?} into Flavor", val_cpy))
+                        }
+                    };
                     self.flavors = Some(hset);
                 }
             },
             None => self.flavors = None,
         }
-        self
+        Ok(self)
     }
 
     /// Set a vec of flavor in the Install struct. This method may be called multiple times,
@@ -762,37 +784,47 @@ impl Install {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
-    /// let mut install = Install::default();
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// # use pk_make::Install;
-    /// install.flavor(Some("^")).flavors(Some(vec!["maya2020"]));
+    /// let mut install = Install::default();
+    /// install.flavors(Some(vec!["maya2020"]))?;
     ///
     /// // Of course we could have done this in one line:
-    /// // let install = Install::default().flavor(Some("^")).flavor(Some("maya2020")).build();
+    /// // let install = Install::default()
+    /// //                    .flavors(Some(vec!["^"]))?
+    /// //                    .build();
+    /// # Ok(())
     /// # }
     /// ```
-    pub fn flavors<I>(&mut self, value: Option<Vec<I>>) -> &mut Self
+    pub fn flavors<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
     where
-        I: Into<Flavor>,
+        I: TryInto<Flavor> + std::fmt::Debug + Clone,
     {
         match value {
-            Some(vals) => match self.flavors {
-                Some(ref mut flavors) => {
-                    for val in vals {
-                        flavors.insert(val.into());
-                    }
-                }
-                None => {
-                    let mut hset = HashSet::new();
-                    for val in vals {
-                        hset.insert(val.into());
-                    }
-                    self.flavors = Some(hset);
-                }
-            },
             None => self.flavors = None,
+            Some(flavors) => {
+                let flavors: Result<Vec<_>, _> =
+                    flavors.into_iter().map(|i_val| i_val.try_into()).collect();
+                match flavors {
+                    Err(_) => return Err(anyhow!("failed to convert one or more flavors")),
+                    Ok(val) => match self.flavors {
+                        Some(ref mut flavors) => {
+                            for v in val {
+                                flavors.insert(v);
+                            }
+                        }
+                        None => {
+                            let mut hset = HashSet::new();
+                            for v in val {
+                                hset.insert(v);
+                            }
+                            self.flavors = Some(hset);
+                        }
+                    },
+                }
+            }
         }
-        self
+        Ok(self)
     }
 
     /// Set the verbose field in the Install struct
@@ -885,10 +917,22 @@ impl Install {
         self.work = input;
         self
     }
-    pub fn vcs(&mut self, input: Option<Vcs>) -> &mut Self {
-        self.vcs = input;
+    // pub fn vcs(&mut self, input: Option<Vcs>) -> &mut Self {
+    //     self.vcs = input;
+    //     self
+    // }
+    /// Set the input given an option wrapped type which can be converted Into Vcs
+    pub fn vcs<I>(&mut self, input: Option<I>) -> &mut Self
+    where
+        I: Into<Vcs>,
+    {
+        match input {
+            None => self.vcs = None,
+            Some(vcs) => self.vcs = Some(vcs.into()),
+        }
         self
     }
+
     /// Construct a new instance of Install from a mutable reference. Used to finalize
     /// a number of chained calls adhering to the builder pattern.
     pub fn build(&mut self) -> Self {

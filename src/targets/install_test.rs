@@ -42,6 +42,7 @@ fn can_build() {
         .platform(Some("cent7"))
         .unwrap()
         .flavor(Some("^"))
+        .unwrap()
         .verbose(true)
         .dist_dir(Some("./foo/bar"))
         // cannot set level and show/context
