@@ -222,7 +222,7 @@ fn main() -> Result<(), AnyError> {
                 .clean(clean)
                 .dry_run(dry_run)
                 .with_docs(!skip_docs)
-                .context(context)
+                .context(context)?
                 .show(show)
                 .sites(site)?
                 .platforms(platform)?

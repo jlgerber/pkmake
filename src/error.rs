@@ -8,4 +8,6 @@ pub enum PkMakeError {
     InvalidSite(String),
     #[error("Invalid Flavor:'{0}'")]
     InvalidFlavor(String),
+    #[error("Invalid Context:'{0}'")]
+    InvalidContext(String),
 }

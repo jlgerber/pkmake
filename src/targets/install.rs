@@ -6,9 +6,11 @@ use crate::traits::Doit;
 use crate::BuildEnv;
 use crate::ManifestInfo;
 use crate::OverridePair;
+use crate::PkMakeError;
 use crate::Vcs;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
+
 //use std::collections::HashSet;
 // IndexSet provides consistent ordering of keys based on insertion
 // order
@@ -515,17 +517,23 @@ impl Install {
     /// let install = Install::default().context(Some("facility")).build();
     /// # }
     /// ```
-    pub fn context<I>(&mut self, value: Option<I>) -> &mut Self
+    pub fn context<I>(&mut self, value: Option<I>) -> Result<&mut Self, AnyError>
     where
-        I: Into<Context>,
+        I: TryInto<Context> + Clone + std::fmt::Debug,
     {
         match value {
-            Some(val) => self.context = Some(val.into()),
+            //Some(val) => self.context = Some(val.into()),
+            Some(val) => {
+                let val_cpy = val.clone();
+                match val.try_into() {
+                    Ok(v) => self.context = Some(v),
+                    Err(_) => return Err(anyhow!("error. bad context {:?}", val_cpy)),
+                }
+            }
             None => self.context = None,
         }
-        self
+        Ok(self)
     }
-
     /// Set an optional, explicit show on the Install struct.
     ///
     /// # Example
