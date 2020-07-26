@@ -24,6 +24,7 @@ fn can_construct_default() {
         defines: None,
         work: false,
         vcs: None,
+        logfile: None,
     };
     assert_eq!(result, expected);
 }
@@ -51,6 +52,7 @@ fn can_build() {
         .overrides(Some(vec!["foo=1.2.3"]))
         .unwrap()
         .defines(Some(vec!["bla=mange"]))
+        .logfile(Some("./log/logfile"))
         .build();
 
     let mut site_hs = HashSet::new();
@@ -79,6 +81,7 @@ fn can_build() {
         defines: Some(vec!["bla=mange".to_string()]),
         work: false,
         vcs: None,
+        logfile: Some(PathBuf::from("./log/logfile")),
     };
     assert_eq!(result, expected);
 }

@@ -4,8 +4,8 @@ use anyhow::Error as AnyError;
 use pk_make::targets::{Build, Docs, Install, Run, Test};
 use pk_make::traits::Doit;
 use pk_make::{context, flavor, platform, site, OverridePair, Vcs};
+use std::path::PathBuf;
 use structopt::StructOpt;
-
 #[derive(Debug, StructOpt)]
 #[structopt(name = "pk-make", about = "Invoke pk recipes.")]
 enum Opt {
@@ -123,6 +123,10 @@ enum Opt {
         /// choose a vcs system manually (sometimes necessary)
         #[structopt(long)]
         vcs: Option<Vcs>,
+
+        /// Specify output log file location
+        #[structopt(long, parse(from_os_str))]
+        logfile: Option<PathBuf>,
     },
     #[structopt(display_order = 3)]
     /// Build documentation
@@ -217,6 +221,7 @@ fn main() -> Result<(), AnyError> {
             define,
             work,
             vcs,
+            logfile,
         } => {
             let mut install = Install::default()
                 .clean(clean)
@@ -235,6 +240,7 @@ fn main() -> Result<(), AnyError> {
                 .defines(define)
                 .work(work)
                 .vcs(vcs)
+                .logfile(logfile)
                 .build();
             install.doit()
         }

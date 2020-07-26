@@ -10,6 +10,7 @@ use crate::OverridePair;
 use crate::Vcs;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
+use std::path::PathBuf;
 
 //use std::collections::HashSet;
 // IndexSet provides consistent ordering of keys based on insertion
@@ -38,6 +39,7 @@ pub struct Install {
     pub defines: Option<Vec<String>>,
     pub work: bool,
     pub vcs: Option<Vcs>,
+    pub logfile: Option<PathBuf>,
 }
 
 /***************************
@@ -106,11 +108,13 @@ impl Doit for Install {
         let platform_str = self.get_platform_str();
 
         let work_str = if self.work { "--work" } else { "" };
+
         let build_dir_str = self.get_build_dir_str()?;
 
+        let logfile_str = self.get_logfile_str();
         // we have to build an install command for every target
         let mut result = vec![format!(
-            "pk audit && pk build {} {} {} {} {} {} {} {} {}",
+            "pk audit && pk build {} {} {} {} {} {} {} {} {} {}",
             clean_str,
             dist_dir_str,
             docs_str,
@@ -120,6 +124,7 @@ impl Doit for Install {
             defines_str,
             work_str,
             build_dir_str,
+            logfile_str
         )];
         self.update_results_with_install(&mut result, &build_env)?;
         Ok(result)
@@ -353,7 +358,15 @@ impl Install {
             None => Ok("".to_string()),
         }
     }
-
+    fn get_logfile_str(&self) -> String {
+        match self.logfile.as_ref() {
+            Some(logfile) => {
+                let lf: &std::path::Path = logfile.as_ref();
+                format!("--logfile={}", lf.display())
+            }
+            None => "".to_string(),
+        }
+    }
     // used to update the results with the installation call
     fn update_results_with_install(
         &mut self,
@@ -443,6 +456,7 @@ impl Default for Install {
             defines: None,
             work: false,
             vcs: None,
+            logfile: None,
         }
     }
 }
@@ -920,6 +934,18 @@ impl Install {
         match input {
             None => self.vcs = None,
             Some(vcs) => self.vcs = Some(vcs.into()),
+        }
+        self
+    }
+
+    /// Set the input given an option wrapped type which can be converted Into logfile
+    pub fn logfile<I>(&mut self, input: Option<I>) -> &mut Self
+    where
+        I: Into<PathBuf>,
+    {
+        match input {
+            None => self.logfile = None,
+            Some(logf) => self.logfile = Some(logf.into()),
         }
         self
     }
