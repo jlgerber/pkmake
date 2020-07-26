@@ -6,7 +6,7 @@ use crate::traits::Doit;
 use crate::BuildEnv;
 use crate::ManifestInfo;
 use crate::OverridePair;
-use crate::PkMakeError;
+//use crate::PkMakeError;
 use crate::Vcs;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
@@ -512,9 +512,10 @@ impl Install {
     ///
     /// # Example
     /// ```
-    /// # fn main() {
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// # use pk_make::Install;
-    /// let install = Install::default().context(Some("facility")).build();
+    /// let install = Install::default().context(Some("facility"))?.build();
+    /// # Ok(())
     /// # }
     /// ```
     pub fn context<I>(&mut self, value: Option<I>) -> Result<&mut Self, AnyError>
