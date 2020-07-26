@@ -17,7 +17,7 @@ pub struct ManifestInfo {
 impl ManifestInfo {
     /// Generate a ManifestInfo from a &Path
     pub fn from_path(manifest: &Path) -> Result<ManifestInfo, AnyError> {
-        Ok(Manifest::from_path(&manifest)?.to_info())
+        Ok(Manifest::from_path(&manifest)?.to_info()?)
     }
     pub fn name(&self) -> &str {
         self.name.as_str()
@@ -77,20 +77,21 @@ impl Manifest {
         Ok(manifest)
     }
     /// Genreate a ManifestInfo from a Manifest
-    pub fn to_info(self) -> ManifestInfo {
-        let flavors = self
+    pub fn to_info(self) -> Result<ManifestInfo, crate::PkMakeError> {
+        let flavors: Result<Vec<_>, _> = self
             .flavours
             .unwrap_or(vec![Flavour {
                 name: "^".to_string(),
             }])
             .iter()
-            .map(|ref v| Flavor::from(v.as_str()))
-            .collect::<Vec<_>>();
-        ManifestInfo {
+            .map(|v| Flavor::from(v.as_str()))
+            .collect();
+        let flavors = flavors?;
+        Ok(ManifestInfo {
             name: self.name.clone(),
             version: self.version.clone(),
             flavors: flavors,
-        }
+        })
     }
 }
 #[cfg(test)]
@@ -136,7 +137,7 @@ mod tests {
                 Flavor::Named("vray4.0.30046_for_maya2020".into()),
             ],
         };
-        assert_eq!(result, expected);
+        assert_eq!(result.unwrap(), expected);
     }
     #[test]
     fn can_read_manifest_without_flavors() {
@@ -163,6 +164,6 @@ mod tests {
             version: "3.1.0".into(),
             flavors: vec![Flavor::Vanilla],
         };
-        assert_eq!(result, expected);
+        assert_eq!(result.unwrap(), expected);
     }
 }
