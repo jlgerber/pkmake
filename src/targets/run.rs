@@ -31,9 +31,14 @@ impl Doit for Run {
     type Err = AnyError;
 
     fn doit(&mut self) -> Result<(), Self::Err> {
-        self.fix_args()?;
         if self.verbose {
             println!("{:#?}", self);
+        }
+        let cmd = self.build_cmd()?;
+        if self.dry_run || self.verbose {
+            for c in cmd {
+                println!("{}", c);
+            }
         }
         Ok(())
     }
