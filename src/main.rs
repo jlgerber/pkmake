@@ -157,6 +157,10 @@ enum Opt {
         /// Provide more verbose output
         #[structopt(short, long)]
         verbose: bool,
+
+        /// Pass variable through to the recipe
+        #[structopt(short = "D", long)]
+        define: Option<Vec<String>>,
     },
     /// Execute an arbitrary pk recipe via pk run-recipe.
     #[structopt(
@@ -266,11 +270,13 @@ fn main() -> Result<(), AnyError> {
             dry_run,
             dist_dir,
             verbose,
+            define,
         } => {
             let mut test = Test::default()
                 .dry_run(dry_run)
                 .dist_dir(dist_dir)
                 .verbose(verbose)
+                .defines(define)
                 .build();
             test.doit()
         }

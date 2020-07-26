@@ -7,6 +7,8 @@
 //! That is, each setter method takes `self` by mutable reference, and returns a mutable
 //! reference to `self` as well.
 use crate::traits::Doit;
+use crate::BuildEnv;
+use anyhow::anyhow;
 use anyhow::Error as AnyError;
 
 /// Models the pk test target.
@@ -15,6 +17,37 @@ pub struct Test {
     pub dist_dir: Option<String>,
     pub dry_run: bool,
     pub verbose: bool,
+    pub defines: Option<Vec<String>>,
+}
+// private functions
+impl Test {
+    fn dist_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
+        match &self.dist_dir {
+            None => {
+                let dist_dir = build_env
+                    .dist_dir
+                    .to_str()
+                    .ok_or_else(|| anyhow!("unable to get dist dir from environment"))?;
+                Ok(format!(" --dist-dir={}=", dist_dir))
+            }
+
+            Some(dist_dir) => Ok(format!(" --dist-dir={}", dist_dir)),
+        }
+    }
+
+    // build up the string representing the define flag invocation.
+    fn get_defines_str(&self) -> String {
+        // NB: The -D flag works differently in pk build in that it
+        // follows posix convention for multiple values; it supports
+        // multiple invocations of the flag.
+        let mut defines_str = String::new();
+        if self.defines.is_some() {
+            for def in self.defines.as_ref().unwrap() {
+                defines_str.push_str(&format!(" -D={}", def));
+            }
+        }
+        defines_str
+    }
 }
 
 impl Doit for Test {
@@ -26,6 +59,17 @@ impl Doit for Test {
         }
         Ok(())
     }
+    fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
+        let build_env = BuildEnv::new(".")?;
+
+        let dist_dir_str = self.dist_dir_str(&build_env)?;
+        let defines_str = self.get_defines_str();
+
+        Ok(vec![format!(
+            "pk run-recipe test {}{}",
+            dist_dir_str, defines_str
+        )])
+    }
 }
 
 impl Default for Test {
@@ -34,6 +78,7 @@ impl Default for Test {
             dist_dir: None,
             dry_run: false,
             verbose: false,
+            defines: None,
         }
     }
 }
@@ -58,6 +103,22 @@ impl Test {
 
     pub fn verbose(&mut self, input: bool) -> &mut Self {
         self.verbose = input;
+        self
+    }
+
+    /// Set the defines and return a mutable reference to self per the
+    /// builder pattern.
+    pub fn defines<I>(&mut self, input: Option<Vec<I>>) -> &mut Self
+    where
+        I: Into<String>,
+    {
+        let input = input.map(|vec_i| {
+            vec_i
+                .into_iter()
+                .map(|i_val| i_val.into())
+                .collect::<Vec<_>>()
+        });
+        self.defines = input;
         self
     }
     /// Finalize a chain of calls by returning a modified instance of the Test instance.
