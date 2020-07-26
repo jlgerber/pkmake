@@ -25,6 +25,7 @@ fn can_construct_default() {
         work: false,
         vcs: None,
         logfile: None,
+        max_jobs: None,
     };
     assert_eq!(result, expected);
 }
@@ -53,6 +54,7 @@ fn can_build() {
         .unwrap()
         .defines(Some(vec!["bla=mange"]))
         .logfile(Some("./log/logfile"))
+        .max_jobs(Some(8))
         .build();
 
     let mut site_hs = HashSet::new();
@@ -82,6 +84,7 @@ fn can_build() {
         work: false,
         vcs: None,
         logfile: Some(PathBuf::from("./log/logfile")),
+        max_jobs: Some(8),
     };
     assert_eq!(result, expected);
 }

@@ -127,6 +127,10 @@ enum Opt {
         /// Specify output log file location
         #[structopt(long, parse(from_os_str))]
         logfile: Option<PathBuf>,
+
+        /// Specify the maximum number of workers used
+        #[structopt(short = "j", long = "max-jobs")]
+        max_jobs: Option<u8>,
     },
     #[structopt(display_order = 3)]
     /// Build documentation
@@ -222,6 +226,7 @@ fn main() -> Result<(), AnyError> {
             work,
             vcs,
             logfile,
+            max_jobs,
         } => {
             let mut install = Install::default()
                 .clean(clean)
@@ -241,6 +246,7 @@ fn main() -> Result<(), AnyError> {
                 .work(work)
                 .vcs(vcs)
                 .logfile(logfile)
+                .max_jobs(max_jobs)
                 .build();
             install.doit()
         }

@@ -40,6 +40,7 @@ pub struct Install {
     pub work: bool,
     pub vcs: Option<Vcs>,
     pub logfile: Option<PathBuf>,
+    pub max_jobs: Option<u8>,
 }
 
 /***************************
@@ -361,6 +362,13 @@ impl Install {
             None => "".to_string(),
         }
     }
+    /// get the max-jobs string
+    fn get_maxjobs_str(&self) -> String {
+        match self.max_jobs {
+            Some(jobs) => format!(" --max-jobs={}", jobs),
+            None => String::new(),
+        }
+    }
     // used to update the results with the installation call
     fn update_results_with_install(
         &mut self,
@@ -395,26 +403,29 @@ impl Install {
 
         let logfile_str = self.get_logfile_str();
 
+        let maxjobs_str = self.get_maxjobs_str();
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
                 result.push(format!(
-                    "pk install{}{}{}{}{}/{}-{}",
+                    "pk install{}{}{}{}{}{}/{}-{}",
                     level_str,
                     site_str,
                     platform_str,
                     dist_dir,
                     logfile_str,
+                    maxjobs_str,
                     manifest_info.name(),
                     manifest_info.version()
                 ));
             } else {
                 result.push(format!(
-                    "pk install{}{}{}{}{}/{}-{}_{}",
+                    "pk install{}{}{}{}{}{}/{}-{}_{}",
                     level_str,
                     site_str,
                     platform_str,
                     dist_dir,
                     logfile_str,
+                    maxjobs_str,
                     manifest_info.name(),
                     manifest_info.version(),
                     flavor.as_str()
@@ -456,6 +467,7 @@ impl Default for Install {
             work: false,
             vcs: None,
             logfile: None,
+            max_jobs: None,
         }
     }
 }
@@ -948,7 +960,11 @@ impl Install {
         }
         self
     }
-
+    /// Specify the optional max jobs to be used when installing
+    pub fn max_jobs(&mut self, input: Option<u8>) -> &mut Self {
+        self.max_jobs = input;
+        self
+    }
     /// Construct a new instance of Install from a mutable reference. Used to finalize
     /// a number of chained calls adhering to the builder pattern.
     pub fn build(&mut self) -> Self {
