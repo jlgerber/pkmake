@@ -1,6 +1,4 @@
 use crate::PkMakeError;
-//use anyhow::anyhow;
-//use anyhow::Error as AnyhowError;
 use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
@@ -14,7 +12,7 @@ pub enum NamedSite {
     Portland,
     Montreal,
     Vancouver,
-    Unknown(String),
+    //Unknown(String),
 }
 
 impl NamedSite {
@@ -25,7 +23,6 @@ impl NamedSite {
             Self::Portland => "portland",
             Self::Montreal => "montreal",
             Self::Vancouver => "vancouver",
-            Self::Unknown(ref val) => val,
         }
     }
 
@@ -40,14 +37,12 @@ impl NamedSite {
 }
 impl fmt::Display for NamedSite {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        //write!(f, "({}, {})", self.x, self.y)
         match self {
             Self::Hyderabad => write!(f, "Hyderabad"),
             Self::Playa => write!(f, "Playa Vista"),
             Self::Portland => write!(f, "Portland"),
             Self::Montreal => write!(f, "Montreal"),
             Self::Vancouver => write!(f, "Vancouver"),
-            Self::Unknown(ref val) => write!(f, "{} (Unknown)", val),
         }
     }
 }
@@ -66,15 +61,6 @@ impl FromStr for NamedSite {
         }
     }
 }
-
-// impl From<&str> for NamedSite {
-//     fn from(input: &str) -> NamedSite {
-//         match NamedSite::from_str(input) {
-//             Ok(site) => site,
-//             Err(_) => Self::Unknown(input.to_string()),
-//         }
-//     }
-// }
 
 impl TryFrom<&str> for NamedSite {
     type Error = PkMakeError;

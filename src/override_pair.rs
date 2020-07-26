@@ -1,22 +1,22 @@
-use crate::PkMakeError;
-//use anyhow::anyhow;
-//use anyhow::Error as AnyError;
-use std::convert::TryFrom;
-//use lazy_static::lazy_static;
-//use regex::Regex;
 use crate::utils::*;
+use crate::PkMakeError;
+use std::convert::TryFrom;
 use std::str::FromStr;
+/// Represents a key,value pair joined by an equal token.
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct OverridePair {
     value: String,
     name_end: u16,
     length: u16,
 }
+
 impl OverridePair {
+    /// Retrieve the name of the OverridePair
     pub fn name(&self) -> &str {
         self.value.as_str().substring(0, self.name_end as usize)
     }
 
+    /// Retrieve the version of the OverridePair
     pub fn version(&self) -> &str {
         self.value
             .as_str()
@@ -26,6 +26,7 @@ impl OverridePair {
     pub fn as_str(&self) -> &str {
         self.value.as_str()
     }
+
     /// Overrides the auto generated trait impl of from to provide a
     /// fallible version
     pub fn from<I>(input: I) -> Result<Self, PkMakeError>
@@ -40,10 +41,6 @@ impl FromStr for OverridePair {
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         let pieces = input.split("=").collect::<Vec<_>>();
         if pieces.len() != 2 {
-            // return Err(anyhow!(
-            //     "Invalid override specification: <package>=<version> '{}'",
-            //     input
-            // ));
             return Err(PkMakeError::ConvertFrom(input.to_string()));
         }
         Ok(Self {
@@ -61,18 +58,6 @@ impl TryFrom<&str> for OverridePair {
         Self::from_str(input)
     }
 }
-// impl From<&str> for OverridePair {
-//     fn from(input: &str) -> Self {
-//         match Self::from_str(input) {
-//             Ok(p) => p,
-//             Err(_) => Self {
-//                 value: "NONE=NONE".into(),
-//                 name_end: 4,
-//                 length: 9,
-//             },
-//         }
-//     }
-// }
 
 #[cfg(test)]
 mod tests {

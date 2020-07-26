@@ -119,10 +119,13 @@ fn dist_dir_given_some_string_updates_state() {
 #[test]
 fn flavors_given_some_vec_flavor_updates_state() {
     let mut result = Build::default();
-    result.flavors(Some(vec![
-        Flavor::Vanilla,
-        Flavor::Named("foo".to_string()),
-    ]));
+    result
+        .flavors(Some(vec![
+            Flavor::Vanilla,
+            Flavor::Named("foo".to_string()),
+        ]))
+        .unwrap();
+
     let mut flavs = HashSet::new();
     flavs.insert(Flavor::Vanilla);
     flavs.insert(Flavor::Named("foo".to_string()));
@@ -146,11 +149,13 @@ fn flavors_given_some_vec_flavor_updates_state() {
 #[test]
 fn flavors_given_none_sets_state_to_none() {
     let mut result = Build::default();
-    result.flavors(Some(vec![
-        Flavor::Vanilla,
-        Flavor::Named("foo".to_string()),
-    ]));
-    result.flavors(None::<Vec<Flavor>>);
+    result
+        .flavors(Some(vec![
+            Flavor::Vanilla,
+            Flavor::Named("foo".to_string()),
+        ]))
+        .unwrap();
+    result.flavors(None::<Vec<Flavor>>).unwrap();
     let expected = Build {
         clean: false,
         with_docs: true, // set by with_docs above

@@ -1,6 +1,4 @@
 use crate::PkMakeError;
-//use anyhow::anyhow;
-//use anyhow::Error as AnyhowError;
 use std::convert::TryFrom;
 use std::str::FromStr;
 
@@ -47,16 +45,6 @@ impl FromStr for Flavor {
         }
     }
 }
-/*
-impl From<&str> for Flavor {
-    fn from(other: &str) -> Self {
-        match Flavor::from_str(other) {
-            Ok(val) => val,
-            Err(_) => Flavor::Unknown(other.to_string()),
-        }
-    }
-}
-*/
 
 impl TryFrom<&str> for Flavor {
     type Error = PkMakeError;

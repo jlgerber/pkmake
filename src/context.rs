@@ -1,6 +1,4 @@
 use crate::PkMakeError;
-//use anyhow::anyhow;
-//use anyhow::Error as AnyhowError;
 use std::convert::TryFrom;
 use std::str::FromStr;
 
@@ -41,16 +39,6 @@ impl FromStr for Context {
         }
     }
 }
-/*
-impl From<&str> for Context {
-    fn from(input: &str) -> Self {
-        match Context::from_str(input) {
-            Err(_) => Context::User,
-            Ok(val) => val,
-        }
-    }
-}
-*/
 
 impl TryFrom<&str> for Context {
     type Error = PkMakeError;
