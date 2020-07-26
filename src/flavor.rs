@@ -1,9 +1,11 @@
+use crate::PkMakeError;
 use anyhow::anyhow;
 use anyhow::Error as AnyhowError;
+use std::convert::TryFrom;
 use std::str::FromStr;
 
 /// A flavor may either be vanilla or named
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Flavor {
     Vanilla,
     Named(String),
@@ -17,6 +19,13 @@ impl Flavor {
             Self::Unknown(ref s) => s.as_str(),
         }
     }
+    /// Convert a &str to a Flavor, fallibly.
+    pub fn from<I>(input: I) -> Result<Self, PkMakeError>
+    where
+        I: AsRef<str>,
+    {
+        Self::try_from(input.as_ref())
+    }
 }
 
 fn is_named_flavor(c: char) -> bool {
@@ -24,7 +33,7 @@ fn is_named_flavor(c: char) -> bool {
 }
 
 impl FromStr for Flavor {
-    type Err = AnyhowError;
+    type Err = PkMakeError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
@@ -34,17 +43,26 @@ impl FromStr for Flavor {
             {
                 Ok(Self::Named(s.to_string()))
             }
-            _ => Err(anyhow!("Invalid Flavor: '{}'", s)),
+            _ => Err(PkMakeError::InvalidFlavor(s.to_string())),
         }
     }
 }
-
+/*
 impl From<&str> for Flavor {
     fn from(other: &str) -> Self {
         match Flavor::from_str(other) {
             Ok(val) => val,
             Err(_) => Flavor::Unknown(other.to_string()),
         }
+    }
+}
+*/
+
+impl TryFrom<&str> for Flavor {
+    type Error = PkMakeError;
+
+    fn try_from(input: &str) -> Result<Self, Self::Error> {
+        Self::from_str(input)
     }
 }
 
@@ -79,17 +97,16 @@ mod tests {
     fn from_from_trait() {
         let vals = vec!["foo", "bar"];
         for val in vals {
-            let result = Flavor::from(val);
+            let result = Flavor::from(val).unwrap();
             assert_eq!(result, Flavor::Named(val.to_string()));
         }
-        assert_eq!(Flavor::from("^"), Flavor::Vanilla);
-        assert_eq!(Flavor::from("Vanilla"), Flavor::Vanilla);
-        assert_eq!(
-            Flavor::from("foo bar#$$"),
-            Flavor::Unknown("foo bar#$$".to_string())
-        );
+        assert_eq!(Flavor::from("^").unwrap(), Flavor::Vanilla);
+        assert_eq!(Flavor::from("Vanilla").unwrap(), Flavor::Vanilla);
     }
-
+    #[test]
+    fn from_given_invalid_str_is_err() {
+        assert!(Flavor::from("foo bar#$#$").is_err());
+    }
     #[test]
     fn fails() {
         let fails = vec!["1foo", "foo bar", "bla_&^^", "FOO_!@#$%^&*()"];
