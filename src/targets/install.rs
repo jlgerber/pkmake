@@ -82,12 +82,12 @@ impl Doit for Install {
         // bail out early if we are installing to facility, as we are simply calling
         if self.get_context() == &Context::Facility {
             return match build_env.vcs {
-                Some(Vcs::Git) => return Ok(vec!["git-tag create".into()]),
+                Some(Vcs::Git) => return Ok(vec!["git-tag create --protect".into()]),
                 Some(Vcs::Svn) => return Ok(vec!["svn-tag create".into()]),
                 Some(Vcs::Both) => {
                     if let Some(ref vcs) = self.vcs {
                         match vcs {
-                            Vcs::Git => Ok(vec!["git-tag create".into()]),
+                            Vcs::Git => Ok(vec!["git-tag create --protect".into()]),
                             Vcs::Svn => Ok(vec!["svn-tag create".into()]),
                             _ => Err(anyhow!(
                                 "Vcs system provided by user unrecognized: '{}'",
