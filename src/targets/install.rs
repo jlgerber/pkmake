@@ -386,11 +386,11 @@ impl Install {
     }
     // retreive the package root directory
     fn get_package_root(&self) -> &std::path::Path {
-        //     self.package_root
-        //         .as_deref()
-        //         .unwrap_or_else(|| std::path::Path::new("."))
+        self.package_root
+            .as_deref()
+            .unwrap_or_else(|| std::path::Path::new("."))
 
-        &std::path::Path::new(".")
+        //&std::path::Path::new(".")
     }
 
     // used to update the results with the installation call
