@@ -19,6 +19,7 @@ pub fn default_produces_instance_with_expected_state() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -41,6 +42,7 @@ pub fn can_set_with_docs() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -62,6 +64,7 @@ pub fn dry_run_given_bool_sets_state() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -83,6 +86,7 @@ fn dist_dir_given_some_str_updates_state() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
     // now test it with a String
@@ -108,6 +112,7 @@ fn dist_dir_given_some_string_updates_state() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
     // now test it with a String
@@ -142,6 +147,7 @@ fn flavors_given_some_vec_flavor_updates_state() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -169,6 +175,7 @@ fn flavors_given_none_sets_state_to_none() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -195,6 +202,7 @@ fn platforms_given_some_vec_str_updates_state() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -223,6 +231,7 @@ fn platforms_given_some_vec_platform_updates_state() {
         verbose: false,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -244,6 +253,7 @@ fn verbose_given_bool_updates_state() {
         verbose: true,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -265,6 +275,7 @@ fn defines_given_vec_str_updates_state() {
         verbose: false,
         defines: Some(vec!["foo=bar".to_string(), "ba=ba_blacksheep".to_string()]),
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -289,6 +300,7 @@ fn defines_given_vec_string_updates_state() {
         verbose: false,
         defines: Some(vec!["foo=bar".to_string(), "ba=ba_blacksheep".to_string()]),
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -318,6 +330,7 @@ fn build_given_mut_ref_to_self_produces_owned_instance() {
         verbose: true,
         defines: None,
         work: false,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }

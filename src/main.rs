@@ -58,6 +58,10 @@ enum Opt {
         /// Include packages from the user workarea
         #[structopt(long)]
         work: bool,
+
+        /// Optionally specify a path to the package root directory
+        #[structopt(short = "r", long = "package-root", parse(from_os_str))]
+        package_root: Option<PathBuf>,
     },
     #[structopt(display_order = 2)]
     /// Build and install one or more flavors of a package to one or more platforms
@@ -201,6 +205,7 @@ fn main() -> Result<(), AnyError> {
             verbose,
             define,
             work,
+            package_root,
         } => {
             let mut build = Build::default()
                 .clean(clean)
@@ -215,6 +220,7 @@ fn main() -> Result<(), AnyError> {
                 .verbose(verbose)
                 .defines(define)
                 .work(work)
+                .package_root(package_root)
                 .build();
             build.doit()
         }

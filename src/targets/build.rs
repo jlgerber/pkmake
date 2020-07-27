@@ -30,6 +30,7 @@ pub struct Build {
     pub verbose: bool,
     pub defines: Option<Vec<String>>,
     pub work: bool,
+    pub package_root: Option<std::path::PathBuf>,
 }
 
 impl Doit for Build {
@@ -60,7 +61,12 @@ impl Doit for Build {
 
     /// construct the command which will be executed
     fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
-        let build_env = BuildEnv::new(".")?;
+        let package_root = self
+            .package_root
+            .as_deref()
+            .unwrap_or_else(|| std::path::Path::new("."));
+
+        let build_env = BuildEnv::new(package_root)?;
 
         let clean_str = if self.clean { " --clean" } else { "" };
 
@@ -234,6 +240,7 @@ impl Default for Build {
             verbose: false,
             defines: None,
             work: false,
+            package_root: None,
         }
     }
 }
@@ -365,7 +372,16 @@ impl Build {
             self
         }
     */
-
+    pub fn package_root<I>(&mut self, input: Option<I>) -> &mut Self
+    where
+        I: Into<std::path::PathBuf>,
+    {
+        match input {
+            None => self.package_root = None,
+            Some(proot) => self.package_root = Some(proot.into()),
+        }
+        self
+    }
     /// Add a vec of platforms to the list of platforms on the BUild struct. This may be called
     /// multiple times to accumulate platforms.
     ///
@@ -490,6 +506,15 @@ impl Tabulate for Build {
                 .unwrap_or(String::from("None"))
         ]);
         table.add_row(row!["work", self.work]);
+
+        table.add_row(row![
+            "package_root",
+            self.package_root
+                .as_deref()
+                .unwrap_or_else(|| std::path::Path::new("."))
+                .to_str()
+                .unwrap()
+        ]);
 
         table
     }
