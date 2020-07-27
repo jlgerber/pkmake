@@ -26,6 +26,7 @@ fn can_construct_default() {
         vcs: None,
         logfile: None,
         max_jobs: None,
+        package_root: None,
     };
     assert_eq!(result, expected);
 }
@@ -85,6 +86,7 @@ fn can_build() {
         vcs: None,
         logfile: Some(PathBuf::from("./log/logfile")),
         max_jobs: Some(8),
+        package_root: None,
     };
     assert_eq!(result, expected);
 }

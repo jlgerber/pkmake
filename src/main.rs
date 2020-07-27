@@ -98,9 +98,11 @@ enum Opt {
         /// Optionally provide the flavor or flavors to build. May be vanilla, %, or a flavor name
         #[structopt(short, long)]
         flavor: Option<Vec<flavor::Flavor>>,
+
         /// Specify the build directory
         #[structopt(short, long = "build-dir")]
         build_dir: Option<String>,
+
         /// Controls  verbose output to shell
         #[structopt(short, long)]
         verbose: bool,
@@ -108,6 +110,7 @@ enum Opt {
         /// Override the default Output Distribution Directory
         #[structopt(short, long = "dist-dir")]
         dist_dir: Option<String>,
+
         /// The target level's repository specified as a level-spec
         #[structopt(short = "L", long)]
         level: Option<String>,
@@ -135,6 +138,10 @@ enum Opt {
         /// Specify the maximum number of workers used
         #[structopt(short = "j", long = "max-jobs")]
         max_jobs: Option<u8>,
+
+        /// Optionally specify a path to the package root directory
+        #[structopt(short = "r", long = "package-root", parse(from_os_str))]
+        package_root: Option<PathBuf>,
     },
     #[structopt(display_order = 3)]
     /// Build documentation
@@ -161,9 +168,11 @@ enum Opt {
         /// Print out commands but do not execute them
         #[structopt(short = "n", long = "dry-run")]
         dry_run: bool,
+
         /// Specify the build directory
         #[structopt(short, long = "dist-dir")]
         dist_dir: Option<String>,
+
         /// Provide more verbose output
         #[structopt(short, long)]
         verbose: bool,
@@ -243,6 +252,7 @@ fn main() -> Result<(), AnyError> {
             vcs,
             logfile,
             max_jobs,
+            package_root,
         } => {
             let mut install = Install::default()
                 .clean(clean)
@@ -263,6 +273,7 @@ fn main() -> Result<(), AnyError> {
                 .vcs(vcs)
                 .logfile(logfile)
                 .max_jobs(max_jobs)
+                .package_root(package_root)
                 .build();
             install.doit()
         }

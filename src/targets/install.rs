@@ -43,6 +43,7 @@ pub struct Install {
     pub vcs: Option<Vcs>,
     pub logfile: Option<PathBuf>,
     pub max_jobs: Option<u8>,
+    pub package_root: Option<PathBuf>,
 }
 
 /***************************
@@ -76,7 +77,7 @@ impl Doit for Install {
     }
     /// construct the command which will be executed
     fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
-        let build_env = BuildEnv::new(".")?;
+        let build_env = BuildEnv::new(self.get_package_root())?;
 
         self.reconcile_context_and_level(&build_env)?;
         // bail out early if we are installing to facility, as we are simply calling
@@ -366,6 +367,7 @@ impl Install {
             None => Ok("".to_string()),
         }
     }
+
     fn get_logfile_str(&self) -> String {
         match self.logfile.as_ref() {
             Some(logfile) => {
@@ -506,6 +508,7 @@ impl Default for Install {
             vcs: None,
             logfile: None,
             max_jobs: None,
+            package_root: None,
         }
     }
 }
@@ -1009,6 +1012,19 @@ impl Install {
         let mut default = Self::default();
         std::mem::swap(self, &mut default);
         default
+    }
+
+    /// Update the package root, which is where we look for the manifest and vcs directories. By
+    /// default, we look in the current working directory...
+    pub fn package_root<I>(&mut self, input: Option<I>) -> &mut Self
+    where
+        I: Into<std::path::PathBuf>,
+    {
+        match input {
+            None => self.package_root = None,
+            Some(proot) => self.package_root = Some(proot.into()),
+        }
+        self
     }
 }
 
