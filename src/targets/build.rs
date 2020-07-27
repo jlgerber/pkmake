@@ -50,7 +50,8 @@ impl Doit for Build {
                 }
             }
             let cmd = cmd.join("\n");
-            exec_in_shell(cmd.as_str())?;
+            let results = exec_in_shell(cmd.as_str())?;
+            println!("{}", results);
         }
         Ok(())
     }
