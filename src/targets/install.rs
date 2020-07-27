@@ -268,7 +268,7 @@ impl Install {
             "".to_string()
         };
         if self.flavors.is_some() {
-            format!(" --flavor={}", &flavors)
+            format!(" --flavour={}", &flavors)
         } else {
             "".to_string()
         }
