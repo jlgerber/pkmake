@@ -161,6 +161,10 @@ enum Opt {
         /// Pass variable through to the recipe
         #[structopt(short = "D", long)]
         define: Option<Vec<String>>,
+
+        /// Optionally specify a path to the package root directory
+        #[structopt(short = "r", long = "package-root", parse(from_os_str))]
+        package_root: Option<PathBuf>,
     },
     #[structopt(display_order = 4)]
     /// Run tests via the pk test target
@@ -282,12 +286,14 @@ fn main() -> Result<(), AnyError> {
             dry_run,
             verbose,
             define,
+            package_root,
         } => {
             let mut docs = Docs::default()
                 .dry_run(dry_run)
                 .dist_dir(dist_dir)
                 .defines(define)
                 .verbose(verbose)
+                .package_root(package_root)
                 .build();
             docs.doit()
         }

@@ -5,13 +5,14 @@ use crate::BuildEnv;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use prettytable::{row, Table};
-
+use std::path::PathBuf;
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Docs {
     pub dist_dir: Option<String>,
     pub dry_run: bool,
     pub verbose: bool,
     pub defines: Option<Vec<String>>,
+    package_root: Option<PathBuf>,
 }
 
 impl Doit for Docs {
@@ -40,7 +41,7 @@ impl Doit for Docs {
         Ok(())
     }
     fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
-        let build_env = BuildEnv::new(".")?;
+        let build_env = BuildEnv::new(self.get_package_root())?;
 
         let dist_dir_str = self.dist_dir_str(&build_env)?;
         let defines_str = self.get_defines_str();
@@ -82,11 +83,9 @@ impl Docs {
 
     // retreive the package root directory
     fn get_package_root(&self) -> &std::path::Path {
-        //     self.package_root
-        //         .as_deref()
-        //         .unwrap_or_else(|| std::path::Path::new("."))
-
-        &std::path::Path::new(".")
+        self.package_root
+            .as_deref()
+            .unwrap_or_else(|| std::path::Path::new("."))
     }
 }
 
@@ -97,6 +96,7 @@ impl std::default::Default for Docs {
             dry_run: false,
             verbose: false,
             defines: None,
+            package_root: None,
         }
     }
 }
@@ -146,6 +146,19 @@ impl Docs {
                 .collect::<Vec<_>>()
         });
         self.defines = input;
+        self
+    }
+
+    /// Update the package root, which is where we look for the manifest and vcs directories. By
+    /// default, we look in the current working directory...
+    pub fn package_root<I>(&mut self, input: Option<I>) -> &mut Self
+    where
+        I: Into<std::path::PathBuf>,
+    {
+        match input {
+            None => self.package_root = None,
+            Some(proot) => self.package_root = Some(proot.into()),
+        }
         self
     }
 
