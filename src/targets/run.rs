@@ -9,12 +9,14 @@ use crate::utils::exec_cmd;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use prettytable::{row, Table};
+use std::path::PathBuf;
 
 /// Models the pk run target as a largely opaque vector of strings.  
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Run {
     verbose: bool,
     dry_run: bool,
+    package_root: Option<PathBuf>,
     vars: Vec<String>,
 }
 
@@ -31,11 +33,9 @@ impl Run {
     }
     // retreive the package root directory
     fn get_package_root(&self) -> &std::path::Path {
-        //     self.package_root
-        //         .as_deref()
-        //         .unwrap_or_else(|| std::path::Path::new("."))
-
-        &std::path::Path::new(".")
+        self.package_root
+            .as_deref()
+            .unwrap_or_else(|| std::path::Path::new(self.get_package_root()))
     }
 }
 impl Doit for Run {
@@ -81,6 +81,7 @@ impl Default for Run {
         Self {
             verbose: false,
             dry_run: false,
+            package_root: None,
             vars: Vec::new(),
         }
     }
@@ -102,6 +103,20 @@ impl Run {
         self.vars.append(&mut input);
         self
     }
+
+    /// Update the package root, which is where we look for the manifest and vcs directories. By
+    /// default, we look in the current working directory...
+    pub fn package_root<I>(&mut self, input: Option<I>) -> &mut Self
+    where
+        I: Into<std::path::PathBuf>,
+    {
+        match input {
+            None => self.package_root = None,
+            Some(proot) => self.package_root = Some(proot.into()),
+        }
+        self
+    }
+
     pub fn build(&mut self) -> Self {
         let mut default = Self::default();
         std::mem::swap(&mut default, self);

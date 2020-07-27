@@ -199,6 +199,10 @@ enum Opt {
         #[structopt(short = "n", long = "dry-run")]
         dry_run: bool,
 
+        /// Optionally specify a path to the package root directory
+        #[structopt(short = "r", long = "package-root", parse(from_os_str))]
+        package_root: Option<PathBuf>,
+
         /// Provide verbose output while executing command
         #[structopt(short, long)]
         verbose: bool,
@@ -320,11 +324,13 @@ fn main() -> Result<(), AnyError> {
         Opt::Run {
             dry_run,
             verbose,
+            package_root,
             vars,
         } => {
             let mut run = Run::default()
                 .dry_run(dry_run)
                 .verbose(verbose)
+                .package_root(package_root)
                 .vars(vars)
                 .build();
             run.doit()
