@@ -44,7 +44,7 @@ enum Opt {
         overrides: Option<Vec<OverridePair>>,
 
         /// Provide the platform(s) to build for. This flag may be repeated.
-        #[structopt(short, long)]
+        #[structopt(short = "P", long)]
         platform: Option<Vec<platform::Platform>>,
 
         /// Provide more verbose output
@@ -92,7 +92,7 @@ enum Opt {
         site: Option<Vec<site::Site>>,
 
         /// Optionally provide the platform or platforms to build for
-        #[structopt(short, long)]
+        #[structopt(short = "P", long)]
         platform: Option<Vec<platform::Platform>>,
 
         /// Optionally provide the flavor or flavors to build. May be vanilla, %, or a flavor name
