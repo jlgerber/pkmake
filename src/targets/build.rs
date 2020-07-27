@@ -12,6 +12,7 @@ use indexmap::IndexSet as HashSet;
 //use subprocess::Exec;
 //use subprocess::Redirection;
 use crate::utils::exec_in_shell;
+use crate::utils::{exec_cmd, ExitStatus};
 use prettytable::{row, Table};
 use std::convert::TryInto;
 /// build target
@@ -49,9 +50,11 @@ impl Doit for Build {
                     println!("{}", c);
                 }
             }
-            let cmd = cmd.join("\n");
-            let results = exec_in_shell(cmd.as_str())?;
-            println!("{}", results);
+            //let cmd = cmd.join("\n");
+            //let results = exec_in_shell(cmd.as_str())?;
+            // println!("{}", results);
+            let exit_status = exec_cmd(cmd)?;
+            println!("Exit Status: {:?}", exit_status);
         }
         Ok(())
     }
