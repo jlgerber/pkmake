@@ -8,6 +8,7 @@ use crate::ManifestInfo;
 use crate::OverridePair;
 use prettytable::{row, Table};
 //use crate::PkMakeError;
+use crate::utils::exec_cmd;
 use crate::Vcs;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
@@ -56,10 +57,20 @@ impl Doit for Install {
             self.tabulate();
         }
         let cmd = self.build_cmd()?;
-        if self.dry_run || self.verbose {
+        if self.dry_run {
             for c in cmd {
                 println!("{}", c);
             }
+        } else {
+            if self.verbose {
+                for c in &cmd {
+                    println!("{}", c);
+                }
+            }
+            let cmd = cmd.join(" ; ");
+
+            let exit_status = exec_cmd(cmd.as_str())?;
+            println!("\nExit Status: {:?}", exit_status);
         }
         Ok(())
     }

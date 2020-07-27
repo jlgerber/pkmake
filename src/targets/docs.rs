@@ -1,5 +1,6 @@
 use crate::traits::Doit;
 use crate::traits::Tabulate;
+use crate::utils::exec_cmd;
 use crate::BuildEnv;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
@@ -21,10 +22,20 @@ impl Doit for Docs {
             self.tabulate();
         }
         let cmd = self.build_cmd()?;
-        if self.dry_run || self.verbose {
+        if self.dry_run {
             for c in cmd {
                 println!("{}", c);
             }
+        } else {
+            if self.verbose {
+                for c in &cmd {
+                    println!("{}", c);
+                }
+            }
+            let cmd = cmd.join(" ; ");
+
+            let exit_status = exec_cmd(cmd.as_str())?;
+            println!("\nExit Status: {:?}", exit_status);
         }
         Ok(())
     }

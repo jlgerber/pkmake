@@ -51,10 +51,9 @@ impl Doit for Build {
                 }
             }
             let cmd = cmd.join(" ; ");
-            //let results = exec_in_shell(cmd.as_str())?;
-            // println!("{}", results);
+
             let exit_status = exec_cmd(cmd.as_str())?;
-            println!("Exit Status: {:?}", exit_status);
+            println!("\nExit Status: {:?}", exit_status);
         }
         Ok(())
     }
@@ -88,12 +87,6 @@ impl Doit for Build {
 
         let work_str = if self.work { " --work" } else { "" };
 
-        // if self.verbose {
-        //     println!(
-        //         "dist_dir: '{}' docs_str: '{}' flavor_str: '{}' defines_str: '{}'\n",
-        //         &dist_dir_str, &docs_str, &flavor_str, &defines_str
-        //     );
-        // }
         let result = vec![format!(
             "pk audit && pk build{}{}{}{}{}{}{}{}{}{}",
             clean_str,
