@@ -2,10 +2,11 @@ use crate::context::Context;
 use crate::flavor::Flavor;
 use crate::platform::Platform;
 use crate::site::Site;
-use crate::traits::Doit;
+use crate::traits::{Doit, Tabulate};
 use crate::BuildEnv;
 use crate::ManifestInfo;
 use crate::OverridePair;
+use prettytable::{row, Table};
 //use crate::PkMakeError;
 use crate::Vcs;
 use anyhow::anyhow;
@@ -51,7 +52,8 @@ impl Doit for Install {
     /// doit executes the install target command
     fn doit(&mut self) -> Result<(), Self::Err> {
         if self.verbose {
-            println!("{:#?}", self);
+            //println!("{:#?}", self);
+            self.tabulate();
         }
         let cmd = self.build_cmd()?;
         if self.dry_run || self.verbose {
@@ -131,7 +133,7 @@ impl Doit for Install {
 }
 
 //
-// Helper Methods for Install::build_cmd(...)
+// Private Helper Methods for Install::build_cmd(...)
 //
 impl Install {
     // context/show and level are both responsible for setting execution level. Context and
@@ -489,7 +491,7 @@ impl Default for Install {
 }
 
 //
-// Public Methods
+// Public Methods - primarily setters
 //
 impl Install {
     /// Set the dry_run field.
@@ -990,6 +992,84 @@ impl Install {
     }
 }
 
+//
+// Tabulate implementation
+//
+impl Tabulate for Install {
+    fn create_table(&self) -> Table {
+        let mut table = Table::new();
+        table.add_row(row!["Field", "Value"]);
+        table.add_row(row!["dry_run", self.dry_run]);
+        table.add_row(row!["with_docs", self.with_docs]);
+        table.add_row(row!["verbose", self.verbose]);
+        table.add_row(row!["dist_dir", self.dist_dir.as_deref().unwrap_or("None")]);
+        table.add_row(row!["level", self.level.as_deref().unwrap_or("None")]);
+        table.add_row(row!["work", self.work]);
+        table.add_row(row![
+            "Vcs",
+            self.vcs.as_ref().map(|vcs| vcs.as_str()).unwrap_or("None")
+        ]);
+        table.add_row(row![
+            "logfile",
+            self.logfile
+                .as_ref()
+                .map(|l| l.to_str().unwrap_or("NON_UTF8_STR_USED"))
+                .unwrap_or("None")
+        ]);
+        table.add_row(row![
+            "max_jobs",
+            self.max_jobs
+                .map(|v| v.to_string())
+                .unwrap_or(String::from("None"))
+        ]);
+        table.add_row(row![
+            "overrides",
+            self.overrides
+                .as_ref()
+                .map(|v| v.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or(String::from("None"))
+        ]);
+        table.add_row(row![
+            "defines",
+            self.defines
+                .as_ref()
+                .map(|v| v.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or(String::from("None"))
+        ]);
+        table.add_row(row![
+            "build_dir",
+            self.build_dir.as_deref().unwrap_or("None")
+        ]);
+        table.add_row(row![
+            "context",
+            self.context.as_ref().map(|v| v.as_str()).unwrap_or("None")
+        ]);
+        table.add_row(row!["show", self.show.as_deref().unwrap_or("None")]);
+        table.add_row(row![
+            "sites",
+            self.sites
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
+        table.add_row(row![
+            "platforms",
+            self.platforms
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
+        table.add_row(row![
+            "flavors",
+            self.flavors
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
+
+        table
+    }
+}
 // thanks to Karol Kuczmarski
 // http://xion.io/post/code/rust-unit-test-placement.html
 #[cfg(test)]

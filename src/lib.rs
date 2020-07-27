@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate prettytable;
 pub mod build_env;
 pub mod context;
 pub mod error;
