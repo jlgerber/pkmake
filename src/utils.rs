@@ -66,6 +66,7 @@ pub fn exec_cmd(cmds: Vec<String>) -> Result<ExitStatus, AnyError> {
         return Err(anyhow!("must pass at least one command to exec_cmd"));
     }
     let mut phandle = Exec::shell(cmds[0].as_str())
+        .stdin(Redirection::Pipe)
         //.stdout(Redirection::Pipe)
         // .stderr(Redirection::Merge)
         .popen()?;
