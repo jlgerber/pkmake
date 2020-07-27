@@ -88,6 +88,7 @@ where
 /// minimal flavour information from manifest
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 pub struct Flavour {
+    #[serde(alias = "Name")]
     name: String,
 }
 
@@ -103,6 +104,7 @@ pub struct Manifest {
     name: String,
     #[serde(alias = "Version")]
     version: String,
+    #[serde(alias = "Flavours")]
     flavours: Option<Vec<Flavour>>,
 }
 
