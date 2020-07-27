@@ -65,9 +65,7 @@ impl Flavour {
 }
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 pub struct Manifest {
-    #[serde(deserialize_with = "deserialize_struct_case_insensitive")]
     name: String,
-    #[serde(deserialize_with = "deserialize_struct_case_insensitive")]
     version: String,
     flavours: Option<Vec<Flavour>>,
 }
