@@ -49,3 +49,11 @@ impl StringUtils for str {
         self.substring(start, len)
     }
 }
+
+use anyhow::Error as AnyError;
+use shellfn::shell;
+
+#[shell]
+pub fn exec_in_shell(fn_str: &str) -> Result<String, AnyError> {
+    r#"$FN_STR"#
+}

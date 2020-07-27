@@ -11,9 +11,9 @@ use anyhow::Error as AnyError;
 use indexmap::IndexSet as HashSet;
 //use subprocess::Exec;
 //use subprocess::Redirection;
+use crate::utils::exec_in_shell;
 use prettytable::{row, Table};
 use std::convert::TryInto;
-
 /// build target
 #[derive(Debug, PartialEq, Eq)]
 pub struct Build {
@@ -39,10 +39,18 @@ impl Doit for Build {
             self.tabulate();
         }
         let cmd = self.build_cmd()?;
-        if self.dry_run || self.verbose {
-            for c in cmd {
+        if self.dry_run {
+            for c in &cmd {
                 println!("{}", c);
             }
+        } else {
+            if self.verbose {
+                for c in &cmd {
+                    println!("{}", c);
+                }
+            }
+            let cmd = cmd.join("\n");
+            exec_in_shell(cmd.as_str())?;
         }
         Ok(())
     }
