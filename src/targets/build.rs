@@ -94,20 +94,23 @@ impl Doit for Build {
         //         &dist_dir_str, &docs_str, &flavor_str, &defines_str
         //     );
         // }
-        let result = format!(
-            "pk audit && pk build{}{}{}{}{}{}{}{}{}{}",
-            clean_str,
-            dist_dir_str,
-            docs_str,
-            flavor_str,
-            level_str,
-            metadata_only_str,
-            overrides_str,
-            platform_str,
-            defines_str,
-            work_str
-        );
-        Ok(vec![result])
+        let result = vec![
+            String::from("pk audit"),
+            format!(
+                "pk build{}{}{}{}{}{}{}{}{}{}",
+                clean_str,
+                dist_dir_str,
+                docs_str,
+                flavor_str,
+                level_str,
+                metadata_only_str,
+                overrides_str,
+                platform_str,
+                defines_str,
+                work_str
+            ),
+        ];
+        Ok(result)
     }
 }
 
