@@ -65,11 +65,11 @@ pub fn exec_cmd(cmds: Vec<String>) -> Result<ExitStatus, AnyError> {
     if cmds.len() < 1 {
         return Err(anyhow!("must pass at least one command to exec_cmd"));
     }
-    let mut phandle = Exec::shell(cmds[0].as_str())
+    let mut phandle = Exec::shell("")
         .stdout(Redirection::Pipe)
         .stderr(Redirection::Merge)
         .popen()?;
-    for cmd in &cmds[1..] {
+    for cmd in &cmds {
         let result = phandle.communicate(Some(cmd.as_str()))?;
         if result.0.is_some() {
             println!("{}", result.0.unwrap());
