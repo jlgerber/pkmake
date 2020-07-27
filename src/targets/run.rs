@@ -3,9 +3,11 @@
 //! but gain flexibility.
 //!
 use crate::traits::Doit;
-use crate::BuildEnv;
+use crate::traits::Tabulate;
+//use crate::BuildEnv;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
+use prettytable::{row, Table};
 
 /// Models the pk run target as a largely opaque vector of strings.  
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -32,7 +34,7 @@ impl Doit for Run {
 
     fn doit(&mut self) -> Result<(), Self::Err> {
         if self.verbose {
-            println!("{:#?}", self);
+            self.tabulate();
         }
         let cmd = self.build_cmd()?;
         if self.dry_run || self.verbose {
@@ -44,6 +46,7 @@ impl Doit for Run {
     }
 
     fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
+        self.fix_args()?;
         let recipe_target = self.get_recipe_target_str();
         let recipe_args_str = self.get_recipe_args_str();
 
@@ -128,6 +131,21 @@ impl Run {
         }
 
         Ok(())
+    }
+}
+
+//
+// Tabulate implementation
+//
+impl Tabulate for Run {
+    fn create_table(&self) -> Table {
+        let mut table = Table::new();
+        table.add_row(row!["Field", "Value"]);
+        table.add_row(row!["verbose", self.verbose]);
+        table.add_row(row!["dry_run", self.dry_run]);
+        table.add_row(row!["vars", self.vars.join("\n")]);
+
+        table
     }
 }
 

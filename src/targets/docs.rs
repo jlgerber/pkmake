@@ -1,7 +1,9 @@
 use crate::traits::Doit;
+use crate::traits::Tabulate;
 use crate::BuildEnv;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
+use prettytable::{row, Table};
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Docs {
@@ -16,7 +18,7 @@ impl Doit for Docs {
 
     fn doit(&mut self) -> Result<(), Self::Err> {
         if self.verbose {
-            println!("{:#?}", self);
+            self.tabulate();
         }
         let cmd = self.build_cmd()?;
         if self.dry_run || self.verbose {
@@ -140,6 +142,28 @@ impl Docs {
         let mut default = Self::default();
         std::mem::swap(self, &mut default);
         default
+    }
+}
+
+//
+// Tabulate implementation
+//
+impl Tabulate for Docs {
+    fn create_table(&self) -> Table {
+        let mut table = Table::new();
+        table.add_row(row!["Field", "Value"]);
+        table.add_row(row!["dist_dir", self.dist_dir.as_deref().unwrap_or("None")]);
+        table.add_row(row!["verbose", self.verbose]);
+        table.add_row(row!["dry_run", self.dry_run]);
+        table.add_row(row![
+            "defines",
+            self.defines
+                .as_ref()
+                .map(|v| v.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or(String::from("None"))
+        ]);
+
+        table
     }
 }
 

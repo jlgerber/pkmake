@@ -31,7 +31,7 @@ fn propagates_dry_run_and_verbose_to_vars_if_set() {
         .verbose(true)
         .vars(vec!["foo".into(), "bar".into()])
         .build();
-    result.fix_args();
+    result.fix_args().unwrap();
     let expected = Run {
         dry_run: true,
         verbose: true,
@@ -56,7 +56,7 @@ fn propagates_dry_run_and_verbose_to_struct_if_set_in_vars() {
             "--dry-run".into(),
         ])
         .build();
-    result.fix_args();
+    result.fix_args().unwrap();
     let expected = Run {
         dry_run: true,
         verbose: true,
@@ -76,7 +76,7 @@ fn propagates_dry_run_and_verbose_to_struct_if_set_in_vars_as_short_flags() {
         .verbose(false)
         .vars(vec!["foo".into(), "-n".into(), "-v".into(), "bar".into()])
         .build();
-    result.fix_args();
+    result.fix_args().unwrap();
     let expected = Run {
         dry_run: true,
         verbose: true,
@@ -91,7 +91,7 @@ fn propagates_verbose_to_struct_if_set_in_vars_as_short_flags() {
         .verbose(false)
         .vars(vec!["foo".into(), "-v".into(), "bar".into()])
         .build();
-    result.fix_args();
+    result.fix_args().unwrap();
     let expected = Run {
         dry_run: false,
         verbose: true,
@@ -107,7 +107,7 @@ fn propagates_dry_run_to_struct_if_set_in_vars_as_short_flags() {
         .verbose(false)
         .vars(vec!["foo".into(), "-n".into(), "bar".into()])
         .build();
-    result.fix_args();
+    result.fix_args().unwrap();
     let expected = Run {
         dry_run: true,
         verbose: false,

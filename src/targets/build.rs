@@ -36,7 +36,7 @@ impl Doit for Build {
 
     fn doit(&mut self) -> Result<(), Self::Err> {
         if self.verbose {
-            println!("{:#?}", self);
+            self.tabulate();
         }
         let cmd = self.build_cmd()?;
         if self.dry_run || self.verbose {
@@ -76,12 +76,12 @@ impl Doit for Build {
 
         let work_str = if self.work { " --work" } else { "" };
 
-        if self.verbose {
-            println!(
-                "dist_dir: '{}' docs_str: '{}' flavor_str: '{}' defines_str: '{}'\n",
-                &dist_dir_str, &docs_str, &flavor_str, &defines_str
-            );
-        }
+        // if self.verbose {
+        //     println!(
+        //         "dist_dir: '{}' docs_str: '{}' flavor_str: '{}' defines_str: '{}'\n",
+        //         &dist_dir_str, &docs_str, &flavor_str, &defines_str
+        //     );
+        // }
         let result = format!(
             "pk audit && pk build{}{}{}{}{}{}{}{}{}{}",
             clean_str,
