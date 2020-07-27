@@ -11,8 +11,8 @@ use anyhow::Error as AnyError;
 use indexmap::IndexSet as HashSet;
 //use subprocess::Exec;
 //use subprocess::Redirection;
-use crate::utils::exec_in_shell;
-use crate::utils::{exec_cmd, ExitStatus};
+use crate::utils::exec_cmd;
+//use crate::utils::exec_in_shell;
 use prettytable::{row, Table};
 use std::convert::TryInto;
 /// build target
@@ -50,10 +50,10 @@ impl Doit for Build {
                     println!("{}", c);
                 }
             }
-            //let cmd = cmd.join("\n");
+            let cmd = cmd.join(" ; ");
             //let results = exec_in_shell(cmd.as_str())?;
             // println!("{}", results);
-            let exit_status = exec_cmd(cmd)?;
+            let exit_status = exec_cmd(cmd.as_str())?;
             println!("Exit Status: {:?}", exit_status);
         }
         Ok(())
@@ -94,22 +94,19 @@ impl Doit for Build {
         //         &dist_dir_str, &docs_str, &flavor_str, &defines_str
         //     );
         // }
-        let result = vec![
-            String::from("pk audit"),
-            format!(
-                "pk build{}{}{}{}{}{}{}{}{}{}",
-                clean_str,
-                dist_dir_str,
-                docs_str,
-                flavor_str,
-                level_str,
-                metadata_only_str,
-                overrides_str,
-                platform_str,
-                defines_str,
-                work_str
-            ),
-        ];
+        let result = vec![format!(
+            "pk audit && pk build{}{}{}{}{}{}{}{}{}{}",
+            clean_str,
+            dist_dir_str,
+            docs_str,
+            flavor_str,
+            level_str,
+            metadata_only_str,
+            overrides_str,
+            platform_str,
+            defines_str,
+            work_str
+        )];
         Ok(result)
     }
 }

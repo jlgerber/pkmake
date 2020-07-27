@@ -61,24 +61,32 @@ pub fn exec_in_shell(fn_str: &str) -> Result<String, AnyError> {
 
 pub use subprocess::ExitStatus;
 use subprocess::{Exec, Redirection};
-pub fn exec_cmd(cmds: Vec<String>) -> Result<ExitStatus, AnyError> {
+// pub fn exec_cmd(cmds: Vec<String>) -> Result<ExitStatus, AnyError> {
+//     if cmds.len() < 1 {
+//         return Err(anyhow!("must pass at least one command to exec_cmd"));
+//     }
+//     let mut phandle = Exec::shell(cmds[0].as_str())
+//         .stdin(Redirection::Pipe)
+//         //.stdout(Redirection::Pipe)
+//         // .stderr(Redirection::Merge)
+//         .popen()?;
+//     for cmd in &cmds[1..] {
+//         let result = phandle.communicate(Some(cmd.as_str()))?;
+//         if result.0.is_some() {
+//             println!("{}", result.0.unwrap());
+//         }
+//         if result.1.is_some() {
+//             println!("{}", result.1.unwrap());
+//         }
+//     }
+//     let exit_status = phandle.wait()?;
+//     Ok(exit_status)
+// }
+pub fn exec_cmd(cmds: &str) -> Result<ExitStatus, AnyError> {
     if cmds.len() < 1 {
         return Err(anyhow!("must pass at least one command to exec_cmd"));
     }
-    let mut phandle = Exec::shell(cmds[0].as_str())
-        .stdin(Redirection::Pipe)
-        //.stdout(Redirection::Pipe)
-        // .stderr(Redirection::Merge)
-        .popen()?;
-    for cmd in &cmds[1..] {
-        let result = phandle.communicate(Some(cmd.as_str()))?;
-        if result.0.is_some() {
-            println!("{}", result.0.unwrap());
-        }
-        if result.1.is_some() {
-            println!("{}", result.1.unwrap());
-        }
-    }
-    let exit_status = phandle.wait()?;
+
+    let exit_status = Exec::shell(cmds).join()?;
     Ok(exit_status)
 }
