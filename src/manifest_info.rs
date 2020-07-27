@@ -2,7 +2,7 @@ use crate::Flavor;
 use anyhow::Error as AnyError;
 use serde::Deserialize;
 //use shellfn::shell;
-use serde_aux::prelude::*;
+use serde::de::{self, DeserializeOwned, Deserializer};
 use std::path::Path;
 /// minimal manifest information in a form that is convenient for us to consume. This
 /// struct is generated after parsing the manifest using serde...
@@ -53,20 +53,57 @@ fn _get_name_and_version(manifest: &str) -> Result<Vec<String>, AnyError> {
     "#
 }
 */
+
+/*
+use serde_yaml::Value;
+//use std::collections::BTreeMap as Map;
+use linked_hash_map::LinkedHashMap as Map;
+fn case_insensitive<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+where
+    T: DeserializeOwned,
+    D: Deserializer<'de>,
+{
+    let map = Map::<String, Value>::deserialize(deserializer)?;
+    let lower = map
+        .into_iter()
+        .map(|(k, v)| (k.to_lowercase(), v))
+        .collect();
+    T::deserialize(Value::Mapping(lower)).map_err(de::Error::custom)
+}
+*/
+use serde_yaml::Value;
+fn case_insensitive<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+where
+    T: DeserializeOwned,
+    D: Deserializer<'de>,
+{
+    let val = Value::deserialize(deserializer)?;
+    if let Value::String(lval) = val {
+        T::deserialize(Value::String(lval.to_lowercase())).map_err(de::Error::custom)
+    } else {
+        T::deserialize(val).map_err(de::Error::custom)
+    }
+}
+
 /// minimal flavour information from manifest
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 pub struct Flavour {
     name: String,
 }
+
 impl Flavour {
     pub fn as_str(&self) -> &str {
         self.name.as_str()
     }
 }
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
+//#[serde(deserialize_with = "deserialize_struct_case_insensitive")]
 pub struct Manifest {
+    #[serde(deserialize_with = "case_insensitive")]
     name: String,
+    #[serde(deserialize_with = "case_insensitive")]
     version: String,
+    //#[serde(deserialize_with = "deserialize_struct_case_insensitive")]
     flavours: Option<Vec<Flavour>>,
 }
 
