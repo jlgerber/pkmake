@@ -69,7 +69,7 @@ impl Doit for Install {
             }
             let cmd = cmd.join(" ; ");
 
-            let exit_status = exec_cmd(cmd.as_str())?;
+            let exit_status = exec_cmd(cmd.as_str(), self.get_package_root())?;
             println!("\nExit Status: {:?}", exit_status);
         }
         Ok(())
@@ -382,6 +382,15 @@ impl Install {
             None => String::new(),
         }
     }
+    // retreive the package root directory
+    fn get_package_root(&self) -> &std::path::Path {
+        //     self.package_root
+        //         .as_deref()
+        //         .unwrap_or_else(|| std::path::Path::new("."))
+
+        &std::path::Path::new(".")
+    }
+
     // used to update the results with the installation call
     fn update_results_with_install(
         &mut self,

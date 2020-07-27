@@ -34,7 +34,7 @@ impl Doit for Docs {
             }
             let cmd = cmd.join(" ; ");
 
-            let exit_status = exec_cmd(cmd.as_str())?;
+            let exit_status = exec_cmd(cmd.as_str(), self.get_package_root())?;
             println!("\nExit Status: {:?}", exit_status);
         }
         Ok(())
@@ -78,6 +78,15 @@ impl Docs {
             }
         }
         defines_str
+    }
+
+    // retreive the package root directory
+    fn get_package_root(&self) -> &std::path::Path {
+        //     self.package_root
+        //         .as_deref()
+        //         .unwrap_or_else(|| std::path::Path::new("."))
+
+        &std::path::Path::new(".")
     }
 }
 

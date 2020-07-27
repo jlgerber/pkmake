@@ -63,11 +63,14 @@ use anyhow::Error as AnyError;
 use subprocess::Exec;
 pub use subprocess::ExitStatus;
 
-pub fn exec_cmd(cmds: &str) -> Result<ExitStatus, AnyError> {
+pub fn exec_cmd<I>(cmds: &str, cwd: I) -> Result<ExitStatus, AnyError>
+where
+    I: AsRef<std::path::Path>,
+{
     if cmds.len() < 1 {
         return Err(anyhow!("must pass at least one command to exec_cmd"));
     }
 
-    let exit_status = Exec::shell(cmds).join()?;
+    let exit_status = Exec::shell(cmds).cwd(cwd.as_ref()).join()?;
     Ok(exit_status)
 }

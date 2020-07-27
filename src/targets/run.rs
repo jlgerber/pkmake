@@ -29,6 +29,14 @@ impl Run {
     fn get_recipe_args_str(&self) -> String {
         self.vars[1..].join(" ")
     }
+    // retreive the package root directory
+    fn get_package_root(&self) -> &std::path::Path {
+        //     self.package_root
+        //         .as_deref()
+        //         .unwrap_or_else(|| std::path::Path::new("."))
+
+        &std::path::Path::new(".")
+    }
 }
 impl Doit for Run {
     type Err = AnyError;
@@ -50,7 +58,7 @@ impl Doit for Run {
             }
             let cmd = cmd.join(" ; ");
 
-            let exit_status = exec_cmd(cmd.as_str())?;
+            let exit_status = exec_cmd(cmd.as_str(), self.get_package_root())?;
             println!("\nExit Status: {:?}", exit_status);
         }
         Ok(())
