@@ -2,8 +2,8 @@ use crate::Flavor;
 use anyhow::Error as AnyError;
 use serde::Deserialize;
 //use shellfn::shell;
+use serde_aux::prelude::*;
 use std::path::Path;
-
 /// minimal manifest information in a form that is convenient for us to consume. This
 /// struct is generated after parsing the manifest using serde...
 #[derive(Debug, PartialEq, Eq)]
@@ -65,7 +65,9 @@ impl Flavour {
 }
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 pub struct Manifest {
+    #[serde(deserialize_with = "deserialize_struct_case_insensitive")]
     name: String,
+    #[serde(deserialize_with = "deserialize_struct_case_insensitive")]
     version: String,
     flavours: Option<Vec<Flavour>>,
 }
