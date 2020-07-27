@@ -70,7 +70,7 @@ where
         .collect();
     T::deserialize(Value::Mapping(lower)).map_err(de::Error::custom)
 }
-*/
+
 use serde_yaml::Value;
 fn case_insensitive<'de, T, D>(deserializer: D) -> Result<T, D::Error>
 where
@@ -84,7 +84,7 @@ where
         T::deserialize(val).map_err(de::Error::custom)
     }
 }
-
+*/
 /// minimal flavour information from manifest
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 pub struct Flavour {
@@ -99,11 +99,10 @@ impl Flavour {
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 //#[serde(deserialize_with = "deserialize_struct_case_insensitive")]
 pub struct Manifest {
-    #[serde(deserialize_with = "case_insensitive")]
+    #[serde(alias = "Name")]
     name: String,
-    #[serde(deserialize_with = "case_insensitive")]
+    #[serde(alias = "Version")]
     version: String,
-    //#[serde(deserialize_with = "deserialize_struct_case_insensitive")]
     flavours: Option<Vec<Flavour>>,
 }
 
