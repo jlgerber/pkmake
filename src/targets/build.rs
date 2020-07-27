@@ -1,7 +1,7 @@
 use crate::build_env::BuildEnv;
 use crate::flavor::Flavor;
 use crate::platform::Platform;
-use crate::traits::Doit;
+use crate::traits::{Doit, Tabulate};
 use crate::OverridePair;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
@@ -11,6 +11,7 @@ use anyhow::Error as AnyError;
 use indexmap::IndexSet as HashSet;
 //use subprocess::Exec;
 //use subprocess::Redirection;
+use prettytable::{row, Table};
 use std::convert::TryInto;
 
 /// build target
@@ -438,6 +439,54 @@ impl Build {
         let mut default = Self::default();
         std::mem::swap(self, &mut default);
         default
+    }
+}
+
+//
+// Tabulate implementation
+//
+impl Tabulate for Build {
+    fn create_table(&self) -> Table {
+        let mut table = Table::new();
+        table.add_row(row!["Field", "Value"]);
+        table.add_row(row!["clean", self.clean]);
+        table.add_row(row!["with_docs", self.with_docs]);
+        table.add_row(row!["dry_run", self.dry_run]);
+        table.add_row(row!["dist_dir", self.dist_dir.as_deref().unwrap_or("None")]);
+        table.add_row(row![
+            "flavors",
+            self.flavors
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
+        table.add_row(row!["level", self.level.as_deref().unwrap_or("None")]);
+        table.add_row(row!["metadata_only", self.metadata_only]);
+        table.add_row(row![
+            "overrides",
+            self.overrides
+                .as_ref()
+                .map(|v| v.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or(String::from("None"))
+        ]);
+        table.add_row(row![
+            "platforms",
+            self.platforms
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
+        table.add_row(row!["verbose", self.verbose]);
+        table.add_row(row![
+            "defines",
+            self.defines
+                .as_ref()
+                .map(|v| v.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or(String::from("None"))
+        ]);
+        table.add_row(row!["work", self.work]);
+
+        table
     }
 }
 
