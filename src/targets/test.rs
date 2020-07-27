@@ -13,6 +13,7 @@ use crate::BuildEnv;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use prettytable::{row, Table};
+use std::path::PathBuf;
 
 /// Models the pk test target.
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -21,6 +22,7 @@ pub struct Test {
     pub dry_run: bool,
     pub verbose: bool,
     pub defines: Option<Vec<String>>,
+    pub package_root: Option<PathBuf>,
 }
 // private functions
 impl Test {
@@ -53,11 +55,9 @@ impl Test {
     }
     // retreive the package root directory
     fn get_package_root(&self) -> &std::path::Path {
-        //     self.package_root
-        //         .as_deref()
-        //         .unwrap_or_else(|| std::path::Path::new("."))
-
-        &std::path::Path::new(".")
+        self.package_root
+            .as_deref()
+            .unwrap_or_else(|| std::path::Path::new("."))
     }
 }
 
@@ -88,7 +88,7 @@ impl Doit for Test {
     }
 
     fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
-        let build_env = BuildEnv::new(".")?;
+        let build_env = BuildEnv::new(self.get_package_root())?;
 
         let dist_dir_str = self.dist_dir_str(&build_env)?;
         let defines_str = self.get_defines_str();
@@ -107,6 +107,7 @@ impl Default for Test {
             dry_run: false,
             verbose: false,
             defines: None,
+            package_root: None,
         }
     }
 }
@@ -147,6 +148,19 @@ impl Test {
                 .collect::<Vec<_>>()
         });
         self.defines = input;
+        self
+    }
+
+    /// Update the package root, which is where we look for the manifest and vcs directories. By
+    /// default, we look in the current working directory...
+    pub fn package_root<I>(&mut self, input: Option<I>) -> &mut Self
+    where
+        I: Into<std::path::PathBuf>,
+    {
+        match input {
+            None => self.package_root = None,
+            Some(proot) => self.package_root = Some(proot.into()),
+        }
         self
     }
     /// Finalize a chain of calls by returning a modified instance of the Test instance.

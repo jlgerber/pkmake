@@ -390,7 +390,7 @@ fn build_cmd_given_clean_distdir_flavor() {
         .unwrap()
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --clean --dist-dir=./foo/bar --with-docs --flavor=^,foo".to_string(),
+        "pk audit && pk build --clean --dist-dir=./foo/bar --with-docs --flavour=^,foo".to_string(),
     ];
     assert_eq!(result.unwrap(), expected);
 }
