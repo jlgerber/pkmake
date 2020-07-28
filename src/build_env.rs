@@ -1,4 +1,6 @@
-use crate::flavor::Flavor;
+//! BuildEnv
+//! 
+//! Model information which must be gleaned from the environment
 use crate::platform::Platform;
 use crate::vcs::Vcs;
 use anyhow::anyhow;
@@ -6,11 +8,7 @@ use anyhow::Error as AnyError;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-pub struct ManifestInfo {
-    pub name: String,
-    pub version: String,
-    pub flavors: Vec<Flavor>,
-}
+
 pub struct BuildEnv {
     pub package_root: PathBuf,
     pub dd_os: Platform,
