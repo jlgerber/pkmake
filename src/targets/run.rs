@@ -427,6 +427,20 @@ impl Tabulate for Run {
         table.add_row(row!["Field", "Value"]);
         table.add_row(row!["verbose", self.verbose]);
         table.add_row(row!["dry_run", self.dry_run]);
+        table.add_row(row![
+            "platforms",
+            self.platforms
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
+        table.add_row(row![
+            "flavors",
+            self.flavors
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
         table.add_row(row!["vars", self.vars.join("\n")]);
 
         table

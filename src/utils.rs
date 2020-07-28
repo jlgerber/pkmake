@@ -1,4 +1,19 @@
+//! Utils
+//!
+//! Contains the StringUtils trait with is used to add a ```substring``` and
+//! ```slice``` method to ```str``` allowing us to get substrings 
+//! based on chars without additional allocations
+//!
+//! Also provides the ```exec_cmd```, which is responsible for executing a 
+//! vec of commands in a subprocess, given a working directory, returning 
+//! the results. The command does not capture stderr or stdout, allowing them
+//! to be viewed by the end user in realtime.
+
 use std::ops::{Bound, RangeBounds};
+use anyhow::anyhow;
+use anyhow::Error as AnyError;
+use subprocess::Exec;
+pub use subprocess::ExitStatus;
 
 pub trait StringUtils {
     fn substring(&self, start: usize, len: usize) -> &str;
@@ -50,8 +65,7 @@ impl StringUtils for str {
     }
 }
 
-use anyhow::anyhow;
-use anyhow::Error as AnyError;
+
 // we are using subprocess instead
 // use shellfn::shell;
 
@@ -60,8 +74,7 @@ use anyhow::Error as AnyError;
 //     r#"$FN_STR"#
 // }
 
-use subprocess::Exec;
-pub use subprocess::ExitStatus;
+
 
 pub fn exec_cmd<I>(cmds: &str, cwd: I) -> Result<ExitStatus, AnyError>
 where

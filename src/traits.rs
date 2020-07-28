@@ -1,3 +1,13 @@
+//! Traits
+//!
+//! # Doit Trait
+//! The Doit trait provides two methods:
+//! - **doit** - responsible for executing a target's underlying pk command(s)
+//! - **build_cmd** - responsible for generating a vector of pk command strs
+//!
+//! # Tabulate Trait
+//! Responsible for generating and styling a table. Used to report internal
+//! state by the targets.
 use prettytable::{format, Table};
 pub trait Doit {
     type Err;

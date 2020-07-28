@@ -1,3 +1,17 @@
+//! Vcs
+// ! An enum that represents the possible vcs states for a project. A project may
+//! either be in git, subversion, or both, in the case where the user is storing 
+//! incremental changes locally in git, but pushing to subversion.
+//! 
+//! The code determines the vcs system(s) by introspecting disk at a location and
+//! attempting to identify appropriate subdirectories (.git and/or .svn)
+//! 
+//! # Example
+//! ```rust
+//! # fn main() -> Result<(),Box<dyn std::error::Error>> {
+//!    let vcs  = vcs::from_path(".")?; 
+//! # Ok(()) }
+//! ```
 use crate::PkMakeError;
 use std::convert::TryFrom;
 use std::fmt;

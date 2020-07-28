@@ -285,26 +285,7 @@ impl Build {
         }
         self
     }
-    /*
-        /// Set flavors per the builder pattern
-        pub fn flavors(&mut self, input: Option<Vec<Flavor>>) -> &mut Self {
-            match input {
-                None => self.flavors = None,
-                Some(flavors) => {
-                    if self.flavors.is_none() {
-                        self.flavors = Some(HashSet::new())
-                    }
-                    if let Some(ref mut flavors_hs) = self.flavors {
-                        flavors.into_iter().for_each(|flav| {
-                            flavors_hs.insert(flav);
-                            ()
-                        });
-                    }
-                }
-            }
-            self
-        }
-    */
+   
     pub fn flavors<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
     where
         I: TryInto<Flavor> + std::fmt::Debug + Clone,
@@ -359,26 +340,7 @@ impl Build {
         self.overrides = value;
         self
     }
-    /*
-        /// Set platforms per the builder pattern
-        pub fn platforms(&mut self, input: Option<Vec<Platform>>) -> &mut Self {
-            match input {
-                None => self.platforms = None,
-                Some(platforms) => {
-                    if self.platforms.is_none() {
-                        self.platforms = Some(HashSet::new())
-                    }
-                    if let Some(ref mut platforms_hs) = self.platforms {
-                        platforms.into_iter().for_each(|flav| {
-                            platforms_hs.insert(flav);
-                            ()
-                        });
-                    }
-                }
-            }
-            self
-        }
-    */
+    
     pub fn package_root<I>(&mut self, input: Option<I>) -> &mut Self
     where
         I: Into<std::path::PathBuf>,
@@ -513,7 +475,20 @@ impl Tabulate for Build {
                 .unwrap_or(String::from("None"))
         ]);
         table.add_row(row!["work", self.work]);
-
+        table.add_row(row![
+            "platforms",
+            self.platforms
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
+        table.add_row(row![
+            "flavors",
+            self.flavors
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
         table.add_row(row![
             "package_root",
             self.package_root

@@ -451,7 +451,20 @@ impl Tabulate for Test {
                 .map(|v| v.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n"))
                 .unwrap_or(String::from("None"))
         ]);
-
+        table.add_row(row![
+            "platforms",
+            self.platforms
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
+        table.add_row(row![
+            "flavors",
+            self.flavors
+                .as_ref()
+                .map(|v| v.iter().map(|x| x.as_str()).collect::<Vec<_>>().join("\n"))
+                .unwrap_or_else(|| "None".to_string())
+        ]);
         table
     }
 }
