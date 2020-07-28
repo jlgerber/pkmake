@@ -1,7 +1,11 @@
 //! Site models the valid state values that a user may provide to the 
 //! command
+
+// Internal crate imports
 use crate::named_site::NamedSite;
 use crate::PkMakeError;
+
+// External crate imports
 use std::convert::TryFrom;
 use std::str::FromStr;
 

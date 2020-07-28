@@ -3,10 +3,16 @@
 //! number of allocations. The expected input is a &str
 //! of the form <name>=<version> and provides a means of 
 // ! retrieving the name and version as &str without additional allocation 
+
+// Internal crate imports
 use crate::utils::*;
 use crate::PkMakeError;
+
+// External crate imports
 use std::convert::TryFrom;
 use std::str::FromStr;
+
+
 /// Represents a key,value pair joined by an equal token.
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct OverridePair {

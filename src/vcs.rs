@@ -13,7 +13,11 @@
 //! let vcs  = Vcs::from_path(".")?; 
 //! # Ok(()) }
 //! ```
+
+// Internal crate imports
 use crate::PkMakeError;
+
+// External crate imports
 use std::convert::TryFrom;
 use std::fmt;
 use std::path::PathBuf;

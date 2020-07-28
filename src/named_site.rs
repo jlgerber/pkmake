@@ -1,6 +1,10 @@
 //! NamedSite
 //! Enumerates our locations and provides a simple api for conversion from / to &str
+
+// Internal crate imports
 use crate::PkMakeError;
+
+// External crate imports
 use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;

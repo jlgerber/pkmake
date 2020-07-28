@@ -9,10 +9,13 @@
 //! the results. The command does not capture stderr or stdout, allowing them
 //! to be viewed by the end user in realtime.
 
-use std::ops::{Bound, RangeBounds};
+// external crate imports
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
+use std::ops::{Bound, RangeBounds};
 use subprocess::Exec;
+
+// public external crate imports 
 pub use subprocess::ExitStatus;
 
 pub trait StringUtils {

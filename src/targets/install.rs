@@ -4,7 +4,7 @@
 //! and provide a means to generate and execute the underlying pk commands
 //! responsible for execution.
 
-// Internal imports
+// Internal crate imports
 use crate::BuildEnv;
 use crate::context::Context;
 use crate::flavor::Flavor;
@@ -54,9 +54,10 @@ pub struct Install {
     pub package_root: Option<PathBuf>,
 }
 
-/***************************
-  Doit trait implementation
-****************************/
+//
+// Implement the Doit trait responsible for generating and executing the underlying 
+// requests. 
+//
 impl Doit for Install {
     type Err = AnyError;
     /// doit executes the install target command

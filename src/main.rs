@@ -1,11 +1,15 @@
-//use anyhow::anyhow;
+//! main
+//! 
+//! Implements pk-make cli and invokes pk_make lib
+// crate imports
 use anyhow::Error as AnyError;
-//use pk_make::build_env::BuildEnv;
+use pk_make::{context, flavor, platform, site, OverridePair, Vcs};
 use pk_make::targets::{Build, Docs, Install, Run, Test};
 use pk_make::traits::Doit;
-use pk_make::{context, flavor, platform, site, OverridePair, Vcs};
 use std::path::PathBuf;
 use structopt::StructOpt;
+
+
 #[derive(Debug, StructOpt)]
 #[structopt(name = "pk-make", about = "Invoke pk recipes.")]
 enum Opt {

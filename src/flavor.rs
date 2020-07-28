@@ -1,7 +1,11 @@
 //! Flavor
 //!
-//! Representation of the types of 
+//! Representation of the types flaovrs that one may request
+
+// Internal crate imports
 use crate::PkMakeError;
+
+// external crate imports
 use std::convert::TryFrom;
 use std::str::FromStr;
 

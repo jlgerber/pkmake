@@ -1,24 +1,16 @@
 //!
 //! Platform models the valid platforms that a user may request be built
 //!
+
+// Internal crate imports
 use crate::PkMakeError;
 
+
+// External crate imports
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-/*
-fc4_32
-deb4_64
-cent5_64
-osx10_64
-cent6_64
-cent7_64
-xp_32
-xp_64
-win7_64
-win10_64
 
- */
  /// The set of platforms that are active.
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Platform {

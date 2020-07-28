@@ -16,6 +16,8 @@
 //! state by the targets.
 //! It provides two methods and a free function. However, all but the ```create_table``` method 
 //! have default implementations that should not need to be overridden. 
+
+// External crate imports
 use prettytable::{format, Table};
 
 /// Doit - execute pk commands in a subshell.

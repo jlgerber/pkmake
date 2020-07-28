@@ -2,19 +2,24 @@
 //!
 //! The Build struct fields model a request 
 //! by the user to trigger a build.
+
+// Internal crate imports
 use crate::build_env::BuildEnv;
 use crate::flavor::Flavor;
+use crate::OverridePair;
 use crate::platform::Platform;
 use crate::traits::{Doit, Tabulate};
-use crate::OverridePair;
+use crate::utils::exec_cmd;
+
+// External crate imports
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 // IndexSet provides consistent ordering of keys based on insertion
 // order
 use indexmap::IndexSet as HashSet;
-use crate::utils::exec_cmd;
 use prettytable::{row, Table};
 use std::convert::TryInto;
+
 /// Build target is constructed using a builder pattern to set
 /// fields based on cli arugments, and subsequently invoke 
 /// the underlying pk build command in a subshell

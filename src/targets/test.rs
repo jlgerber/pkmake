@@ -8,12 +8,12 @@
 //! reference to `self` as well.
 
 // Internal crate imports
-use crate::traits::Doit;
-use crate::traits::Tabulate;
-use crate::utils::exec_cmd;
 use crate::BuildEnv;
 use crate::Flavor;
 use crate::Platform;
+use crate::traits::Doit;
+use crate::traits::Tabulate;
+use crate::utils::exec_cmd;
 
 // external crate imports
 use anyhow::anyhow;

@@ -2,19 +2,22 @@
 //! lose the ability to typecheck arguments at the pk-make level,
 //! but gain flexibility.
 //!
+
+// Internal crate imports
 use crate::traits::Doit;
 use crate::traits::Tabulate;
-//use crate::BuildEnv;
 use crate::utils::exec_cmd;
-use anyhow::anyhow;
-use anyhow::Error as AnyError;
-use prettytable::{row, Table};
-use std::path::PathBuf;
-use indexmap::IndexSet as HashSet;
-use std::convert::TryInto;
 use crate::Flavor;
 use crate::Platform;
 use crate::BuildEnv;
+
+// External crate imports
+use anyhow::anyhow;
+use anyhow::Error as AnyError;
+use indexmap::IndexSet as HashSet;
+use prettytable::{row, Table};
+use std::convert::TryInto;
+use std::path::PathBuf;
 
 /// Models the pk run target as a largely opaque vector of strings.  
 #[derive(Debug, PartialEq, Eq, Clone)]

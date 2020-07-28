@@ -3,10 +3,12 @@
 //! A struct whihc provides a minimal amount of information from the package manifest, as required
 //! by the rest of the pk-make implementation.
 
+// Internal crate imports
 use crate::Flavor;
-use anyhow::Error as AnyError;
+
+// External ctate imports
 use serde::Deserialize;
-//use shellfn::shell;
+use anyhow::Error as AnyError;
 use std::path::Path;
 
 

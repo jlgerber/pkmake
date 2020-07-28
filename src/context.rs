@@ -2,7 +2,12 @@
 //!
 //! Models the valid context values which a user may supply to 
 //! pk-make
+
+
+// Internal crate imports
 use crate::PkMakeError;
+
+// External crate imports
 use std::convert::TryFrom;
 use std::str::FromStr;
 

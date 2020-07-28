@@ -1,8 +1,12 @@
 //! BuildEnv
 //! 
 //! Model information which must be gleaned from the environment
+
+// internal crate imports
 use crate::platform::Platform;
 use crate::vcs::Vcs;
+
+// external crate imports
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
 use std::path::PathBuf;
