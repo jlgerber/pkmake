@@ -9,7 +9,8 @@
 //! # Example
 //! ```rust
 //! # fn main() -> Result<(),Box<dyn std::error::Error>> {
-//!    let vcs  = vcs::from_path(".")?; 
+//! use pk_make::Vcs;    
+//! let vcs  = Vcs::from_path(".")?; 
 //! # Ok(()) }
 //! ```
 use crate::PkMakeError;
