@@ -396,7 +396,7 @@ impl Build {
     /// ```
     /// # fn main() -> Result<(),Box<dyn std::error::Error>> {
     /// # use pk_make::Build;
-    /// let install = Build::default()
+    /// let build = Build::default()
     ///                 .platforms(Some(vec!["cent7", "cent6"]))?
     ///                 .build();
     /// # Ok(())
