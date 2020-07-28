@@ -149,6 +149,9 @@ impl Doit for Test {
     }
 }
 
+//
+// Default Trait Implementation
+//
 impl Default for Test {
     fn default() -> Self {
         Self {
@@ -163,6 +166,9 @@ impl Default for Test {
     }
 }
 
+//
+// Public Methods - primarily setters
+//
 impl Test {
     /// Set the dist_dir. Note that one must wrap it in an Option.
     pub fn dist_dir<I>(&mut self, input: Option<I>) -> &mut Self
