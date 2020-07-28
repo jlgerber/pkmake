@@ -45,7 +45,7 @@ impl FromStr for OverridePair {
     type Err = PkMakeError;
     fn from_str(input: &str) -> Result<Self, Self::Err> {
       
-        if input.matches('=').count() != 1 || !input.ends_with('=') {
+        if input.matches('=').count() != 1 || input.ends_with('=') {
             return Err(PkMakeError::ConvertFrom(input.to_string()));
         }
        

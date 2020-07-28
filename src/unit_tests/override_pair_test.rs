@@ -2,7 +2,8 @@ use super::*;
 
 #[test]
 fn can_get_name_and_version() {
-    let op = OverridePair::from_str("foo=1.3.2").unwrap();
+    let op = OverridePair::from_str("foo=1.3.2");
+    let op = op.unwrap();
     assert_eq!(op.name(), "foo");
     assert_eq!(op.version(), "1.3.2");
 }
