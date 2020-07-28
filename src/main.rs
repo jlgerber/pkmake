@@ -189,6 +189,14 @@ enum Opt {
         #[structopt(short, long)]
         verbose: bool,
 
+        /// Optionally provide the platform or platforms to build for
+        #[structopt(short = "P", long)]
+        platform: Option<Vec<platform::Platform>>,
+
+        /// Optionally provide the flavor or flavors to build. May be vanilla, %, or a flavor name
+        #[structopt(short, long)]
+        flavor: Option<Vec<flavor::Flavor>>,
+
         /// Pass variable through to the recipe
         #[structopt(short = "D", long)]
         define: Option<Vec<String>>,
@@ -330,6 +338,8 @@ fn main() -> Result<(), AnyError> {
             dry_run,
             dist_dir,
             verbose,
+            platform,
+            flavor,
             define,
             package_root,
         } => {
@@ -337,6 +347,8 @@ fn main() -> Result<(), AnyError> {
                 .dry_run(dry_run)
                 .dist_dir(dist_dir)
                 .verbose(verbose)
+                .platforms(platform)?
+                .flavors(flavor)?
                 .defines(define)
                 .package_root(package_root)
                 .build();
