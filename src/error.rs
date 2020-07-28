@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, PartialEq)]
 pub enum PkMakeError {
     #[error("Conversion Failed for '{0}'")]
     ConvertFrom(String),
