@@ -17,7 +17,7 @@ pub enum NamedSite {
 }
 
 impl NamedSite {
-    
+    /// Return a string literal representation of the current variant of the NamedSite instance
     pub fn as_str(&self) -> &str {
         match self {
             Self::Hyderabad => "hyderabad",
@@ -37,6 +37,7 @@ impl NamedSite {
         Self::try_from(input.as_ref())
     }
 }
+
 impl fmt::Display for NamedSite {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

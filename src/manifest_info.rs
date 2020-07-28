@@ -1,9 +1,16 @@
+//! ManifestInfo
+//!
+//! A struct whihc provides a minimal amount of information from the package manifest, as required
+//! by the rest of the pk-make implementation.
+
 use crate::Flavor;
 use anyhow::Error as AnyError;
 use serde::Deserialize;
 //use shellfn::shell;
 use std::path::Path;
-/// minimal manifest information in a form that is convenient for us to consume. This
+
+
+/// Minimal manifest information in a form that is convenient for us to consume. This
 /// struct is generated after parsing the manifest using serde...
 #[derive(Debug, PartialEq, Eq)]
 pub struct ManifestInfo {
@@ -17,14 +24,18 @@ impl ManifestInfo {
     pub fn from_path(manifest: &Path) -> Result<ManifestInfo, AnyError> {
         Ok(Manifest::from_path(&manifest)?.to_info()?)
     }
+    /// Retrieve the name of the package from the manifest.
     pub fn name(&self) -> &str {
         self.name.as_str()
     }
-
+    /// Retrieve the package version from the manifest.
     pub fn version(&self) -> &str {
         self.version.as_str()
     }
-    /* THIS IS AN ALTERNATE VERSION WHICH RELIES ON PK MANIFEST
+    //
+    // THIS IS AN ALTERNATE VERSION WHICH RELIES ON PK MANIFEST INSTEAD OF 
+    // SERDE. 
+    /* 
     // retrieve the name and version as a tuple
     fn get_name_and_version(manifest: &Path) -> Result<(String, String), AnyError> {
         match _get_name_and_version(manifest.to_str().unwrap()) {
@@ -45,7 +56,11 @@ impl ManifestInfo {
     */
 }
 
-/// minimal flavour information from manifest
+//
+//  Serde Structures
+//
+
+/// Minimal flavour information from manifest. This is populated by serde
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 pub struct Flavour {
     #[serde(alias = "Name")]
@@ -57,6 +72,10 @@ impl Flavour {
         self.name.as_str()
     }
 }
+
+/// Struct to deserialize the part of the manfiest in which
+/// we are interested. The struct implements a method which produces
+/// a ManifestInfo struct and consumes itself in the process.
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize)]
 pub struct Manifest {
     #[serde(alias = "Name")]
@@ -74,7 +93,8 @@ impl Manifest {
         let manifest: Manifest = serde_yaml::from_str(&contents)?;
         Ok(manifest)
     }
-    /// Generate a ManifestInfo from a Manifest
+
+    /// Generate a ManifestInfo from a Manifest, consuming self in the process
     pub fn to_info(self) -> Result<ManifestInfo, crate::PkMakeError> {
         let flavors: Result<Vec<_>, _> = self
             .flavours
@@ -95,6 +115,9 @@ impl Manifest {
     }
 }
 
+//
+// Import Tests
+//
 #[cfg(test)]
 #[path = "./unit_tests/manifest_info_test.rs"]
 mod manifest_info_test;
