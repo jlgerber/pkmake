@@ -155,7 +155,7 @@ impl Run {
         self
     }
 
-    /// Add a platform to the list of platforms on the Install struct. This may be called
+    /// Add a platform to the list of platforms on the Run struct. This may be called
     /// multiple times to accumulate platforms.
     ///
     /// # Example
@@ -254,8 +254,8 @@ impl Run {
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// # use pk_make::Run;
-    /// let mut install = Run::default();
-    /// install.flavor(Some("^"))?.flavor(Some("maya2020"))?;
+    /// let mut run = Run::default();
+    /// run.flavor(Some("^"))?.flavor(Some("maya2020"))?;
     ///
     /// // Of course we could have done this in one line:
     /// // let run = Run::default()
