@@ -8,6 +8,8 @@ fn can_build_default() {
         dist_dir: None,
         verbose: false,
         defines: None,
+        flavors: None,
+        platforms: None,
         package_root: None,
     };
     assert_eq!(result, expected);
@@ -27,6 +29,8 @@ fn can_update_build() {
         dry_run: true,
         verbose: true,
         defines: Some(vec!["foo=bar".to_string()]),
+        flavors: None,
+        platforms: None,
         package_root: Some(std::path::PathBuf::from("./foo/bar")),
     };
     assert_eq!(result, expected);

@@ -162,6 +162,14 @@ enum Opt {
         #[structopt(short = "D", long)]
         define: Option<Vec<String>>,
 
+        /// Optionally provide the platform or platforms to build for
+        #[structopt(short = "P", long)]
+        platform: Option<Vec<platform::Platform>>,
+
+        /// Optionally provide the flavor or flavors to build. May be vanilla, %, or a flavor name
+        #[structopt(short, long)]
+        flavor: Option<Vec<flavor::Flavor>>,
+
         /// Optionally specify a path to the package root directory
         #[structopt(short = "r", long = "package-root", parse(from_os_str))]
         package_root: Option<PathBuf>,
@@ -294,6 +302,8 @@ fn main() -> Result<(), AnyError> {
             dry_run,
             verbose,
             define,
+            flavor,
+            platform,
             package_root,
         } => {
             let mut docs = Docs::default()
@@ -301,6 +311,8 @@ fn main() -> Result<(), AnyError> {
                 .dist_dir(dist_dir)
                 .defines(define)
                 .verbose(verbose)
+                .flavors(flavor)?
+                .platforms(platform)?
                 .package_root(package_root)
                 .build();
             docs.doit()
