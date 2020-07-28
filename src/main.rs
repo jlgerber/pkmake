@@ -214,6 +214,15 @@ enum Opt {
         /// Provide verbose output while executing command
         #[structopt(short, long)]
         verbose: bool,
+
+        /// Optionally provide the platform or platforms to build for
+        #[structopt(short = "P", long)]
+        platform: Option<Vec<platform::Platform>>,
+
+        /// Optionally provide the flavor or flavors to build. May be vanilla, %, or a flavor name
+        #[structopt(short, long)]
+        flavor: Option<Vec<flavor::Flavor>>,
+
         vars: Vec<String>,
     },
 }
@@ -337,12 +346,16 @@ fn main() -> Result<(), AnyError> {
             dry_run,
             verbose,
             package_root,
+            platform,
+            flavor,
             vars,
         } => {
             let mut run = Run::default()
                 .dry_run(dry_run)
                 .verbose(verbose)
                 .package_root(package_root)
+                .platforms(platform)?
+                .flavors(flavor)?
                 .vars(vars)
                 .build();
             run.doit()
