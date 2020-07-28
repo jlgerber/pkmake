@@ -19,7 +19,7 @@ impl Site {
         match self {
             Self::Local => "local",
             Self::All => "all",
-            Self::Named(named_site) => named_site.to_str(),
+            Self::Named(named_site) => named_site.as_str(),
         }
     }
 

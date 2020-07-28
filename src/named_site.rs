@@ -1,3 +1,5 @@
+//! NamedSite
+//! Enumerates our locations and provides a simple api for conversion from / to &str
 use crate::PkMakeError;
 use std::convert::TryFrom;
 use std::fmt;
@@ -12,11 +14,11 @@ pub enum NamedSite {
     Portland,
     Montreal,
     Vancouver,
-    //Unknown(String),
 }
 
 impl NamedSite {
-    pub fn to_str(&self) -> &str {
+    
+    pub fn as_str(&self) -> &str {
         match self {
             Self::Hyderabad => "hyderabad",
             Self::Playa => "playa",
