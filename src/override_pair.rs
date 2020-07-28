@@ -1,3 +1,8 @@
+//! OverridePair
+//! provides an efficient means of storing an override with a minimal 
+//! number of allocations. The expected input is a &str
+//! of the form <name>=<version> and provides a means of 
+// ! retrieving the name and version as &str without additional allocation 
 use crate::utils::*;
 use crate::PkMakeError;
 use std::convert::TryFrom;
@@ -39,13 +44,14 @@ impl OverridePair {
 impl FromStr for OverridePair {
     type Err = PkMakeError;
     fn from_str(input: &str) -> Result<Self, Self::Err> {
-        let pieces = input.split('=').collect::<Vec<_>>();
-        if pieces.len() != 2 {
+      
+        if input.matches('=').count() != 1 || !input.ends_with('=') {
             return Err(PkMakeError::ConvertFrom(input.to_string()));
         }
+       
         Ok(Self {
             value: input.to_string(),
-            name_end: pieces[0].chars().count() as u16,
+            name_end: input.chars().take_while(|c| c != &'=').count() as u16,
             length: input.chars().count() as u16,
         })
     }

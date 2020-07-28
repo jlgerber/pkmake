@@ -1,11 +1,8 @@
 //!
-//! Platform
-//!
-//! representation of build platforms
+//! Platform models the valid platforms that a user may request be built
 //!
 use crate::PkMakeError;
-//use anyhow::anyhow;
-//use anyhow::Error as AnyhowError;
+
 use std::convert::TryFrom;
 use std::str::FromStr;
 
@@ -22,17 +19,27 @@ win7_64
 win10_64
 
  */
+ /// The set of platforms that are active.
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Platform {
+    /// As of this writing, we sstil hvae some legacy windows 
     Win7_64,
+    /// This is our current windows platform
     Win10_64,
+    /// We have osx defined in our platforms config. However, we 
+    /// currently do not have osx build machines. 
     Osx10_64,
+    /// Our former mainstay, and still actively built
     Cent6_64,
+    /// Our current primary platform
     Cent7_64,
+    /// The next primary linux platform; not currently used, but should be comming up.
     Cent8_64,
 }
 
 impl Platform {
+    /// Return a string literal representing the enum.
+    // we could use an external dependency to generate this via macro...
     pub fn as_str(&self) -> &str {
         match self {
             Self::Win7_64 => "win7_64",
@@ -53,6 +60,8 @@ impl Platform {
         Self::try_from(input.as_ref())
     }
 }
+/// Convert a str to a Platform. It is case insensitive (at the small cost of a string allocation)
+/// and accepts names which drop the _64, assuming that we are 64 bit.
 impl FromStr for Platform {
     type Err = PkMakeError;
 
@@ -69,6 +78,8 @@ impl FromStr for Platform {
     }
 }
 
+/// Fallible conversion from a &str to a Platform. TryInto<Platform> will be auto implemented
+/// for &str as well, thanks to Rust's helpful developers.
 impl TryFrom<&str> for Platform {
     type Error = PkMakeError;
 

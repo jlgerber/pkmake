@@ -1,22 +1,20 @@
+//! Site models the valid state values that a user may provide to the 
+//! command
 use crate::named_site::NamedSite;
 use crate::PkMakeError;
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-/// enum representing valid state of Sites input
+/// Valid Site input variants supplied by the user.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Site {
     Local,
     All,
     Named(NamedSite),
 }
-// // helper function to test whether a character is alphabetic
-// // or a comma. Used for named site(s)
-// fn site_tst(c: char) -> bool {
-//     c.is_alphabetic() //|| c == ','
-// }
 
 impl Site {
+    /// Return a &str representation of the Site.
     pub fn as_str(&self) -> &str {
         match self {
             Self::Local => "local",
@@ -34,6 +32,8 @@ impl Site {
         Self::try_from(input.as_ref())
     }
 }
+
+/// Falible conversion from a string
 impl FromStr for Site {
     type Err = PkMakeError;
 
@@ -42,19 +42,17 @@ impl FromStr for Site {
             "local" => Ok(Site::Local),
             "all" => Ok(Site::All),
             _ => {
-                // if !s.chars().all(site_tst) {
-                //     Err(PkMakeError::InvalidSite(s.to_string()))
-                // } else
-                // {
+               
                 match NamedSite::from_str(s) {
                     Ok(site) => Ok(Site::Named(site)),
                     Err(_) => Err(PkMakeError::InvalidSite(s.to_string())),
                 }
-                //}
             }
         }
     }
 }
+
+/// Implementation of TryFrom provides fallible conversion from a &str. 
 impl TryFrom<&str> for Site {
     type Error = PkMakeError;
 
