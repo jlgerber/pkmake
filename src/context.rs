@@ -1,11 +1,24 @@
+//! Context
+//!
+//! Models the valid context values which a user may supply to 
+//! pk-make
 use crate::PkMakeError;
 use std::convert::TryFrom;
 use std::str::FromStr;
 
+/// Tme possible contexts that a user may request a recipe 
+/// be executed in. 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum Context {
     Facility,
+    /// Shared indicates that the recipe is targeting a show. It is called Shared
+    /// (as opposed to say Show), for historical reasons. The data used to all be stored
+    /// in a SHARED directory at the SHOW level.
+    // todo: change to Show 
     Shared,
+    /// User indicates that the recipe is targeting a work directory
+    /// on a show. It is called User for historical reasons (eg go <show> =user)
+    // todo: change to Work
     User,
 }
 
@@ -47,6 +60,10 @@ impl TryFrom<&str> for Context {
         Self::from_str(input)
     }
 }
+
+//
+// Import Tests
+//
 #[cfg(test)]
 #[path = "./unit_tests/context_test.rs"]
 mod context_test;
