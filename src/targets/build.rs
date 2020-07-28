@@ -1,3 +1,7 @@
+//! Build target
+//!
+//! The Build struct fields model a request 
+//! by the user to trigger a build.
 use crate::build_env::BuildEnv;
 use crate::flavor::Flavor;
 use crate::platform::Platform;
@@ -5,17 +9,15 @@ use crate::traits::{Doit, Tabulate};
 use crate::OverridePair;
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
-//use std::collections::HashSet;
 // IndexSet provides consistent ordering of keys based on insertion
 // order
 use indexmap::IndexSet as HashSet;
-//use subprocess::Exec;
-//use subprocess::Redirection;
 use crate::utils::exec_cmd;
-//use crate::utils::exec_in_shell;
 use prettytable::{row, Table};
 use std::convert::TryInto;
-/// build target
+/// Build target is constructed using a builder pattern to set
+/// fields based on cli arugments, and subsequently invoke 
+/// the underlying pk build command in a subshell
 #[derive(Debug, PartialEq, Eq)]
 pub struct Build {
     pub clean: bool,
@@ -33,9 +35,13 @@ pub struct Build {
     pub package_root: Option<std::path::PathBuf>,
 }
 
+/// We provide a means to generate a set of subshell commands to trigger
+/// the build via pk build, and then execute them in a subshell using the 
+/// Doit trait.
 impl Doit for Build {
     type Err = AnyError;
-
+    /// Generate the subshell pk struct commands from current state, and
+    /// execute them in a subshell.
     fn doit(&mut self) -> Result<(), Self::Err> {
         if self.verbose {
             self.tabulate();
@@ -59,7 +65,7 @@ impl Doit for Build {
         Ok(())
     }
 
-    /// construct the command which will be executed
+    /// Construct the commands to be executed in a subshell as a vector of strings.
     fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
         let package_root = self
             .package_root
@@ -110,7 +116,9 @@ impl Doit for Build {
     }
 }
 
-// implementation of private convenience methods
+//
+// Private methods - helpers to construct pk command flags
+//
 impl Build {
     fn get_defines_str(&self) -> String {
         // NB: The -D flag works differently in pk build in that it
@@ -252,7 +260,9 @@ impl Default for Build {
     }
 }
 
-// Implementation of the Setter methods
+//
+// Public Methods -  the Setter methods
+//
 impl Build {
     /// Set the clean value and return a mutable reference to self per the builder pattern.
     pub fn clean(&mut self, value: bool) -> &mut Self {
@@ -502,6 +512,9 @@ impl Tabulate for Build {
     }
 }
 
+//
+// Import Tests
+//
 #[cfg(test)]
 #[path = "./build_test.rs"]
 mod build_test;

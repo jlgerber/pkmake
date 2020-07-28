@@ -1,17 +1,27 @@
+//! Docs target
+//!
+//! Build the documentation
+
+// Internal imports
+use crate::BuildEnv;
+use crate::Flavor;
+use crate::Platform;
 use crate::traits::Doit;
 use crate::traits::Tabulate;
 use crate::utils::exec_cmd;
-use crate::BuildEnv;
+
+
+// External crate impots
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
+// IndexSet preserves insertion order
+use indexmap::IndexSet as HashSet;
 use prettytable::{row, Table};
 use std::path::PathBuf;
-use indexmap::IndexSet as HashSet;
-use crate::Flavor;
-use crate::Platform;
 use std::convert::TryInto;
 
-
+/// Docs pod struct stores cli subcommand invocation parameters,
+/// as well as provies a means to execute the eponymous pk target
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Docs {
     pub dist_dir: Option<String>,
@@ -22,10 +32,11 @@ pub struct Docs {
     pub flavors: Option<HashSet<Flavor>>,
     pub package_root: Option<PathBuf>,
 }
-
+/// Implement the trait responsible for calculating the appropriate pk make commands
+/// and executing them in a subshell.
 impl Doit for Docs {
     type Err = AnyError;
-
+    /// Calculate appropriate pk make commands given internal state, and execute them in a subshell
     fn doit(&mut self) -> Result<(), Self::Err> {
         if self.verbose {
             self.tabulate();
@@ -48,6 +59,9 @@ impl Doit for Docs {
         }
         Ok(())
     }
+
+    /// Generate a vector of strings representing one or more commands to be 
+    /// executed in a subshell. 
     fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
         let build_env = BuildEnv::new(self.get_package_root())?;
 
@@ -63,7 +77,9 @@ impl Doit for Docs {
     }
 }
 
-// private functions
+//
+// Private Methods - largely responsible for calculating appropriate pk flags given internal state
+//
 impl Docs {
     fn dist_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
         match &self.dist_dir {
@@ -218,7 +234,6 @@ impl Docs {
         self
     }
 
-
     /// Add a platform to the list of platforms on the Install struct. This may be called
     /// multiple times to accumulate platforms.
     ///
@@ -267,6 +282,7 @@ impl Docs {
         }
         Ok(self)
     }
+
     /// Add a vec of platforms to the list of platforms on the Install struct. This may be called
     /// multiple times to accumulate platforms.
     ///
@@ -463,6 +479,9 @@ impl Tabulate for Docs {
     }
 }
 
+//
+// Import Tests
+//
 #[cfg(test)]
 #[path = "./docs_test.rs"]
 mod docs_test;

@@ -1,29 +1,37 @@
+//! Install 
+//!
+//! Model the request state for invoking the Install command
+//! and provide a means to generate and execute the underlying pk commands
+//! responsible for execution.
+
+// Internal imports
+use crate::BuildEnv;
 use crate::context::Context;
 use crate::flavor::Flavor;
+use crate::ManifestInfo;
+use crate::OverridePair;
 use crate::platform::Platform;
 use crate::site::Site;
 use crate::traits::{Doit, Tabulate};
-use crate::BuildEnv;
-use crate::ManifestInfo;
-use crate::OverridePair;
-use prettytable::{row, Table};
-//use crate::PkMakeError;
 use crate::utils::exec_cmd;
 use crate::Vcs;
+
+// External crate imports
 use anyhow::anyhow;
 use anyhow::Error as AnyError;
-use std::path::PathBuf;
-
 //use std::collections::HashSet;
 // IndexSet provides consistent ordering of keys based on insertion
 // order
 use indexmap::IndexSet as HashSet;
+use prettytable::{row, Table};
 use std::convert::TryInto;
+use std::path::PathBuf;
 
 const DEFAULT_CONTEXT: Context = Context::User;
 
 #[derive(Debug, PartialEq, Eq)]
-/// struct implementing Install target.
+/// Models user install request state, and implements traits necessary to execute 
+/// the request
 pub struct Install {
     pub clean: bool,
     pub dry_run: bool,

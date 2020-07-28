@@ -6,18 +6,22 @@
 //! Like other targets, it provides individual methods which follow the builder pattern.
 //! That is, each setter method takes `self` by mutable reference, and returns a mutable
 //! reference to `self` as well.
+
+// Internal crate imports
 use crate::traits::Doit;
 use crate::traits::Tabulate;
 use crate::utils::exec_cmd;
 use crate::BuildEnv;
-use anyhow::anyhow;
-use anyhow::Error as AnyError;
-use prettytable::{row, Table};
-use std::path::PathBuf;
-use indexmap::IndexSet as HashSet;
 use crate::Flavor;
 use crate::Platform;
+
+// external crate imports
+use anyhow::anyhow;
+use anyhow::Error as AnyError;
+use indexmap::IndexSet as HashSet;
+use prettytable::{row, Table};
 use std::convert::TryInto;
+use std::path::PathBuf;
 
 /// Models the pk test target.
 #[derive(Debug, PartialEq, Eq)]
@@ -30,7 +34,9 @@ pub struct Test {
     pub flavors: Option<HashSet<Flavor>>,
     pub package_root: Option<PathBuf>,
 }
-// private functions
+//
+// Private Methods - used to construct pk test arguements
+//
 impl Test {
     fn dist_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
         match &self.dist_dir {
@@ -82,6 +88,7 @@ impl Test {
             "".to_string()
         }
     }
+
     fn get_platform_str(&self, build_env: &BuildEnv) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
@@ -108,6 +115,9 @@ impl Test {
     }
 }
 
+//
+// Doit Trait Implementation
+//
 impl Doit for Test {
     type Err = AnyError;
 
@@ -469,6 +479,9 @@ impl Tabulate for Test {
     }
 }
 
+//
+// Import Tests for Test
+//
 #[cfg(test)]
 #[path = "./test_test.rs"]
 mod test_test;

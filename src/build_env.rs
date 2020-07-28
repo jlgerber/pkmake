@@ -8,7 +8,8 @@ use anyhow::Error as AnyError;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-
+/// Environment related values used generally as fallbacks when 
+/// not explicitly provided by the user.
 pub struct BuildEnv {
     pub package_root: PathBuf,
     pub dd_os: Platform,
@@ -100,6 +101,9 @@ impl BuildEnv {
     }
 }
 
+//
+// Import Test
+//
 #[cfg(test)]
 #[path = "./unit_tests/build_env_test.rs"]
 mod build_env_test;
