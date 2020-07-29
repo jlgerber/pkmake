@@ -101,11 +101,11 @@ impl Doit for Build {
         let overrides_str = self.get_overrides_str();
 
         let platform_str = self.get_platform_str();
-
+        let verbose_str = if self.verbose {" --verbose" } else {""};
         let work_str = if self.work { " --work" } else { "" };
 
         let result = vec![format!(
-            "pk audit && pk build{}{}{}{}{}{}{}{}{}{}",
+            "pk audit && pk build{}{}{}{}{}{}{}{}{}{}{}",
             clean_str,
             dist_dir_str,
             docs_str,
@@ -115,6 +115,7 @@ impl Doit for Build {
             metadata_only_str,
             overrides_str,
             defines_str,
+            verbose_str,
             work_str
         )];
         Ok(result)
@@ -357,6 +358,8 @@ impl Build {
         self
     }
     */
+    /// Set the overrides for the Target and return a mutable reference to self wrapped 
+    /// in a result.
     pub fn overrides<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
     where
         I: TryInto<OverridePair>+std::fmt::Debug,
@@ -437,6 +440,7 @@ impl Build {
     }
     /// Set the defines and return a mutable reference to self per the
     /// builder pattern.
+    // this should really take a vec of OverridePair (which should be changed to kvpair or something like that)
     pub fn defines<I>(&mut self, input: Option<Vec<I>>) -> &mut Self
     where
         I: Into<String>,

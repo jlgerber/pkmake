@@ -496,7 +496,8 @@ fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides() {
 }
 
 
-
+// NB that --overrides behaves differently in pk build than most other multi flags in that it is a posix compliant multi flag. you use multiple invocations of the flag
+// instead of comma separated list of values with one flag
 #[test]
 fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines() {
     setup_manifest_dir(false);
@@ -512,9 +513,34 @@ fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines()
         .level(Some("DEV01.work"))
         .overrides(Some(vec!["make=2.0.0","bs=2.1.0"]))
         .unwrap()
+        .defines(Some(vec!["foo=bar", "la=deda"]))
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --clean --dist-dir=./foo/bar --with-docs --flavour=^,foo --platform=cent6_64,cent7_64 --level=DEV01.work --override=make=2.0.0,bs=2.1.0".to_string(),
+        "pk audit && pk build --clean --dist-dir=./foo/bar --with-docs --flavour=^,foo --platform=cent6_64,cent7_64 --level=DEV01.work --override=make=2.0.0,bs=2.1.0 -D=foo=bar -D=la=deda".to_string(),
+    ];
+    assert_eq!(result.unwrap(), expected);
+}
+
+#[test]
+fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines_verbose() {
+    setup_manifest_dir(false);
+    env::set_var("DD_SHOW", "DEV01");
+    env::set_var("DD_OS", "cent7_64");
+    let result = Build::default()
+        .clean(true)
+        .dist_dir(Some("./foo/bar"))
+        .flavors(Some(vec!["^", "foo"]))
+        .unwrap()
+        .platforms(Some(vec!["cent6","cent7"]))
+        .unwrap()
+        .level(Some("DEV01.work"))
+        .overrides(Some(vec!["make=2.0.0","bs=2.1.0"]))
+        .unwrap()
+        .defines(Some(vec!["foo=bar", "la=deda"]))
+        .verbose(true)
+        .build_cmd();
+    let expected = vec![
+        "pk audit && pk build --clean --dist-dir=./foo/bar --with-docs --flavour=^,foo --platform=cent6_64,cent7_64 --level=DEV01.work --override=make=2.0.0,bs=2.1.0 -D=foo=bar -D=la=deda --verbose".to_string(),
     ];
     assert_eq!(result.unwrap(), expected);
 }
