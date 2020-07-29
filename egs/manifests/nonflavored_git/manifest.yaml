@@ -1,0 +1,30 @@
+---
+schema: 1
+name: makebridge
+version: 3.1.0
+description: Provides aux makefile to aid transition to pk based builds
+
+loadRequires:
+  dd: 4.3+<5
+  make: ^4.0
+  python: 2.7+<3
+  vcstools: 0.8.0+<1  
+
+requires: &requires
+  pyyaml: 3.11+<6 
+
+recipes:
+  build:
+    - mkdir -p $distDir/context
+    - touch $distDir/context/__init__.py
+    - cp $packageDir/context.py $distDir/context/makebridge.py
+    - cp -r $packageDir/src/{bin,etc} $distDir/
+  docs:
+    requires:
+      <<: *requires
+      sphinx: 1.8.5+<2
+      sphinx_extensions: 1.8.2+<2
+    steps:
+      - env PACKAGE_NAME=$package PACKAGE_VERSION=$version PACKAGE_ROOT=$packageDir
+        BUILD_ROOT=$distDir sphinx-build -qN $packageDir/docs $distDir/docs/html
+      - echo "Preview docs at file://$distDir/docs/html/index.html"
