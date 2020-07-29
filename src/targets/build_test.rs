@@ -494,3 +494,27 @@ fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides() {
     ];
     assert_eq!(result.unwrap(), expected);
 }
+
+
+
+#[test]
+fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines() {
+    setup_manifest_dir(false);
+    env::set_var("DD_SHOW", "DEV01");
+    env::set_var("DD_OS", "cent7_64");
+    let result = Build::default()
+        .clean(true)
+        .dist_dir(Some("./foo/bar"))
+        .flavors(Some(vec!["^", "foo"]))
+        .unwrap()
+        .platforms(Some(vec!["cent6","cent7"]))
+        .unwrap()
+        .level(Some("DEV01.work"))
+        .overrides(Some(vec!["make=2.0.0","bs=2.1.0"]))
+        .unwrap()
+        .build_cmd();
+    let expected = vec![
+        "pk audit && pk build --clean --dist-dir=./foo/bar --with-docs --flavour=^,foo --platform=cent6_64,cent7_64 --level=DEV01.work --override=make=2.0.0,bs=2.1.0".to_string(),
+    ];
+    assert_eq!(result.unwrap(), expected);
+}

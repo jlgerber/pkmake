@@ -226,7 +226,7 @@ impl Build {
                 .iter()
                 .map(|v| v.as_str())
                 .collect::<Vec<_>>()
-                .join(" --override=")
+                .join(",")
         } else {
             "".to_string()
         };
