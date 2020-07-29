@@ -110,10 +110,10 @@ impl Doit for Build {
             dist_dir_str,
             docs_str,
             flavor_str,
+            platform_str,
             level_str,
             metadata_only_str,
             overrides_str,
-            platform_str,
             defines_str,
             work_str
         )];
@@ -226,7 +226,7 @@ impl Build {
                 .iter()
                 .map(|v| v.as_str())
                 .collect::<Vec<_>>()
-                .join(",")
+                .join(" --override=")
         } else {
             "".to_string()
         };
@@ -350,12 +350,31 @@ impl Build {
         self.metadata_only = value;
         self
     }
+    /*
     /// Set the overrides value and return a mutable reference to self
     pub fn overrides(&mut self, value: Option<Vec<OverridePair>>) -> &mut Self {
         self.overrides = value;
         self
     }
-    
+    */
+    pub fn overrides<I>(&mut self, value: Option<Vec<I>>) -> Result<&mut Self, AnyError>
+    where
+        I: TryInto<OverridePair>+std::fmt::Debug,
+    {
+        match value {
+            None => self.overrides = None,
+            Some(overs) => {
+                let overs: Result<Vec<_>, _> =
+                    overs.into_iter().map(|i_val| i_val.try_into()).collect();
+                match overs {
+                    Err(_) => return Err(anyhow!("failed to convert input into an Override")),
+                    Ok(val) => self.overrides = Some(val),
+                }
+            }
+        }
+        Ok(self)
+    }
+
     pub fn package_root<I>(&mut self, input: Option<I>) -> &mut Self
     where
         I: Into<std::path::PathBuf>,

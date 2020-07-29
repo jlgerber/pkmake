@@ -265,7 +265,7 @@ fn main() -> Result<(), AnyError> {
                 .flavors(flavor)?
                 .level(level)
                 .metadata_only(metadata_only)
-                .overrides(overrides)
+                .overrides(overrides)?
                 .platforms(platform)?
                 .verbose(verbose)
                 .defines(define)
