@@ -307,7 +307,7 @@ fn main() -> Result<(), AnyError> {
                 .build_dir(build_dir)
                 .verbose(verbose)
                 .dist_dir(dist_dir)
-                .level(level)
+                .level(level)?
                 .overrides(overrides)?
                 .defines(define)
                 .work(work)

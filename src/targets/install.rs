@@ -134,10 +134,10 @@ impl Doit for Install {
         let work_str = if self.work { " --work" } else { "" };
 
         let build_dir_str = self.get_build_dir_str()?;
-
+        let verbose_str = if self.verbose {" --verbose"} else {""};
         // we have to build an install command for every target
         let mut result = vec![format!(
-            "pk audit && pk build{}{}{}{}{}{}{}{}{}",
+            "pk audit && pk build{}{}{}{}{}{}{}{}{}{}",
             clean_str,
             dist_dir_str,
             docs_str,
@@ -147,6 +147,7 @@ impl Doit for Install {
             defines_str,
             work_str,
             build_dir_str,
+            verbose_str,
         )];
         self.update_results_with_install(&mut result, &build_env)?;
         Ok(result)
@@ -437,7 +438,8 @@ impl Install {
         let logfile_str = self.get_logfile_str();
 
         let maxjobs_str = self.get_maxjobs_str();
-
+        
+        let verbose_str = if self.verbose {" --verbose"} else {""};
         // if self.verbose {
         //     println!("\n Install Formatting\n");
         //     for item in vec![
@@ -454,12 +456,13 @@ impl Install {
         for flavor in flavors_ref {
             if flavor == &Flavor::Vanilla {
                 result.push(format!(
-                    "pk install{}{}{}{}{} {}/{}-{}",
+                    "pk install{}{}{}{}{}{} {}/{}-{}",
                     level_str,
                     site_str,
                     platform_str,
                     logfile_str,
                     maxjobs_str,
+                    verbose_str,
                     // last 3
                     dist_dir,
                     manifest_info.name(),
@@ -467,12 +470,13 @@ impl Install {
                 ));
             } else {
                 result.push(format!(
-                    "pk install{}{}{}{}{} {}/{}-{}_{}",
+                    "pk install{}{}{}{}{}{} {}/{}-{}_{}",
                     level_str,
                     site_str,
                     platform_str,
                     logfile_str,
                     maxjobs_str,
+                    verbose_str,
                     // last 4
                     dist_dir,
                     manifest_info.name(),
@@ -498,6 +502,7 @@ impl Install {
 impl Default for Install {
     fn default() -> Self {
         Self {
+            clean: false,
             dry_run: false,
             with_docs: true,
             build_dir: None,
@@ -507,8 +512,6 @@ impl Default for Install {
             platforms: None,
             flavors: None,
             verbose: false,
-
-            clean: false,
             dist_dir: None,
             level: None,
             overrides: None,
@@ -582,6 +585,9 @@ impl Install {
         match value {
             //Some(val) => self.context = Some(val.into()),
             Some(val) => {
+                if self.level.is_some() {
+                    return Err(anyhow!("Cannot set context and level. Use Context and Show or use Level"));
+                }
                 let val_cpy = val.clone();
                 match val.try_into() {
                     Ok(v) => self.context = Some(v),
@@ -920,15 +926,20 @@ impl Install {
 
     /// Set the level value and return a mutable reference to
     /// self, per the builder pattern.
-    pub fn level<I>(&mut self, input: Option<I>) -> &mut Self
+    pub fn level<I>(&mut self, input: Option<I>) -> Result<&mut Self, AnyError>
     where
         I: Into<String>,
     {
         match input {
+            
             None => self.level = None,
-            Some(level) => self.level = Some(level.into()),
+            Some(level) => {
+                if self.context.is_some() {
+                    return Err(anyhow!("Cannot set level and context"));
+                }
+                self.level = Some(level.into())},
         }
-        self
+        Ok(self)
     }
     /// Set the overrides value and return a mutable reference to self. This method
     /// is fallible, and must be unwrapped to get a &mut Self

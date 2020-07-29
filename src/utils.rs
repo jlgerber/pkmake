@@ -94,7 +94,7 @@ where
 
 #[cfg(test)]
 /// setup function only available in tests
-pub fn setup_manifest_dir(flavored: bool) {
+pub fn setup_manifest_dir(flavored: bool) -> std::path::PathBuf {
     use std::env;
     let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let mut mani_dir = std::path::PathBuf::from(root_dir);
@@ -105,5 +105,6 @@ pub fn setup_manifest_dir(flavored: bool) {
     } else {
         mani_dir.push("nonflavored");
     }
-    env::set_current_dir(mani_dir).unwrap();
+    env::set_current_dir(&mani_dir).unwrap();
+    return mani_dir
 }
