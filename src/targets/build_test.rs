@@ -1,5 +1,6 @@
 use super::*;
 use std::env;
+use crate::utils::setup_manifest_dir;
 
 // test that we are getting what we expect when we call
 // Build::defauot()
@@ -335,18 +336,9 @@ fn build_given_mut_ref_to_self_produces_owned_instance() {
     assert_eq!(result, expected);
 }
 
-fn setup_mani_dir() {
-    let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let mut mani_dir = std::path::PathBuf::from(root_dir);
-    mani_dir.push("egs");
-    mani_dir.push("manifests");
-    mani_dir.push("nonflavored");
-    env::set_current_dir(mani_dir).unwrap();
-}
-
 #[test]
 fn build_cmd_given_default() {
-    setup_mani_dir();
+    setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
     let result = Build::default().build_cmd();
@@ -356,7 +348,7 @@ fn build_cmd_given_default() {
 
 #[test]
 fn build_cmd_given_clean() {
-    setup_mani_dir();
+    setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
     let result = Build::default().clean(true).build_cmd();
@@ -366,7 +358,7 @@ fn build_cmd_given_clean() {
 
 #[test]
 fn build_cmd_given_clean_distdir() {
-    setup_mani_dir();
+    setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
     let result = Build::default()
@@ -380,7 +372,7 @@ fn build_cmd_given_clean_distdir() {
 
 #[test]
 fn build_cmd_given_clean_distdir_flavor() {
-    setup_mani_dir();
+    setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
     let result = Build::default()
@@ -394,3 +386,4 @@ fn build_cmd_given_clean_distdir_flavor() {
     ];
     assert_eq!(result.unwrap(), expected);
 }
+

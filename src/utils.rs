@@ -90,3 +90,20 @@ where
     let exit_status = Exec::shell(cmds).cwd(cwd.as_ref()).join()?;
     Ok(exit_status)
 }
+
+
+#[cfg(test)]
+/// setup function only available in tests
+pub fn setup_manifest_dir(flavored: bool) {
+    use std::env;
+    let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let mut mani_dir = std::path::PathBuf::from(root_dir);
+    mani_dir.push("egs");
+    mani_dir.push("manifests");
+    if flavored {
+        mani_dir.push("flavored");
+    } else {
+        mani_dir.push("nonflavored");
+    }
+    env::set_current_dir(mani_dir).unwrap();
+}
