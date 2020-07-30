@@ -38,11 +38,16 @@ impl Run {
         // we assume that validation has been done already
         self.vars[0].as_str()
     }
+
     fn get_recipe_args_str(&self) -> String {
-        self.vars[1..].join(" ")
+        // first entry is build target. we handle this elsewhere
+        if self.vars.len() < 2 {
+            return String::new()
+        }
+        format!(" {}",self.vars[1..].join(" "))
     }
 
-    fn get_platform_str(&self, build_env: &BuildEnv) -> String {
+    fn get_platform_str(&self, _build_env: &BuildEnv) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
         match self.platforms {
@@ -56,7 +61,8 @@ impl Run {
                     .collect::<Vec<_>>()
                     .join(",")
             ),
-            None => format!(" --platform={}", build_env.dd_os.as_str()),
+            //None => format!(" --platform={}", build_env.dd_os.as_str()),
+            None => String::new()
         }
     }
     fn get_flavor_str(&self) -> String {
@@ -128,7 +134,7 @@ impl Doit for Run {
         let flavor_str = self.get_flavor_str();
 
         Ok(vec![format!(
-            "pk run-recipe {} {}{}{}",
+            "pk run-recipe {}{}{}{}",
             recipe_target, flavor_str, platform_str,recipe_args_str
         )])
     }
@@ -351,8 +357,9 @@ impl Run {
         Ok(self)
     }
 
-    pub fn vars(&mut self, input: Vec<String>) -> &mut Self {
-        let mut input = input;
+    /// Given a vector of some type which is Into<String>, update vars
+    pub fn vars<I>(&mut self, input: Vec<I>) -> &mut Self where I: Into<String> {
+        let mut input = input.into_iter().map(|v| v.into()).collect();
         self.vars.append(&mut input);
         self
     }
