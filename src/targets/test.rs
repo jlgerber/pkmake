@@ -154,10 +154,11 @@ impl Doit for Test {
         let defines_str = self.get_defines_str();
         let platform_str = self.get_platform_str(&build_env);
         let flavor_str = self.get_flavor_str();
+        let dry_run_str = if self.dry_run {" --dry-run"} else {""};
 
         Ok(vec![format!(
-            "pk run-recipe test{}{}{}{}",
-            dist_dir_str, defines_str,platform_str,flavor_str
+            "pk run-recipe test{}{}{}{}{}",
+            dist_dir_str, defines_str,platform_str,flavor_str,dry_run_str
         )])
     }
 }
