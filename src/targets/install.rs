@@ -87,7 +87,9 @@ impl Doit for Install {
     /// construct the command which will be executed
     fn build_cmd(&mut self) -> Result<Vec<String>, Self::Err> {
         let build_env = BuildEnv::new(self.get_package_root())?;
-
+        // if build_env.vcs.is_none() {
+        //     return Err(anyhow!("Unable to identify vcs at package root: {:?}", self.get_package_root()));
+        // }
         self.reconcile_context_and_level(&build_env)?;
         // bail out early if we are installing to facility, as we are simply calling
         if self.get_context() == &Context::Facility {
@@ -110,7 +112,7 @@ impl Doit for Install {
                         ))
                     }
                 }
-                _ => Err(anyhow!("Unrecognized vcs")),
+                _ => Err(anyhow!("Unrecognized vcs for context: {} and build_env.vcs: {:?}",self.get_context().as_str(), build_env.vcs)),
             };
         }
 
@@ -999,15 +1001,20 @@ impl Install {
     //     self
     // }
     /// Set the input given an option wrapped type which can be converted Into Vcs
-    pub fn vcs<I>(&mut self, input: Option<I>) -> &mut Self
+    pub fn vcs<I>(&mut self, input: Option<I>) -> Result<&mut Self, AnyError>
     where
-        I: Into<Vcs>,
+        I: TryInto<Vcs>,
     {
         match input {
             None => self.vcs = None,
-            Some(vcs) => self.vcs = Some(vcs.into()),
+            Some(vcs) => {
+                 match vcs.try_into() {
+                    Ok(res) => self.vcs = Some(res),
+                    Err(_e) => return Err(anyhow!("Unable to identify vcs")),
+                }
+            },
         }
-        self
+        Ok(self)
     }
 
     /// Set the input given an option wrapped type which can be converted Into logfile
