@@ -311,7 +311,7 @@ fn main() -> Result<(), AnyError> {
                 .overrides(overrides)?
                 .defines(define)
                 .work(work)
-                .vcs(vcs)
+                .vcs(vcs)?
                 .logfile(logfile)
                 .max_jobs(max_jobs)
                 .package_root(package_root)

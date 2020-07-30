@@ -45,6 +45,7 @@ impl Vcs {
         root.pop();
         root.push(".git");
         let git_dir_exists = root.exists();
+        
         root.pop();
         // return appropriate variant
         if svn_dir_exists && git_dir_exists {
