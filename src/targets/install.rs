@@ -29,6 +29,12 @@ use std::path::PathBuf;
 
 const DEFAULT_CONTEXT: Context = Context::User;
 
+// Used by internal methods which have to destinguish between the pk target command.
+#[derive(Debug, PartialEq, Eq)]
+enum PkPhase {
+    Build,
+    Install
+}
 #[derive(Debug, PartialEq, Eq)]
 /// Models user install request state, and implements traits necessary to execute 
 /// the request
@@ -131,7 +137,7 @@ impl Doit for Install {
 
         let overrides_str = self.get_overrides_str();
 
-        let platform_str = self.get_platform_str(&build_env);
+        let platform_str = self.get_platform_str(PkPhase::Build, &build_env);
 
         let work_str = if self.work { " --work" } else { "" };
 
@@ -235,13 +241,13 @@ impl Install {
 
     // build up the string representing the define flag invocation.
     fn get_defines_str(&self) -> String {
-        // NB: The -D flag works differently in pk build in that it
+        // NB: The --define flag works differently in pk build in that it
         // follows posix convention for multiple values; it supports
         // multiple invocations of the flag.
         let mut defines_str = String::new();
         if self.defines.is_some() {
             for def in self.defines.as_ref().unwrap() {
-                defines_str.push_str(&format!(" -D={}", def));
+                defines_str.push_str(&format!(" --define={}", def));
             }
         }
         defines_str
@@ -319,7 +325,7 @@ impl Install {
         platform_str
     }
     */
-    fn get_platform_str(&self, build_env: &BuildEnv) -> String {
+    fn get_platform_str(&self, phase: PkPhase, build_env: &BuildEnv) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
         match self.platforms {
@@ -333,7 +339,12 @@ impl Install {
                     .collect::<Vec<_>>()
                     .join(",")
             ),
-            None => format!(" --platform={}", build_env.dd_os.as_str()),
+            None => {
+                match phase {
+                    PkPhase::Build => String::new(),
+                    PkPhase::Install =>format!(" --platform={}", build_env.dd_os.as_str()),
+                }
+            },
         }
     }
 
@@ -433,7 +444,7 @@ impl Install {
 
         let site_str = self.get_site_str();
 
-        let platform_str = self.get_platform_str(&build_env);
+        let platform_str = self.get_platform_str(PkPhase::Install, &build_env);
 
         let level_str = self.get_level_str();
 
