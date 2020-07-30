@@ -37,7 +37,7 @@ fn can_update_build() -> Result<(), Box<dyn std::error::Error>> {
         let mut platform_hs = HashSet::new();
         platform_hs.insert(Platform::Cent6_64);
         platform_hs.insert(Platform::Cent7_64);
-        
+         
     let expected = Docs {
         dist_dir: Some("foo/bar".to_string()),
         dry_run: true,

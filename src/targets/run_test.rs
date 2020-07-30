@@ -136,12 +136,14 @@ fn propagates_dry_run_to_struct_if_set_in_vars_as_short_flags() {
     };
     assert_eq!(result, expected);
 }
+
 #[test]
 fn doit_errors_if_first_vars_is_a_flag() {
     let mut result = Run::default().vars(vec!["-v".into(), "bla".into()]).build();
     let result = result.doit();
     assert!(result.is_err());
 }
+
 #[test]
 fn doit_errors_if_vars_is_empty() {
     let mut result = Run::default().build();
