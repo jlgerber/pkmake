@@ -38,14 +38,16 @@ pub struct Test {
 // Private Methods - used to construct pk test arguements
 //
 impl Test {
-    fn dist_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
+    fn dist_dir_str(&self, _build_env: &BuildEnv) -> Result<String, AnyError> {
         match &self.dist_dir {
             None => {
-                let dist_dir = build_env
-                    .dist_dir
-                    .to_str()
-                    .ok_or_else(|| anyhow!("unable to get dist dir from environment"))?;
-                Ok(format!(" --dist-dir={}=", dist_dir))
+                // No longer build default dist-dir from the environment. That is pk's job
+                // let dist_dir = build_env
+                //     .dist_dir
+                //     .to_str()
+                //     .ok_or_else(|| anyhow!("unable to get dist dir from environment"))?;
+                // Ok(format!(" --dist-dir={}=", dist_dir))
+                Ok(String::new())
             }
 
             Some(dist_dir) => Ok(format!(" --dist-dir={}", dist_dir)),
@@ -54,13 +56,13 @@ impl Test {
 
     // build up the string representing the define flag invocation.
     fn get_defines_str(&self) -> String {
-        // NB: The -D flag works differently in pk build in that it
+        // NB: The --define flag works differently in pk build in that it
         // follows posix convention for multiple values; it supports
         // multiple invocations of the flag.
         let mut defines_str = String::new();
         if self.defines.is_some() {
             for def in self.defines.as_ref().unwrap() {
-                defines_str.push_str(&format!(" -D={}", def));
+                defines_str.push_str(&format!(" --define={}", def));
             }
         }
         defines_str
@@ -89,7 +91,7 @@ impl Test {
         }
     }
 
-    fn get_platform_str(&self, build_env: &BuildEnv) -> String {
+    fn get_platform_str(&self, _build_env: &BuildEnv) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
         match self.platforms {
@@ -103,7 +105,8 @@ impl Test {
                     .collect::<Vec<_>>()
                     .join(",")
             ),
-            None => format!(" --platform={}", build_env.dd_os.as_str()),
+            //None => format!(" --platform={}", build_env.dd_os.as_str()),
+            None => String::new()
         }
     }
 
@@ -153,7 +156,7 @@ impl Doit for Test {
         let flavor_str = self.get_flavor_str();
 
         Ok(vec![format!(
-            "pk run-recipe test {}{}{}{}",
+            "pk run-recipe test{}{}{}{}",
             dist_dir_str, defines_str,platform_str,flavor_str
         )])
     }
