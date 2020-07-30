@@ -3,7 +3,10 @@
 //
 use super::*;
 use std::env;
+use serial_test::serial;
+
 use crate::utils::setup_manifest_dir;
+use crate::utils::setup_manifest_dir2;
 
 // This tests that we can construct an appropriate default
 #[test]
@@ -95,6 +98,17 @@ fn build_given_context_and_show() {
     assert_eq!(result, expected);
 }
 
+#[test]
+fn vcs_given_str() {
+    let mut target = setup_manifest_dir(false);
+    target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
+    env::set_var("DD_SHOW", "DEV01");
+    env::set_var("DD_OS", "cent7_64");
+
+    let mut result = Install::default();
+    let result = result.vcs(Some("git"));
+    assert!(result.is_ok());
+}
 
 #[test]
 fn build_given_level() {
@@ -231,13 +245,15 @@ fn build_given_context_and_level_fails() {
 //
 
 #[test]
+#[serial]
 fn build_cmd_given_default() {
-    let mut target = setup_manifest_dir(false);
+    let root = setup_manifest_dir2("nonflavored_git");
+    let mut target = root.clone();
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
 
-    let result = Install::default().build_cmd();
+    let result = Install::default().package_root(Some(root)).build_cmd();
     let expected = vec![
         "pk audit && pk build --with-docs --platform=cent7_64".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap()),
@@ -247,13 +263,15 @@ fn build_cmd_given_default() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean() {
-    let mut target = setup_manifest_dir(false);
+    let root = setup_manifest_dir2("nonflavored_git");
+    let mut target = root.clone();
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
 
-    let result = Install::default().clean(true).build_cmd();
+    let result = Install::default().clean(true).package_root(Some(&root)).build_cmd();
     let expected = vec![
         "pk audit && pk build --clean --with-docs --platform=cent7_64".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap()),
@@ -263,14 +281,17 @@ fn build_cmd_given_clean() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_distdir() {
-    let mut target = setup_manifest_dir(false);
+    let root = setup_manifest_dir2("nonflavored_git");
+    let mut target = root.clone();
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
 
     let result = Install::default()
         .dist_dir(Some("./foo/bar"))
+        //.package_root(Some(root))
         .build_cmd();
     let expected =
         vec!["pk audit && pk build --dist-dir=./foo/bar --with-docs --platform=cent7_64".to_string(),
@@ -280,8 +301,10 @@ fn build_cmd_given_distdir() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_flavors() {
-    let mut target = setup_manifest_dir(true);
+    let root = setup_manifest_dir(true);
+    let mut target = root.clone();
     target.push("private"); target.push("dist"); target.push("vrayddbase-5.0.8");    
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
@@ -289,6 +312,7 @@ fn build_cmd_given_flavors() {
     let result = Install::default()
         .flavors(Some(vec!["^", "foo"]))
         .unwrap()
+        //.package_root(Some("."))
         .build_cmd();
     let expected = vec![
         "pk audit && pk build --with-docs --flavour=^,foo --platform=cent7_64".to_string(),
@@ -299,8 +323,10 @@ fn build_cmd_given_flavors() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_platforms() {
-    let mut target = setup_manifest_dir(false);
+    let root = setup_manifest_dir2("nonflavored_git");
+    let mut target = root.clone();
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
@@ -308,6 +334,7 @@ fn build_cmd_given_clean_platforms() {
     let result = Install::default()
         .platforms(Some(vec!["cent6","cent7"]))
         .unwrap()
+        //.package_root(Some(root))
         .build_cmd();
     let expected = vec![
         "pk audit && pk build --with-docs --platform=cent6_64,cent7_64".to_string(),
@@ -317,6 +344,7 @@ fn build_cmd_given_clean_platforms() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_showlevel() {
     let mut target = setup_manifest_dir(false);
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
@@ -334,6 +362,7 @@ fn build_cmd_given_showlevel() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_worklevel() {
     let mut target = setup_manifest_dir(false);
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
@@ -352,6 +381,7 @@ fn build_cmd_given_worklevel() {
 
 
 #[test]
+#[serial]
 fn build_cmd_given_overrides() {
     let mut target = setup_manifest_dir(false);
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
@@ -371,14 +401,17 @@ fn build_cmd_given_overrides() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_defines() {
-    let mut target = setup_manifest_dir(false);
+    let root = setup_manifest_dir2("nonflavored_git");
+    let mut target = root.clone();
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
 
     let result = Install::default()
         .defines(Some(vec!["foo=bar", "la=deda"]))
+        .package_root(Some(root))
         .build_cmd();
     let expected = vec![
         "pk audit && pk build --with-docs --platform=cent7_64 -D=foo=bar -D=la=deda".to_string(),
@@ -389,8 +422,10 @@ fn build_cmd_given_defines() {
 
 // verify that setting the show and context overrides the default level which is set to SHOW.work
 #[test]
+#[serial]
 fn build_cmd_given_defines_show_and_context() {
-    let mut target = setup_manifest_dir(false);
+    let root = setup_manifest_dir2("nonflavored_git");
+    let mut target = root.clone();
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");    
     env::set_var("DD_SHOW", "DEV01");
     env::set_var("DD_OS", "cent7_64");
@@ -398,6 +433,7 @@ fn build_cmd_given_defines_show_and_context() {
     let result = Install::default()
         .defines(Some(vec!["foo=bar", "la=deda"]))
         .show(Some("DEV01"))
+        .package_root(Some(root))
         .context(Some("shared")).unwrap()
         .build_cmd();
     let expected = vec![
@@ -408,6 +444,7 @@ fn build_cmd_given_defines_show_and_context() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_verbose() {
     let mut target = setup_manifest_dir(false);
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");
@@ -425,6 +462,7 @@ fn build_cmd_given_verbose() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_work() {
     let mut target = setup_manifest_dir(false);
     target.push("private"); target.push("dist"); target.push("makebridge-3.1.0");
@@ -438,5 +476,123 @@ fn build_cmd_given_work() {
         "pk audit && pk build --with-docs --platform=cent7_64 --work".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap() )
     ];
+    assert_eq!(result.unwrap(), expected);
+}
+//
+//
+
+#[test]
+#[serial]
+fn build_cmd_given_facility_level_git() {
+    let mut target = setup_manifest_dir(false);
+    // this is a super ugly test. 
+    target.pop();
+    target.push("nonflavored_git");
+
+    let mut source = target.clone();
+    source.push(".gittest");
+    let mut dest = target.clone();
+        dest.push(".git");
+
+    if source.exists() {
+        
+        std::fs::rename(&source, &dest).unwrap_or(());
+    }
+    env::set_var("DD_SHOW", "DEV01");
+    env::set_var("DD_OS", "cent7_64");
+
+    let result = Install::default()
+        .vcs(Some("git")).unwrap()
+        .package_root(Some(&target))
+        .level(Some("facility")).unwrap()
+        .build_cmd();
+    let expected = vec![
+        "git-tag create --protect".to_string(),
+    ];
+    // move this back before testing - only uncomment if you can run tests in single threaded mode
+    // if dest.exists() {
+    //     std::fs::rename(dest, source).unwrap_or(());
+    // }
+    assert_eq!(result.unwrap(), expected);
+}
+
+
+#[test]
+#[serial]
+fn build_cmd_given_facility_level_svn() {
+    let mut target = setup_manifest_dir(false);
+    // this is a super ugly test. 
+    target.pop();
+    target.push("nonflavored_svn");
+
+
+    env::set_var("DD_SHOW", "DEV01");
+    env::set_var("DD_OS", "cent7_64");
+
+    let result = Install::default()
+        .package_root(Some(&target))
+        .level(Some("facility")).unwrap()
+        .build_cmd();
+    let expected = vec![
+        "svn-tag create".to_string(),
+    ];
+    
+    assert_eq!(result.unwrap(), expected);
+}
+
+
+#[test]
+#[serial]
+fn build_cmd_given_facility_level_both_explicit_svn() {
+    let  root = setup_manifest_dir2("nonflavored_both");
+    // this is a super ugly test. 
+    env::set_var("DD_SHOW", "DEV01");
+    env::set_var("DD_OS", "cent7_64");
+
+    let result = Install::default()
+        .package_root(Some(root))
+        .level(Some("facility")).unwrap()
+        .vcs(Some("svn")).unwrap()
+        .build_cmd();
+    let expected = vec![
+        "svn-tag create".to_string(),
+    ];
+    
+    assert_eq!(result.unwrap(), expected);
+}
+
+
+#[test]
+#[serial]
+fn build_cmd_given_facility_level_both_set_git() {
+    let mut target = setup_manifest_dir(false);
+    // this is a super ugly test. 
+    target.pop();
+    target.push("nonflavored_both");
+
+    let mut source = target.clone();
+    source.push(".gittest");
+    let mut dest = target.clone();
+        dest.push(".git");
+
+    if source.exists() {
+        
+        std::fs::rename(&source, &dest).unwrap_or(());
+    }
+    env::set_var("DD_SHOW", "DEV01");
+    env::set_var("DD_OS", "cent7_64");
+
+    let result = Install::default()
+        .vcs(Some("git")).unwrap()
+        .package_root(Some(&target))
+        .level(Some("facility")).unwrap()
+        .build_cmd();
+    let expected = vec![
+        "git-tag create --protect".to_string(),
+    ];
+    // // move this back before testing
+    // if dest.exists() {
+    //     std::fs::rename(dest, source).unwrap_or(());
+    // }
     assert_eq!(result.unwrap(), expected);
 }

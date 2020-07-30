@@ -1,5 +1,7 @@
 use super::*;
 use std::env;
+use serial_test::serial;
+
 use crate::utils::setup_manifest_dir;
 
 // test that we are getting what we expect when we call
@@ -337,6 +339,7 @@ fn build_given_mut_ref_to_self_produces_owned_instance() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_default() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -347,6 +350,7 @@ fn build_cmd_given_default() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -357,6 +361,7 @@ fn build_cmd_given_clean() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -371,6 +376,7 @@ fn build_cmd_given_clean_distdir() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_distdir() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -384,6 +390,7 @@ fn build_cmd_given_distdir() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavor() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -402,6 +409,7 @@ fn build_cmd_given_clean_distdir_flavor() {
 
 
 #[test]
+#[serial]
 fn build_cmd_given_flavor() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -417,6 +425,7 @@ fn build_cmd_given_flavor() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavors_platforms() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -436,6 +445,7 @@ fn build_cmd_given_clean_distdir_flavors_platforms() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_platforms() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -452,6 +462,7 @@ fn build_cmd_given_clean_platforms() {
 
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavors_platforms_showlevel() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -473,6 +484,7 @@ fn build_cmd_given_clean_distdir_flavors_platforms_showlevel() {
 
 
 #[test]
+#[serial]
 fn build_cmd_given_showlevel() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -487,6 +499,7 @@ fn build_cmd_given_showlevel() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavors_platforms_worklevel() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -507,6 +520,7 @@ fn build_cmd_given_clean_distdir_flavors_platforms_worklevel() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_worklevel() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -522,6 +536,7 @@ fn build_cmd_given_worklevel() {
 
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavors_platforms_showlevel_metadataonly() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -544,6 +559,7 @@ fn build_cmd_given_clean_distdir_flavors_platforms_showlevel_metadataonly() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_metadataonly() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -559,6 +575,7 @@ fn build_cmd_given_metadataonly() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -581,6 +598,7 @@ fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_overrides() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -599,6 +617,7 @@ fn build_cmd_given_overrides() {
 // NB that --overrides behaves differently in pk build than most other multi flags in that it is a posix compliant multi flag. you use multiple invocations of the flag
 // instead of comma separated list of values with one flag
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -624,6 +643,7 @@ fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines()
 // NB that --overrides behaves differently in pk build than most other multi flags in that it is a posix compliant multi flag. you use multiple invocations of the flag
 // instead of comma separated list of values with one flag
 #[test]
+#[serial]
 fn build_cmd_given_defines() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -639,6 +659,7 @@ fn build_cmd_given_defines() {
 
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines_verbose() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -663,6 +684,7 @@ fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines_v
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_verbose() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -677,6 +699,7 @@ fn build_cmd_given_verbose() {
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines_verbose_work() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
@@ -702,6 +725,7 @@ fn build_cmd_given_clean_distdir_flavors_platforms_worklevel_overrides_defines_v
 }
 
 #[test]
+#[serial]
 fn build_cmd_given_work() {
     setup_manifest_dir(false);
     env::set_var("DD_SHOW", "DEV01");
