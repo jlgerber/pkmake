@@ -1,4 +1,10 @@
 use super::*;
+use serial_test::serial;
+use crate::utils::setup_manifest_dir;
+use std::env;
+use indexmap::IndexSet as HashSet;
+
+
 #[test]
 fn can_build_default() {
     let result = Run::default();
@@ -150,3 +156,7 @@ fn doit_errors_if_vars_is_empty() {
     let result = result.doit();
     assert!(result.is_err());
 }
+
+//
+// build_cmd
+//
