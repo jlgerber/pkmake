@@ -255,7 +255,7 @@ fn build_cmd_given_default() {
 
     let result = Install::default().package_root(Some(root)).build_cmd();
     let expected = vec![
-        "pk audit && pk build --with-docs --platform=cent7_64".to_string(),
+        "pk audit && pk build --with-docs".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap()),
 
     ];
@@ -273,7 +273,7 @@ fn build_cmd_given_clean() {
 
     let result = Install::default().clean(true).package_root(Some(&root)).build_cmd();
     let expected = vec![
-        "pk audit && pk build --clean --with-docs --platform=cent7_64".to_string(),
+        "pk audit && pk build --clean --with-docs".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap()),
     ];
 
@@ -294,7 +294,7 @@ fn build_cmd_given_distdir() {
         //.package_root(Some(root))
         .build_cmd();
     let expected =
-        vec!["pk audit && pk build --dist-dir=./foo/bar --with-docs --platform=cent7_64".to_string(),
+        vec!["pk audit && pk build --dist-dir=./foo/bar --with-docs".to_string(),
         "pk install --level=DEV01.work --site=local --platform=cent7_64 ./foo/bar/makebridge-3.1.0".to_string(),
         ];
     assert_eq!(result.unwrap(), expected);
@@ -315,7 +315,7 @@ fn build_cmd_given_flavors() {
         //.package_root(Some("."))
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --with-docs --flavour=^,foo --platform=cent7_64".to_string(),
+        "pk audit && pk build --with-docs --flavour=^,foo".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap()),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}_foo", target.to_str().unwrap())
     ];
@@ -355,7 +355,7 @@ fn build_cmd_given_showlevel() {
         .level(Some("DEV01")).unwrap()
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --with-docs --platform=cent7_64".to_string(),
+        "pk audit && pk build --with-docs".to_string(),
         format!("pk install --level=DEV01 --site=local --platform=cent7_64 {}", target.to_str().unwrap())
     ];
     assert_eq!(result.unwrap(), expected);
@@ -373,7 +373,7 @@ fn build_cmd_given_worklevel() {
         .level(Some("DEV01.work")).unwrap()
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --with-docs --platform=cent7_64".to_string(),
+        "pk audit && pk build --with-docs".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap())
     ];
     assert_eq!(result.unwrap(), expected);
@@ -394,7 +394,7 @@ fn build_cmd_given_overrides() {
         .build_cmd();
 
     let expected = vec![
-        "pk audit && pk build --with-docs --override=make=2.0.0,bs=2.1.0 --platform=cent7_64".to_string(),
+        "pk audit && pk build --with-docs --override=make=2.0.0,bs=2.1.0".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap())
     ];
     assert_eq!(result.unwrap(), expected);
@@ -414,7 +414,7 @@ fn build_cmd_given_defines() {
         .package_root(Some(root))
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --with-docs --platform=cent7_64 -D=foo=bar -D=la=deda".to_string(),
+        "pk audit && pk build --with-docs --define=foo=bar --define=la=deda".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap())
     ];
     assert_eq!(result.unwrap(), expected);
@@ -437,7 +437,7 @@ fn build_cmd_given_defines_show_and_context() {
         .context(Some("shared")).unwrap()
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --with-docs --platform=cent7_64 -D=foo=bar -D=la=deda".to_string(),
+        "pk audit && pk build --with-docs --define=foo=bar --define=la=deda".to_string(),
         format!("pk install --level=DEV01 --site=local --platform=cent7_64 {}", target.to_str().unwrap())
     ];
     assert_eq!(result.unwrap(), expected);
@@ -455,7 +455,7 @@ fn build_cmd_given_verbose() {
         .verbose(true)
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --with-docs --platform=cent7_64 --verbose".to_string(),
+        "pk audit && pk build --with-docs --verbose".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 --verbose {}", target.to_str().unwrap() )
     ];
     assert_eq!(result.unwrap(), expected);
@@ -473,7 +473,7 @@ fn build_cmd_given_work() {
         .work(true)
         .build_cmd();
     let expected = vec![
-        "pk audit && pk build --with-docs --platform=cent7_64 --work".to_string(),
+        "pk audit && pk build --with-docs --work".to_string(),
         format!("pk install --level=DEV01.work --site=local --platform=cent7_64 {}", target.to_str().unwrap() )
     ];
     assert_eq!(result.unwrap(), expected);
