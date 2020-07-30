@@ -71,7 +71,7 @@ impl Doit for Docs {
         let flavor_str = self.get_flavor_str();
 
         Ok(vec![format!(
-            "pk run-recipe docs {}{}{}{}",
+            "pk run-recipe docs{}{}{}{}",
             dist_dir_str, defines_str, flavor_str, platform_str
         )])
     }
@@ -81,15 +81,18 @@ impl Doit for Docs {
 // Private Methods - largely responsible for calculating appropriate pk flags given internal state
 //
 impl Docs {
-    fn dist_dir_str(&self, build_env: &BuildEnv) -> Result<String, AnyError> {
+    fn dist_dir_str(&self, _build_env: &BuildEnv) -> Result<String, AnyError> {
         match &self.dist_dir {
             None => {
-                let dist_dir = build_env
-                    .dist_dir
-                    .to_str()
-                    .ok_or_else(|| anyhow!("unable to get dist dir from environment"))?;
-                Ok(format!(" --dist-dir={}=", dist_dir))
+                // why are we setting the dist dir if the user has not passed one in?
+                // let dist_dir = build_env
+                //     .dist_dir
+                //     .to_str()
+                //     .ok_or_else(|| anyhow!("unable to get dist dir from environment"))?;
+                // Ok(format!(" --dist-dir={}", dist_dir))
+                Ok(String::new())
             }
+
             Some(dist_dir) => Ok(format!(" --dist-dir={}", dist_dir)),
         }
     }
@@ -101,7 +104,7 @@ impl Docs {
         let mut defines_str = String::new();
         if self.defines.is_some() {
             for def in self.defines.as_ref().unwrap() {
-                defines_str.push_str(&format!(" -D={}", def));
+                defines_str.push_str(&format!(" --define={}", def));
             }
         }
         defines_str
@@ -130,7 +133,7 @@ impl Docs {
             "".to_string()
         }
     }
-    fn get_platform_str(&self, build_env: &BuildEnv) -> String {
+    fn get_platform_str(&self, _build_env: &BuildEnv) -> String {
         // wow this one is fun. we need to convert Option<T> -> Option<&T> then unwrap,
         // get a vector of Flavors, them convert them to strs, and join them into a string
         match self.platforms {
@@ -144,7 +147,9 @@ impl Docs {
                     .collect::<Vec<_>>()
                     .join(",")
             ),
-            None => format!(" --platform={}", build_env.dd_os.as_str()),
+            // have decided to avoid setting platform unless explicitly set by user
+            //None => format!(" --platform={}", build_env.dd_os.as_str()),
+            None => String::new()
         }
     }
 
