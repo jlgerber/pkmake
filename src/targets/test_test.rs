@@ -72,7 +72,6 @@ fn build_cmp()  -> Result<(),Box<dyn std::error::Error>> {
     Ok(())
 }
 
-
 #[test]
 #[serial]
 fn build_cmp_given_distdir()  -> Result<(),Box<dyn std::error::Error>> {
@@ -142,7 +141,6 @@ fn build_cmp_given_defines()  -> Result<(),Box<dyn std::error::Error>> {
     );
     Ok(())
 }
-
 
 #[test]
 #[serial]
