@@ -338,6 +338,10 @@ fn build_given_mut_ref_to_self_produces_owned_instance() {
     assert_eq!(result, expected);
 }
 
+//
+// build_cmd
+//
+
 #[test]
 #[serial]
 fn build_cmd_given_default() {
