@@ -108,3 +108,18 @@ pub fn setup_manifest_dir(flavored: bool) -> std::path::PathBuf {
     env::set_current_dir(&mani_dir).unwrap();
     return mani_dir
 }
+
+
+#[cfg(test)]
+/// setup function only available in tests
+pub fn setup_manifest_dir2(subdir: &str) -> std::path::PathBuf {
+    use std::env;
+    let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let mut mani_dir = std::path::PathBuf::from(root_dir);
+    mani_dir.push("egs");
+    mani_dir.push("manifests");
+    mani_dir.push(subdir);
+   
+    env::set_current_dir(&mani_dir).unwrap();
+    return mani_dir
+}
